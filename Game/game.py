@@ -22,6 +22,7 @@ class Game:
 
         self.assets = {"grass" : load_images("tiles/grass")}
         self.tilemap = TileMap(self)
+        self.tilemap.load("data/maps/map.json")
 
     def run(self):
         running = True
