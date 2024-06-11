@@ -1,6 +1,8 @@
 import pygame
 import json
 
+NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0,0), (-1, 1), (0, 1), (1, 1)]
+
 class TileMap:
     def __init__(self, game, tile_size=16):
         self.game = game
@@ -16,6 +18,22 @@ class TileMap:
                     tile = self.tilemap[loc]
                     surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
 
+    def tiles_around(self, pos):   
+        physics_tiles = []
+        tile_loc = (int((pos[0])//self.tile_size), int((pos[1])//self.tile_size))
+        for offset in NEIGHBOR_OFFSETS:
+            key = str(tile_loc[0] + offset[0]) + ';' + str(tile_loc[1] + offset[1])
+            if key in self.tilemap:
+                physics_tiles.append(self.tilemap[key])
+        return physics_tiles
+    
+    def tiles_rect_around(self, pos):
+        rects = []
+        for tile in self.tiles_around(pos):
+            rects.append(pygame.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
+    
+        return rects
+    
     def save(self, path):
         f = open(path, 'w')
         json.dump({'tilemap' : self.tilemap, 'tile_size' : self.tile_size, 'offgrid' : self.offgrid_tiles}, f)
