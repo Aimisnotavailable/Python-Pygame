@@ -2,7 +2,7 @@ import pygame
 import sys
 import os
 import random
-from scripts.utils import load_image, load_images
+from scripts.utils import load_image, load_images, Animation
 from scripts.tilemap import TileMap
 from scripts.entities import PhysicsEntities, Player
 
@@ -22,7 +22,10 @@ class Game:
         self.scroll = [0, 0]
 
         self.assets = {"grass" : load_images("tiles/grass"),
-                       "player" : load_image("entities/player/player.png")}
+                       "player" : load_image("entities/player/player1.png"),
+                       "player/idle" : Animation(load_images("entities/player/idle")),
+                       "player/jump" : Animation(load_images("entities/player/jump")),
+                       "player/run" : Animation(load_images("entities/player/run"), image_dur=5)}
         self.tilemap = TileMap(self)
         self.tilemap.load("data/maps/map.json")
 
