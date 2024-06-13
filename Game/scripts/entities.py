@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class PhysicsEntities:
 
@@ -22,7 +23,10 @@ class PhysicsEntities:
     def set_action(self, action):
         if action != self.action:
             self.action = action
-            self.animation = self.game.assets[self.type + '/' + self.action].copy()
+            if action != "attack":
+                self.animation = self.game.assets[self.type + '/' + self.action].copy()
+            else:
+                self.particle_animation = self.game.assets['slash'].copy()
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -77,10 +81,46 @@ class PhysicsEntities:
 
         self.animation.update()
 
+class Enemy(PhysicsEntities):
+    def __init__(self, game, pos, size=(16,16)):
+        super().__init__(game, 'enemy', pos, size)
+    
+        self.walking = 0
+        self.current_hp = 5
+        self.max_hp = 5
+        self.attacked =0
+
+    def update(self, tilemap, movement=(0,0)):
+        if self.walking:
+            if tilemap.solid_check((self.rect().centerx + (-7 if self.flip else 7), self.pos[1] + 23)):
+                if(self.collisions['right'] or self.collisions['left']):
+                    self.flip = not self.flip
+                movement = (movement[0] -0.5 if self.flip else 0.5, movement[1])
+            else:
+                self.flip = not self.flip
+            self.walking = max(0, self.walking - 1)
+        elif random.random() < 0.01:
+            self.walking = random.randint(30, 120)
+        super().update(tilemap, movement)
+
+        self.attacked -= 1
+        if self.attacked <= 0:
+            self.attacked = 0
+        if self.movement[0] != 0:
+            self.set_action('run')
+        else:
+            self.set_action('idle')
+    
+    def render(self, surf, offset=(0,0)):
+        super().render(surf, offset)
+        pygame.draw.rect(surf, (0, 255, 0), pygame.Rect(self.pos[0] - offset[0] + (5 * (self.max_hp - self.current_hp)), self.pos[1] - offset[1], 5 * self.current_hp, 5))
+        pygame.draw.rect(surf, (255, 0, 0), pygame.Rect(self.pos[0] - offset[0], self.pos[1] - offset[1], 5 * (self.max_hp - self.current_hp), 5))
+
 class Player(PhysicsEntities):
 
     def __init__(self, game, pos, size=(16,16)):
         super().__init__(game,'player', pos, size)
+        self.attacking = 0
 
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
@@ -88,8 +128,11 @@ class Player(PhysicsEntities):
         self.air_time += 1
         if self.collisions['down']:
             self.air_time = 0
-        
-        if self.air_time > 4:
+        self.attacking -= 1
+        if self.attacking > 0:
+            self.set_action('attack')
+            self.particle_animation.update()
+        elif self.air_time > 4:
             self.set_action('jump')
         elif self.movement[0] != 0:
             self.set_action('run')
@@ -98,4 +141,11 @@ class Player(PhysicsEntities):
 
     def render(self, surf, offset=(0,0)):
         super().render(surf, offset)
+        if(self.action == "attack"):
+            slash_x = self.pos[0] - offset[0] + (-20 if self.flip else 20)
+            slash_y = self.pos[1] - offset[1] - 5
+
+            self.slash_rect = pygame.Rect(slash_x + offset[0], slash_y + offset[1], 8, 16)
+            surf.blit(pygame.transform.flip(self.particle_animation.img(), self.flip, False), (slash_x, slash_y))
+            surf.blit(pygame.transform.flip(self.game.assets['sword'], self.flip, False), (self.pos[0] - offset[0] + (-10 if self.flip else 10), self.pos[1] - offset[1] - 5))
     

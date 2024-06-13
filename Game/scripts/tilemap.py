@@ -27,6 +27,12 @@ class TileMap:
                 physics_tiles.append(self.tilemap[key])
         return physics_tiles
     
+    def solid_check(self, pos):
+        tile_loc = str(int((pos[0]//self.tile_size))) + ";" + str(int((pos[1]//self.tile_size)))
+        
+        if tile_loc in self.tilemap:
+            return self.tilemap[tile_loc]
+
     def tiles_rect_around(self, pos):
         rects = []
         for tile in self.tiles_around(pos):
