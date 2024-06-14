@@ -22,10 +22,10 @@ class Game:
         self.scroll = [0, 0]
 
         self.assets = {"grass" : load_images("tiles/grass"),
-                       "sword" : load_image("entities/weapon/sword/sword.png"),
+                       "sword" : Animation(load_images("entities/weapon/sword"), image_dur=6),
                        "slash" : Animation(load_images("particles/slash"), image_dur=10),
                        "player" : load_image("entities/player/player1.png"),
-                       "player/idle" : Animation(load_images("entities/player/idle")),
+                       "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                        "player/jump" : Animation(load_images("entities/player/jump")),
                        "player/run" : Animation(load_images("entities/player/run"), image_dur=5),
                        "enemy" : load_image("entities/enemy/enemy.png"),
@@ -42,7 +42,7 @@ class Game:
         self.enemies = [Enemy(self, self.pos)]
 
         for loc in self.tilemap.tilemap:
-            if random.randint(0, 4) == 1:
+            if random.randint(0, 10) == 1:
                 self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
 
     def run(self):
@@ -89,13 +89,16 @@ class Game:
             for enemy in self.enemies:
                 enemy.update(self.tilemap)
                 enemy.render(self.display, offset=render_scroll)
-            
+                pygame.draw.circle(self.display, (0, 0 if not self.tilemap.solid_check((enemy.rect().centerx + (-7 if enemy.flip else 7), enemy.pos[1] + 23)) else 255, 0), (enemy.rect().centerx + (-7 if enemy.flip else 7) - render_scroll[0], enemy.pos[1] + 23 - render_scroll[1]), 1)
+
             if self.player.action == "attack":
                 for enemy in self.enemies:
                     if enemy.rect().colliderect(self.player.slash_rect):
                         if enemy.attacked == 0:
                             enemy.current_hp -=1
                             enemy.attacked = 30
+                            enemy.velocity[1] = -2
+                            enemy.flip = not enemy.flip
                         if enemy.current_hp <= 0:
                             self.enemies.remove(enemy)
 

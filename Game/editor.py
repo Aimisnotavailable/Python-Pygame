@@ -33,7 +33,9 @@ class Game:
             self.display.fill((25, 201, 224))
             self.render_scroll[0] += self.movement[0] * RENDER_SCALE
             self.render_scroll[1] += self.movement[1] * RENDER_SCALE
-
+            current_image = self.assets['grass'][0].copy()
+            current_image.set_alpha(100)
+            self.display.blit(current_image, (5,5))
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()

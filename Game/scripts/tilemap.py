@@ -27,9 +27,8 @@ class TileMap:
                 physics_tiles.append(self.tilemap[key])
         return physics_tiles
     
-    def solid_check(self, pos):
-        tile_loc = str(int((pos[0]//self.tile_size))) + ";" + str(int((pos[1]//self.tile_size)))
-        
+    def solid_check(self, pos, offset=(0,0)):
+        tile_loc = str(int((pos[0] //self.tile_size))) + ";" + str(int((pos[1]//self.tile_size)))
         if tile_loc in self.tilemap:
             return self.tilemap[tile_loc]
 

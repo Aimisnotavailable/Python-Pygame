@@ -26,6 +26,7 @@ class PhysicsEntities:
             if action != "attack":
                 self.animation = self.game.assets[self.type + '/' + self.action].copy()
             else:
+                self.weapon_animation = self.game.assets['sword'].copy()
                 self.particle_animation = self.game.assets['slash'].copy()
 
     def rect(self):
@@ -73,7 +74,7 @@ class PhysicsEntities:
         self.velocity[1] = min(5, self.velocity[1] + 0.1)
         if self.collisions['up'] or self.collisions['down']:
             self.velocity[1] = 0
-
+        
         if self.velocity[0] > 0:
             self.velocity[0] = max(self.velocity[0] - 0.1, 0)
         elif self.velocity[1] < 0:
@@ -91,25 +92,31 @@ class Enemy(PhysicsEntities):
         self.attacked =0
 
     def update(self, tilemap, movement=(0,0)):
-        if self.walking:
+        if self.walking and self.action != 'damaged':
             if tilemap.solid_check((self.rect().centerx + (-7 if self.flip else 7), self.pos[1] + 23)):
                 if(self.collisions['right'] or self.collisions['left']):
                     self.flip = not self.flip
-                movement = (movement[0] -0.5 if self.flip else 0.5, movement[1])
+                movement = (movement[0] + (-0.5 if self.flip else 0.5), movement[1])
             else:
                 self.flip = not self.flip
+                self.velocity[0] = 0
             self.walking = max(0, self.walking - 1)
         elif random.random() < 0.01:
             self.walking = random.randint(30, 120)
-        super().update(tilemap, movement)
-
+        
         self.attacked -= 1
         if self.attacked <= 0:
             self.attacked = 0
-        if self.movement[0] != 0:
+
+        if self.attacked > 0:
+            self.set_action('damaged')
+            movement = (movement[0] + (-0.3 if self.flip else 0.3), movement[1])
+        elif movement[0] != 0:
             self.set_action('run')
         else:
             self.set_action('idle')
+        
+        super().update(tilemap, movement)
     
     def render(self, surf, offset=(0,0)):
         super().render(surf, offset)
@@ -126,14 +133,18 @@ class Player(PhysicsEntities):
         super().update(tilemap, movement)
 
         self.air_time += 1
+        self.attacking -= 1
         if self.collisions['down']:
             self.air_time = 0
-        self.attacking -= 1
         if self.attacking > 0:
             self.set_action('attack')
             self.particle_animation.update()
+            self.weapon_animation.update()
         elif self.air_time > 4:
             self.set_action('jump')
+            # if self.air_time > 60:
+            #     self.pos = [self.game.display.get_width() // 2, self.game.display.get_height() // 2]
+            #     self.air_time = 0
         elif self.movement[0] != 0:
             self.set_action('run')
         else:
@@ -147,5 +158,5 @@ class Player(PhysicsEntities):
 
             self.slash_rect = pygame.Rect(slash_x + offset[0], slash_y + offset[1], 8, 16)
             surf.blit(pygame.transform.flip(self.particle_animation.img(), self.flip, False), (slash_x, slash_y))
-            surf.blit(pygame.transform.flip(self.game.assets['sword'], self.flip, False), (self.pos[0] - offset[0] + (-10 if self.flip else 10), self.pos[1] - offset[1] - 5))
+            surf.blit(pygame.transform.flip(self.weapon_animation.img(), self.flip, False), (self.pos[0] - offset[0] + (-10 if self.flip else 10), self.pos[1] - offset[1] - 5))
     
