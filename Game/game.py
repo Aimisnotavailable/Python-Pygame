@@ -5,6 +5,7 @@ import random
 from scripts.utils import load_image, load_images, Animation
 from scripts.tilemap import TileMap
 from scripts.entities import PhysicsEntities, Player, Enemy
+from scripts.items import Weapon
 
 class Game:
     def __init__(self):
@@ -20,10 +21,8 @@ class Game:
         self.movement = [0, 0]
 
         self.scroll = [0, 0]
-
+        self.weapons = [Weapon('dirt_stick'), Weapon('slime_stick')]
         self.assets = {"grass" : load_images("tiles/grass"),
-                       "sword" : Animation(load_images("entities/weapon/sword"), image_dur=6),
-                       "slash" : Animation(load_images("particles/slash"), image_dur=10),
                        "player" : load_image("entities/player/player1.png"),
                        "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                        "player/jump" : Animation(load_images("entities/player/jump")),
@@ -31,16 +30,21 @@ class Game:
                        "enemy" : load_image("entities/enemy/enemy.png"),
                        "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),
                        "enemy/damaged" : Animation(load_images("entities/enemy/damaged")),
-                       "enemy/run" : Animation(load_images("entities/enemy/run"), image_dur=5),}
+                       "enemy/run" : Animation(load_images("entities/enemy/run"), image_dur=5),
+                       "weapon" :{"dirt_stick" : self.weapons[0], "slime_stick": self.weapons[1]}
+                    }
         
+        self.current_weapon = self.weapons[0]
         self.tilemap = TileMap(self)
         self.tilemap.load("data/maps/map.json")
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
+        self.weapon_pos = self.pos
+        self.d_anim = self.assets['weapon']['dirt_stick'].drop_animation()
 
         self.player = Player(self, self.pos)
         self.enemies = [Enemy(self, self.pos)]
-
+        self.items_nearby = []
         for loc in self.tilemap.tilemap:
             if random.randint(0, 10) == 1:
                 self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
@@ -71,8 +75,24 @@ class Game:
                     if event.key == pygame.K_UP:
                         self.player.velocity[1] = -3
                     
-                    if event.key == pygame.K_x and self.player.attacking <= 0:
+                    if event.key == pygame.K_x and self.player.attacking <= 0 and self.current_weapon is not None:
                         self.player.attacking = 30
+
+                    if event.key == pygame.K_g and self.current_weapon is not None:
+                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
+                        self.items_nearby.append(self.current_weapon)
+                        self.current_weapon = None
+                    
+                    if event.key == pygame.K_p:
+                        for item in self.items_nearby:
+                            print(item.pos[0], self.pos[0], item.pos[1], self.pos[1])
+                            if (item.pos[0] >= self.player.pos[0] - self.tilemap.tile_size and item.pos[0] <= self.player.pos[0] + self.tilemap.tile_size) and (item.pos[1] >= self.player.pos[1] - self.tilemap.tile_size and item.pos[1] <= self.player.pos[1] + self.tilemap.tile_size):
+                                if self.current_weapon is not None:
+                                    self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
+                                    self.items_nearby.append(self.current_weapon)
+                                self.current_weapon = item
+                                self.items_nearby.remove(self.current_weapon)
+                                break
 
                 if event.type == pygame.KEYUP:
 
@@ -99,10 +119,15 @@ class Game:
                             enemy.attacked = 30
                             enemy.velocity[1] = -2
                             enemy.flip = not enemy.flip
+                            
                         if enemy.current_hp <= 0:
+                            dropped_item = Weapon('slime_stick')
+                            dropped_item.set_drop_status(enemy.pos,is_dropped=True)
+                            self.items_nearby.append(dropped_item)
                             self.enemies.remove(enemy)
-
-                    
+            
+            for item in self.items_nearby:
+                item.render(self.display, render_scroll)
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
 
             pygame.display.update()

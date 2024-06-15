@@ -20,14 +20,14 @@ class PhysicsEntities:
 
         self.last_movement = [0, 0]
 
-    def set_action(self, action):
+    def set_action(self, action, weapon_name='dirt_stick'):
         if action != self.action:
             self.action = action
             if action != "attack":
                 self.animation = self.game.assets[self.type + '/' + self.action].copy()
             else:
-                self.weapon_animation = self.game.assets['sword'].copy()
-                self.particle_animation = self.game.assets['slash'].copy()
+                self.weapon_animation = self.game.assets['weapon'][weapon_name].weapon_animation()
+                self.weapon_particle_animation = self.game.assets['weapon'][weapon_name].particle_animation()
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -137,8 +137,8 @@ class Player(PhysicsEntities):
         if self.collisions['down']:
             self.air_time = 0
         if self.attacking > 0:
-            self.set_action('attack')
-            self.particle_animation.update()
+            self.set_action('attack', self.game.current_weapon.name)
+            self.weapon_particle_animation.update()
             self.weapon_animation.update()
         elif self.air_time > 4:
             self.set_action('jump')
@@ -157,6 +157,6 @@ class Player(PhysicsEntities):
             slash_y = self.pos[1] - offset[1] - 5
 
             self.slash_rect = pygame.Rect(slash_x + offset[0], slash_y + offset[1], 8, 16)
-            surf.blit(pygame.transform.flip(self.particle_animation.img(), self.flip, False), (slash_x, slash_y))
+            surf.blit(pygame.transform.flip(self.weapon_particle_animation.img(), self.flip, False), (slash_x, slash_y))
             surf.blit(pygame.transform.flip(self.weapon_animation.img(), self.flip, False), (self.pos[0] - offset[0] + (-10 if self.flip else 10), self.pos[1] - offset[1] - 5))
     
