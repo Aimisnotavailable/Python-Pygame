@@ -46,7 +46,7 @@ class Game:
         self.enemies = [Enemy(self, self.pos)]
         self.items_nearby = []
         for loc in self.tilemap.tilemap:
-            if random.randint(0, 10) == 1:
+            if random.randint(0, 5) == 1:
                 self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
 
     def run(self):
@@ -75,17 +75,16 @@ class Game:
                     if event.key == pygame.K_UP:
                         self.player.velocity[1] = -3
                     
-                    if event.key == pygame.K_x and self.player.attacking <= 0 and self.current_weapon is not None:
-                        self.player.attacking = 30
-
-                    if event.key == pygame.K_g and self.current_weapon is not None:
+                    if event.key == pygame.K_x and self.player.attacking == 0:
+                        self.player.set_attack(is_initialized=True)
+                    
+                    if event.key == pygame.K_g and self.current_weapon is not None and self.player.attacking == 0:
                         self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
                         self.items_nearby.append(self.current_weapon)
                         self.current_weapon = None
                     
                     if event.key == pygame.K_p:
                         for item in self.items_nearby:
-                            print(item.pos[0], self.pos[0], item.pos[1], self.pos[1])
                             if (item.pos[0] >= self.player.pos[0] - self.tilemap.tile_size and item.pos[0] <= self.player.pos[0] + self.tilemap.tile_size) and (item.pos[1] >= self.player.pos[1] - self.tilemap.tile_size and item.pos[1] <= self.player.pos[1] + self.tilemap.tile_size):
                                 if self.current_weapon is not None:
                                     self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
@@ -95,12 +94,17 @@ class Game:
                                 break
 
                 if event.type == pygame.KEYUP:
-
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = 0
 
                     if event.key == pygame.K_RIGHT:
                         self.movement[0] = 0
+                    
+                    if event.key == pygame.K_x and self.player.attacking == 0:
+                        if event.key == pygame.K_x and self.player.attacking <= 0 and self.current_weapon is not None:
+                            self.player.attacking = 30
+                            self.player.atk_type = self.player.atk_list[int(self.player.attack_type//self.player.charge_duration)]
+                            self.player.set_action('attack', self.current_weapon.name, atk_type=self.player.atk_type)
 
             self.tilemap.render(self.display, offset=render_scroll)
             self.player.update(self.tilemap, self.movement)
@@ -125,11 +129,9 @@ class Game:
                             dropped_item.set_drop_status(enemy.pos,is_dropped=True)
                             self.items_nearby.append(dropped_item)
                             self.enemies.remove(enemy)
-            
             for item in self.items_nearby:
                 item.render(self.display, render_scroll)
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
-
             pygame.display.update()
             self.clock.tick(60)   
     

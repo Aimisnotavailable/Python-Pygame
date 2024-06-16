@@ -1,12 +1,16 @@
+import os
 from scripts.utils import Animation, load_images
 
+BASE_IMG_PATH = 'data/images/'
 class Weapon():
     def __init__(self, name, is_dropped=False):
         self.name = name
         self.atk = 1
         self.pos = (0, 0)
-        self.w_animation = Animation(load_images(f"items/weapons/swords/weapon_animation/{self.name}"), image_dur=6)
-        self.p_animation =  Animation(load_images(f"items/weapons/swords/particle_animation/{self.name}"), image_dur=10)
+        weapon_path = f'items/weapons/swords/weapon_animation/{self.name}/'
+        particle_path = f'items/weapons/swords/particle_animation/{self.name}/'
+        self.w_animation = {atk_type : Animation(load_images(f"{weapon_path}{atk_type}"), image_dur=6) for atk_type in os.listdir(BASE_IMG_PATH + weapon_path)}
+        self.p_animation =  {atk_type : Animation(load_images(f"{particle_path}{atk_type}"), image_dur=10) for atk_type in os.listdir(BASE_IMG_PATH + particle_path)}
         self.d_animation = Animation(load_images(f"items/weapons/swords/drop_animation/{self.name}"), image_dur=10)
         self.is_dropped = True
     

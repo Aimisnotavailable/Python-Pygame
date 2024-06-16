@@ -20,14 +20,14 @@ class PhysicsEntities:
 
         self.last_movement = [0, 0]
 
-    def set_action(self, action, weapon_name='dirt_stick'):
+    def set_action(self, action, weapon_name='dirt_stick', atk_type='normal_attack'):
         if action != self.action:
             self.action = action
             if action != "attack":
                 self.animation = self.game.assets[self.type + '/' + self.action].copy()
             else:
-                self.weapon_animation = self.game.assets['weapon'][weapon_name].weapon_animation()
-                self.weapon_particle_animation = self.game.assets['weapon'][weapon_name].particle_animation()
+                self.weapon_animation = self.game.assets['weapon'][weapon_name].weapon_animation()[atk_type]
+                self.weapon_particle_animation = self.game.assets['weapon'][weapon_name].particle_animation()[atk_type]
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -128,16 +128,46 @@ class Player(PhysicsEntities):
     def __init__(self, game, pos, size=(16,16)):
         super().__init__(game,'player', pos, size)
         self.attacking = 0
+        self.atk_list = ['normal_attack', 'slash_attack']
+
+        self.attack_type = 0
+        self.atk_type = 'normal_attack'
+
+        self.is_initialized = False
+        self.charge_duration = 30
+
+        self.dashing = 10
+        self.dash_multiplier = 0
+    
+    def set_attack(self, is_initialized=False):
+        self.is_initialized = is_initialized
+    
+    def dash(self):
+        if self.attacking >= 20 * (1 - self.dash_multiplier):
+            self.velocity[0] = -8  if self.flip else 8
+        else:
+            self.velocity[0] = 0
 
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
 
         self.air_time += 1
-        self.attacking -= 1
+        self.attack_type = min(self.attack_type + 1, self.charge_duration * len(self.atk_list) - 1)
+        self.attacking = max(0, self.attacking - 1)
+        
+        if not self.is_initialized:
+            self.attack_type = 0
         if self.collisions['down']:
             self.air_time = 0
         if self.attacking > 0:
-            self.set_action('attack', self.game.current_weapon.name)
+            if self.attacking == 1:
+                self.set_attack(is_initialized=False)
+                self.atk_type = ''
+            if self.atk_type == "slash_attack":
+                if self.attacking == 29:
+                    self.dash_multiplier = ((self.attack_type - self.charge_duration) / self.charge_duration) * 0.5
+                    self.attack_type = 0
+                self.dash()
             self.weapon_particle_animation.update()
             self.weapon_animation.update()
         elif self.air_time > 4:
@@ -152,6 +182,11 @@ class Player(PhysicsEntities):
 
     def render(self, surf, offset=(0,0)):
         super().render(surf, offset)
+
+        # Charge tooltip
+        if self.is_initialized and self.attacking == 0:
+            pygame.draw.rect(surf, (255, 0, 0) if self.attack_type < self.charge_duration else (0, 255, 0) if self.attack_type < self.charge_duration * len(self.atk_list) - 1 else (0, 0, 255), pygame.Rect(self.pos[0] - offset[0] - (self.charge_duration * len(self.atk_list) - 1 - self.attack_type) //5, self.pos[1] - offset[1] - 10, self.attack_type //5, 3))
+        
         if(self.action == "attack"):
             slash_x = self.pos[0] - offset[0] + (-20 if self.flip else 20)
             slash_y = self.pos[1] - offset[1] - 5
