@@ -18,10 +18,12 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
+        self.tilemap = TileMap(self)
+        self.tilemap.load("data/maps/map.json")
         self.movement = [0, 0]
 
         self.scroll = [0, 0]
-        self.weapons = [Weapon('dirt_stick'), Weapon('slime_stick')]
+        self.weapons = [Weapon('dirt_stick', self), Weapon('slime_stick', self)]
         self.assets = {"grass" : load_images("tiles/grass"),
                        "player" : load_image("entities/player/player1.png"),
                        "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
@@ -35,8 +37,6 @@ class Game:
                     }
         
         self.current_weapon = self.weapons[0]
-        self.tilemap = TileMap(self)
-        self.tilemap.load("data/maps/map.json")
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
         self.weapon_pos = self.pos
@@ -45,6 +45,7 @@ class Game:
         self.player = Player(self, self.pos)
         self.enemies = [Enemy(self, self.pos)]
         self.items_nearby = []
+        self.attack_rect = None
         for loc in self.tilemap.tilemap:
             if random.randint(0, 5) == 1:
                 self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
@@ -69,21 +70,30 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     
                     if event.key == pygame.K_LEFT:
-                        self.movement[0] = -1
+                        self.movement[0] = -2
                     if event.key == pygame.K_RIGHT:
-                        self.movement[0] = 1
+                        self.movement[0] = 2
                     if event.key == pygame.K_UP:
                         self.player.velocity[1] = -3
                     
-                    if event.key == pygame.K_x and self.player.attacking == 0:
+                    if event.key == pygame.K_x and self.current_weapon is not None and self.player.attacking == 0:
                         self.player.set_attack(is_initialized=True)
                     
-                    if event.key == pygame.K_g and self.current_weapon is not None and self.player.attacking == 0:
+                    if event.key == pygame.K_e and self.current_weapon is not None and self.player.attacking == 0:
                         self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
                         self.items_nearby.append(self.current_weapon)
                         self.current_weapon = None
                     
-                    if event.key == pygame.K_p:
+                    if event.key == pygame.K_r and self.current_weapon is not None and self.player.attacking == 0:
+                        self.current_weapon.velocity[0] = -5 if self.player.flip else 5
+                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=False)
+                        self.current_weapon.set_throw_status(self.player.pos.copy(), is_thrown=True)
+                        self.items_nearby.append(self.current_weapon)
+                        self.player.set_action('throw', self.current_weapon)
+                        self.player.attacking = 50
+                        self.current_weapon = None
+
+                    if event.key == pygame.K_q:
                         for item in self.items_nearby:
                             if (item.pos[0] >= self.player.pos[0] - self.tilemap.tile_size and item.pos[0] <= self.player.pos[0] + self.tilemap.tile_size) and (item.pos[1] >= self.player.pos[1] - self.tilemap.tile_size and item.pos[1] <= self.player.pos[1] + self.tilemap.tile_size):
                                 if self.current_weapon is not None:
@@ -100,12 +110,12 @@ class Game:
                     if event.key == pygame.K_RIGHT:
                         self.movement[0] = 0
                     
-                    if event.key == pygame.K_x and self.player.attacking == 0:
+                    if event.key == pygame.K_x and self.current_weapon is not None and self.player.attacking == 0:
                         if event.key == pygame.K_x and self.player.attacking <= 0 and self.current_weapon is not None:
                             self.player.attacking = 30
                             self.player.atk_type = self.player.atk_list[int(self.player.attack_type//self.player.charge_duration)]
-                            self.player.set_action('attack', self.current_weapon.name, atk_type=self.player.atk_type)
-
+                            self.player.set_action('attack', self.current_weapon.name)
+            
             self.tilemap.render(self.display, offset=render_scroll)
             self.player.update(self.tilemap, self.movement)
             self.player.render(self.display, offset=render_scroll)
@@ -114,10 +124,13 @@ class Game:
                 enemy.update(self.tilemap)
                 enemy.render(self.display, offset=render_scroll)
                 pygame.draw.circle(self.display, (0, 0 if not self.tilemap.solid_check((enemy.rect().centerx + (-7 if enemy.flip else 7), enemy.pos[1] + 23)) else 255, 0), (enemy.rect().centerx + (-7 if enemy.flip else 7) - render_scroll[0], enemy.pos[1] + 23 - render_scroll[1]), 1)
+            
+            for item in self.items_nearby:
+                item.render(self.display, render_scroll)
 
-            if self.player.action == "attack":
+            if self.player.attacking != 0:
                 for enemy in self.enemies:
-                    if enemy.rect().colliderect(self.player.slash_rect):
+                    if enemy.rect().colliderect(self.attack_rect):
                         if enemy.attacked == 0:
                             enemy.current_hp -=1
                             enemy.attacked = 30
@@ -125,12 +138,11 @@ class Game:
                             enemy.flip = not enemy.flip
                             
                         if enemy.current_hp <= 0:
-                            dropped_item = Weapon('slime_stick')
+                            dropped_item = Weapon('slime_stick', self)
                             dropped_item.set_drop_status(enemy.pos,is_dropped=True)
                             self.items_nearby.append(dropped_item)
                             self.enemies.remove(enemy)
-            for item in self.items_nearby:
-                item.render(self.display, render_scroll)
+                            
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60)   

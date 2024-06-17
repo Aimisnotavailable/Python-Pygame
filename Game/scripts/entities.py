@@ -3,7 +3,7 @@ import random
 
 class PhysicsEntities:
 
-    def __init__(self, game, e_type, pos, size):
+    def __init__(self, game, e_type, pos=(0,0), size=(16,16)):
 
         self.game = game
         self.type = e_type
@@ -15,19 +15,22 @@ class PhysicsEntities:
         self.action = ''
         self.anim_offset = (-3, -3)
         self.flip = False
-        self.set_action('idle')
         self.air_time = 0
 
         self.last_movement = [0, 0]
 
-    def set_action(self, action, weapon_name='dirt_stick', atk_type='normal_attack'):
+        self.objects = []
+
+    def set_action(self, action, weapon_name='dirt_stick'):
         if action != self.action:
             self.action = action
+            if action == 'throw':
+                return
             if action != "attack":
                 self.animation = self.game.assets[self.type + '/' + self.action].copy()
             else:
-                self.weapon_animation = self.game.assets['weapon'][weapon_name].weapon_animation()[atk_type]
-                self.weapon_particle_animation = self.game.assets['weapon'][weapon_name].particle_animation()[atk_type]
+                self.objects.append({'img': self.game.assets['weapon'][weapon_name].particle_animation()[self.atk_type].copy(), 'pos' : self.pos, 'type' : 'particle'})
+                self.objects.append({'img' : self.game.assets['weapon'][weapon_name].weapon_animation()[self.atk_type].copy(), 'pos' : self.pos, 'type' : 'weapon'})
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -70,14 +73,14 @@ class PhysicsEntities:
             self.flip = False
         elif movement[0] < 0:
             self.flip = True
-
+        
         self.velocity[1] = min(5, self.velocity[1] + 0.1)
         if self.collisions['up'] or self.collisions['down']:
             self.velocity[1] = 0
         
         if self.velocity[0] > 0:
             self.velocity[0] = max(self.velocity[0] - 0.1, 0)
-        elif self.velocity[1] < 0:
+        elif self.velocity[0] < 0:
             self.velocity[0] = min(self.velocity[0] + 0.1, 0)
 
         self.animation.update()
@@ -85,7 +88,7 @@ class PhysicsEntities:
 class Enemy(PhysicsEntities):
     def __init__(self, game, pos, size=(16,16)):
         super().__init__(game, 'enemy', pos, size)
-    
+        self.set_action('idle')
         self.walking = 0
         self.current_hp = 5
         self.max_hp = 5
@@ -127,6 +130,7 @@ class Player(PhysicsEntities):
 
     def __init__(self, game, pos, size=(16,16)):
         super().__init__(game,'player', pos, size)
+        self.set_action('idle')
         self.attacking = 0
         self.atk_list = ['normal_attack', 'slash_attack']
 
@@ -138,7 +142,7 @@ class Player(PhysicsEntities):
 
         self.dashing = 10
         self.dash_multiplier = 0
-    
+
     def set_attack(self, is_initialized=False):
         self.is_initialized = is_initialized
     
@@ -168,13 +172,12 @@ class Player(PhysicsEntities):
                     self.dash_multiplier = ((self.attack_type - self.charge_duration) / self.charge_duration) * 0.5
                     self.attack_type = 0
                 self.dash()
-            self.weapon_particle_animation.update()
-            self.weapon_animation.update()
+            for object in self.objects.copy():
+                object['img'].update()
+                if object['img'].done:
+                    self.objects.remove(object)
         elif self.air_time > 4:
             self.set_action('jump')
-            # if self.air_time > 60:
-            #     self.pos = [self.game.display.get_width() // 2, self.game.display.get_height() // 2]
-            #     self.air_time = 0
         elif self.movement[0] != 0:
             self.set_action('run')
         else:
@@ -188,10 +191,8 @@ class Player(PhysicsEntities):
             pygame.draw.rect(surf, (255, 0, 0) if self.attack_type < self.charge_duration else (0, 255, 0) if self.attack_type < self.charge_duration * len(self.atk_list) - 1 else (0, 0, 255), pygame.Rect(self.pos[0] - offset[0] - (self.charge_duration * len(self.atk_list) - 1 - self.attack_type) //5, self.pos[1] - offset[1] - 10, self.attack_type //5, 3))
         
         if(self.action == "attack"):
-            slash_x = self.pos[0] - offset[0] + (-20 if self.flip else 20)
-            slash_y = self.pos[1] - offset[1] - 5
-
-            self.slash_rect = pygame.Rect(slash_x + offset[0], slash_y + offset[1], 8, 16)
-            surf.blit(pygame.transform.flip(self.weapon_particle_animation.img(), self.flip, False), (slash_x, slash_y))
-            surf.blit(pygame.transform.flip(self.weapon_animation.img(), self.flip, False), (self.pos[0] - offset[0] + (-10 if self.flip else 10), self.pos[1] - offset[1] - 5))
+            for object in self.objects:
+                surf.blit(pygame.transform.flip(object['img'].img(), self.flip, False), (object['pos'][0] - offset[0] + (-10 if self.flip else 10), object['pos'][1] - offset[1] - 5))
+                if (object['type'] == 'particle'):
+                    self.game.attack_rect = pygame.Rect(object['pos'][0] + (-10 if self.flip else 10), object['pos'][1], 16, 16)
     
