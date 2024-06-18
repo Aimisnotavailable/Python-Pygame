@@ -11,7 +11,6 @@ class Weapon(PhysicsEntities):
 
         weapon_path = f'items/weapons/swords/weapon_animation/{self.name}/'
         particle_path = f'items/weapons/swords/particle_animation/{self.name}/'
-        throw_path = f'items/weapons/swords/throw_animation/{self.name}/'
         self.w_animation = {atk_type : Animation(load_images(f"{weapon_path}{atk_type}"), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + weapon_path)}
         self.p_animation =  {atk_type : Animation(load_images(f"{particle_path}{atk_type}"), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + particle_path)}
         self.t_animation = Animation(load_images(f"items/weapons/swords/throw_animation/{self.name}"), image_dur=10)

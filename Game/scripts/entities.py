@@ -128,7 +128,7 @@ class Enemy(PhysicsEntities):
 
 class Player(PhysicsEntities):
 
-    def __init__(self, game, pos, size=(16,16)):
+    def __init__(self, game, pos, size=(12,16)):
         super().__init__(game,'player', pos, size)
         self.set_action('idle')
         self.attacking = 0
