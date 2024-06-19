@@ -51,11 +51,14 @@ class Game:
 
             key = str(tile_pos[0]) + ";" + str(tile_pos[1])
             
+            print(key)
             if self.clicking:
-                self.tilemap.tilemap[key] = {"type": "grass", "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
+                if not (key in self.tilemap.tilemap):
+                    self.tilemap.tilemap[key] = {"type": "grass", "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
             
             if self.right_clicking:
-                del self.tilemap.tilemap[key]
+                if key in self.tilemap.tilemap:
+                    del self.tilemap.tilemap[key]
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -88,9 +91,9 @@ class Game:
                     if event.key == pygame.K_d:
                         self.movement[0] = 1
 
-                    if event.key == pygame.K_w:
-                        self.movement[1] = 1
                     if event.key == pygame.K_s:
+                        self.movement[1] = 1
+                    if event.key == pygame.K_w:
                         self.movement[1] = -1
 
                     if event.key == pygame.K_k:
