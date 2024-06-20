@@ -29,6 +29,8 @@ class Game:
         self.clicking = False
         self.right_clicking = False
 
+        self.font = pygame.font.Font(size=15)
+        
     def run(self):
         running = True
 
@@ -45,6 +47,9 @@ class Game:
 
             current_image = self.assets['grass'][self.tile_variant].copy()
             current_image.set_alpha(100)
+
+            text  = self.font.render(str(mpos[0] + self.render_scroll[0]) + ';' + str(mpos[1] + self.render_scroll[1]), True, (0, 0, 0))
+            self.display.blit(text, (0, 32))
 
             self.display.blit(current_image, (tile_pos[0] * self.tilemap.tile_size - self.render_scroll[0], tile_pos[1] * self.tilemap.tile_size - self.render_scroll[1]))
             self.display.blit(current_image, (5,5))

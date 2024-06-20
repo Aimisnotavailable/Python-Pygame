@@ -3,8 +3,6 @@ import pygame
 
 from scripts.utils import load_image
 
-RENDER_SCALE = 2
-
 class Cloud:
     
     def __init__(self, img, speed, depth, pos=(0,0)):
@@ -12,16 +10,15 @@ class Cloud:
         self.pos = list(pos)
         self.speed = speed
         self.depth = depth
-        rand = (random.random())
-        self.size = (rand * RENDER_SCALE * self.img.get_width(), rand * RENDER_SCALE * self.img.get_height())
-
+        rand = (random.random()) + 1
+        self.size = [int(rand * self.img.get_width()), int(rand * self.img.get_height())]
+        
     def update(self):
         self.pos[0] += self.speed
 
     def render(self, surf, offset=(0,0)):
-        render_pos = ((self.pos[0] - offset[0] * self.depth), (self.pos[1] - offset[1] * self.depth))
-
-        surf.blit(pygame.transform.scale(self.img, self.size), (render_pos[0] % (surf.get_width() + self.img.get_width()), render_pos[1] % (surf.get_height() + self.img.get_height())))
+        render_pos = ((self.pos[0] - offset[0] * self.depth), (self.pos[1] - offset[1] * self.depth)) 
+        surf.blit(pygame.transform.scale(self.img, self.size), (render_pos[0] % (surf.get_width() + self.size[0]), render_pos[1] % (surf.get_height() + self.size[1])))
 
 class Clouds:
 

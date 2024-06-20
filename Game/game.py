@@ -2,12 +2,14 @@ import pygame
 import sys
 import os
 import random
+import math
 from scripts.utils import load_image, load_images, Animation
 from scripts.tilemap import TileMap
 from scripts.entities import PhysicsEntities, Player, Enemy
-from scripts.items import Weapon, Sword
+from scripts.items import Weapon, Sword, Gun
 from scripts.inventory import Inventory
 from scripts.clouds import Clouds
+from scripts.sparks import Sparks
 
 class Game:
     def __init__(self):
@@ -60,6 +62,9 @@ class Game:
         self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
         self.clouds = Clouds(self.assets['clouds'], count=30)
 
+        self.gun = Gun(self, 'dirt_gun')
+        self.sparks = []
+
         for loc in self.tilemap.tilemap:
             if random.randint(0, 20) == 1:
                 self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
@@ -83,7 +88,6 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                
                 if event.type == pygame.KEYDOWN:
                     
                     if event.key == pygame.K_LEFT:
@@ -150,6 +154,12 @@ class Game:
                             self.player.set_action('attack', self.current_weapon.name)
             
             self.tilemap.render(self.display, offset=render_scroll)
+
+            for spark in self.sparks.copy():
+                spark.render(self.display, render_scroll)
+                if spark.update():
+                    self.sparks.remove(spark)
+
             self.player.update(self.tilemap, self.movement)
             self.player.render(self.display, offset=render_scroll)
 
@@ -158,8 +168,10 @@ class Game:
                 enemy.render(self.display, offset=render_scroll)
                 pygame.draw.circle(self.display, (0, 0 if not self.tilemap.solid_check((enemy.rect().centerx + (-7 if enemy.flip else 7), enemy.pos[1] + 23)) else 255, 0), (enemy.rect().centerx + (-7 if enemy.flip else 7) - render_scroll[0], enemy.pos[1] + 23 - render_scroll[1]), 1)
             
-            for item in self.items_nearby:
+            for item in self.items_nearby.copy():
                 item.render(self.display, render_scroll)
+                if item.life == 0:
+                    self.items_nearby.remove(item)
 
             if self.player.attacking != 0:
                 for enemy in self.enemies:
@@ -169,13 +181,17 @@ class Game:
                             enemy.attacked = 30
                             enemy.velocity[1] = -2
                             enemy.flip = not enemy.flip
-                            
+
                         if enemy.current_hp <= 0:
                             dropped_item = Sword('slime_stick', self)
                             dropped_item.set_drop_status(enemy.pos,is_dropped=True)
                             self.items_nearby.append(dropped_item)
                             self.enemies.remove(enemy)
-            
+                            for i in range(30):
+                                angle = (random.random() + 0.5) * math.pi * 2
+                                speed = (random.random() + 0.5) + 1
+                                self.sparks.append(Sparks(angle, speed, enemy.pos))
+                    
             self.inventory.render(self.display)
 
             display_mask = pygame.mask.from_surface(self.display)
@@ -185,8 +201,7 @@ class Game:
                 self.display_2.blit(display_sillhouette, offset)
 
             self.display_2.blit(self.display, (0, 0))
-
-            self.time = (self.time + 1) % 1000
+            self.gun.render(self.display_2, render_scroll)
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60)   
