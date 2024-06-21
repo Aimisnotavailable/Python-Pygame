@@ -2,6 +2,8 @@ import pygame
 import random
 import math
 from scripts.sparks import Sparks
+from scripts.particles import Particles
+from scripts.projectiles import Projectiles
 
 class PhysicsEntities:
 
@@ -23,14 +25,22 @@ class PhysicsEntities:
 
         self.objects = []
 
-    def set_action(self, action, weapon_name='dirt_stick'):
+    def set_action(self, action):
         if action != self.action:
             self.action = action
-            if action == 'throw':
-                return
-            elif action == 'attack':
-                self.objects.append({'img': self.game.assets['weapon'][weapon_name].particle_animation()[self.atk_type].copy(), 'pos' : self.pos, 'type' : 'particle'})
-                self.objects.append({'img' : self.game.assets['weapon'][weapon_name].weapon_animation()[self.atk_type].copy(), 'pos' : self.pos, 'type' : 'weapon'})
+            if action == 'attack':
+                if self.atk_type == "normal_attack" or self.atk_type == "charged_attack":
+                    self.objects.append({'img': self.game.current_weapon.particle_animation()[self.atk_type].copy(), 'pos' : self.pos, 'type' : 'attack_radius'})
+                    self.objects.append({'img' : self.game.current_weapon.weapon_animation()[self.atk_type].copy(), 'pos' : self.pos, 'type' : 'weapon'})
+                elif self.atk_type == "throw_meele_attack":
+                    return
+                elif self.atk_type == "shoot_attack":
+                    self.objects.append({'img' : self.game.current_weapon.weapon_animation().copy(), 'pos' : (self.rect().centerx + (-7 if self.flip else -3), self.rect().centery), 'type' : 'weapon'})
+                    for i in range(4):
+                        angle = (random.random() - 0.5) + (math.pi if self.flip else 0)
+                        speed = random.random() + 2
+                        self.game.sparks.append(Sparks(angle, speed, (self.rect().centerx + (-23 if self.flip else 23), self.rect().centery)))
+                    self.game.projectiles.append(Projectiles(self.game.current_weapon.particle_animation()[self.atk_type].copy().img(), (-5 if self.flip else 5), 360, (self.rect().centerx + (-25 if self.flip else 25), self.rect().centery - 3)))
             else:
                 self.animation = self.game.assets[self.type + '/' + self.action].copy()
 
@@ -111,6 +121,7 @@ class Enemy(PhysicsEntities):
             self.walking = random.randint(30, 120)
         
         self.attacked -= 1
+
         if self.attacked <= 0:
             self.attacked = 0
 
@@ -135,10 +146,9 @@ class Player(PhysicsEntities):
         super().__init__(game,'player', pos, size)
         self.set_action('idle')
         self.attacking = 0
-        self.atk_list = ['normal_attack', 'slash_attack']
 
         self.attack_type = 0
-        self.atk_type = 'normal_attack'
+        self.atk_type = ''
 
         self.is_initialized = False
         self.charge_duration = 30
@@ -147,16 +157,29 @@ class Player(PhysicsEntities):
         self.dash_duration = 10
         self.dash_multiplier = 1
 
+        self.atk_type_count_meele = 2
+        self.shooting = False
+
     def set_attack(self, is_initialized=False):
         self.is_initialized = is_initialized
     
     def dash(self):
         if self.dashing <= self.dash_duration * self.dash_multiplier:
             self.velocity[0] = -8  if self.flip else 8
-            for i in range(4):
-                angle = 0 + (math.pi if not self.flip else 0)
-                speed = (random.random() + 0.5) * 2
-                self.game.sparks.append(Sparks(angle, speed, self.rect().center))
+            if self.dashing == 0 or self.dashing == int((self.dash_duration * self.dash_multiplier)):
+                for i in range(30):
+                    angle = (random.random() + 0.5) * math.pi * 2
+                    speed = (random.random() + 0.5) * 2
+                    self.game.sparks.append(Sparks(angle, speed, self.rect().center))
+                
+            else:
+                for i in range(4):
+                    angle = (random.random() - 0.5) * math.pi * 0.5 + (math.pi if not self.flip else 0)
+                    speed = (random.random() + 0.5) * 2
+                    self.game.sparks.append(Sparks(angle, speed, self.rect().center))
+
+                # if i % 2 == 0:
+                #     self.game.particles.append(Particles(self.game, 'particles', angle, speed, self.rect().center))
             self.dashing += 1
         else:
             self.velocity[0] = 0
@@ -165,7 +188,7 @@ class Player(PhysicsEntities):
         super().update(tilemap, movement)
 
         self.air_time += 1
-        self.attack_type = min(self.attack_type + 1, self.charge_duration * len(self.atk_list) - 1)
+        self.attack_type = min(self.attack_type + 1, self.charge_duration * self.atk_type_count_meele - 1)
         self.attacking = max(0, self.attacking - 1)
         
         if not self.is_initialized:
@@ -173,44 +196,42 @@ class Player(PhysicsEntities):
         if self.collisions['down']:
             self.air_time = 0
 
-        if self.attacking > 0:
+        if self.action == "attack":
+            if self.attacking > 0:
+                if self.attacking == 1:
+                    self.set_attack(is_initialized=False)
+                    self.atk_type = ''
+                    self.dash_multiplier = 1
+                    self.dashing = 0
+                    self.set_action('idle')
 
-            if self.attacking == 1:
-                self.set_attack(is_initialized=False)
-                self.atk_type = ''
-                self.dash_multiplier = 1
-                self.dashing = 0
-
-            if self.atk_type == "slash_attack":
-                if self.attacking == 29:
-                    self.dash_multiplier = 1 + ((self.attack_type - self.charge_duration) / self.charge_duration) * 0.5
-                    self.attack_type = 0
-                self.dash()
-
+                if self.atk_type == "charged_attack":
+                    if self.attacking == 29:
+                        self.dash_multiplier = 1 + ((self.attack_type - self.charge_duration) / self.charge_duration) * 0.5
+                        self.attack_type = 0
+                    self.dash()
         elif self.air_time > 4:
             self.set_action('jump')
         elif self.movement[0] != 0:
             self.set_action('run')
         else:
+            print("hehe")
             self.set_action('idle')
 
     def render(self, surf, offset=(0,0)):
-        if self.dashing == 0:
-            super().render(surf, offset)
-
         # Charge tooltip
         if self.is_initialized and self.attacking == 0:
-            pygame.draw.rect(surf, (255, 0, 0) if self.attack_type < self.charge_duration else (0, 255, 0) if self.attack_type < self.charge_duration * len(self.atk_list) - 1 else (0, 0, 255), pygame.Rect(self.pos[0] - offset[0] - (self.charge_duration * len(self.atk_list) - 1 - self.attack_type) //5, self.pos[1] - offset[1] - 10, self.attack_type //5, 3))
-        
+            pygame.draw.rect(surf, (255, 0, 0) if self.attack_type < self.charge_duration else (0, 255, 0) if self.attack_type < self.charge_duration * self.atk_type_count_meele - 1 else (0, 0, 255), pygame.Rect(self.pos[0] - offset[0] - (self.charge_duration * self.atk_type_count_meele - 1 - self.attack_type) //5, self.pos[1] - offset[1] - 10, self.attack_type //5, 3))
+
         if(self.action == "attack"):
             for object in self.objects:
-                
                 if self.dashing <= 0:
                     surf.blit(pygame.transform.flip(object['img'].img(), self.flip, False), (object['pos'][0] - offset[0] + (-10 if self.flip else 10), object['pos'][1] - offset[1] - 5))
-                if (object['type'] == 'particle'):
+                if (object['type'] == 'attack_radius'):
                     self.game.attack_rect = pygame.Rect(object['pos'][0] + (-10 if self.flip else 10), object['pos'][1], 16, 16)
 
                 object['img'].update()
                 if object['img'].done:
                     self.objects.remove(object)
-    
+        if self.dashing <= 0:
+            super().render(surf, offset)

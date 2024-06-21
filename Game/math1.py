@@ -11,10 +11,10 @@ pygame.init()
 clock = pygame.time.Clock()
 
 render_points = [
-    [ 10 * math.cos(45) + 150, 10 * math.sin(45) + 150],
-    [ 10 * math.cos(45 + math.pi * 0.5) + 100, 10 * math.sin(45 + math.pi * 0.5) + 100],
-    [ 10 * math.cos(45 + math.pi) + 100, 10 * math.sin(45 + math.pi) + 100],
-    [ 10 * math.cos(45 - math.pi * 0.5) + 100, 10 * math.sin(45 - math.pi * 0.5) + 100],
+    [ 10 * math.cos(-1) + 150, 10 * math.sin(-1) + 150],
+    [ 10 * math.cos(-1 + math.pi * 0.5) + 100, 10 * math.sin(-1 + math.pi * 0.5) + 100],
+    [ 10 * math.cos(-1 + math.pi) + 100, 10 * math.sin(-1 + math.pi) + 100],
+    [ 10 * math.cos(-1 - math.pi * 0.5) + 100, 10 * math.sin(-1 - math.pi * 0.5) + 100],
 ]
 
 current_selected = 0

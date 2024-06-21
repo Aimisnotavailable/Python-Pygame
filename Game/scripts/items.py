@@ -8,9 +8,10 @@ from scripts.sparks import Sparks
 BASE_IMG_PATH = 'data/images/'
 
 class Weapon(PhysicsEntities):
-    def __init__(self, game, name, w_type, w_path, p_path, is_dropped=False):
-        super().__init__(game, name)
+    def __init__(self, game, name, w_type, w_path, p_path, size=(16, 16), is_dropped=False):
+        super().__init__(game, name, size=size)
         self.name = name
+        self.type = w_type
         self.atk = 1
         self.is_dropped = False
         self.velocity = [0, 0]
@@ -54,7 +55,7 @@ class Weapon(PhysicsEntities):
             surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))   
 
 class Sword(Weapon):
-    def __init__(self, name, game, is_dropped=False):
+    def __init__(self, game, name, is_dropped=False):
         type = 'swords'
         w_path = f'items/weapons/{type}/weapon_animation/{name}/'
         p_path = f'items/weapons/{type}/particle_animation/{name}/'
@@ -104,16 +105,20 @@ class Sword(Weapon):
 
 class Gun(Weapon):
 
-    def __init__(self, game, name, is_dropped=False):
-        
+    def __init__(self, game, name, size=(15,9), is_dropped=False):
         type = 'guns'
         w_path = f'items/weapons/{type}/weapon_animation/{name}/'
         p_path = f'items/weapons/{type}/particle_animation/{name}/'
 
         super().__init__(game, name, type, w_path, p_path)
-        self.w_animation = Animation(load_images(self.weapon_path), image_dur=10)
+        self.w_animation = Animation(load_images(self.weapon_path), image_dur=10, loop=False)
+        self.p_animation =  {atk_type : Animation(load_images(f"{self.particle_path}{atk_type}"), image_dur=10) for atk_type in os.listdir(BASE_IMG_PATH + self.particle_path)}
         self.animation = self.w_animation.copy()
-        self.pos = (0,0)
+        self.pos = [0,0]
+        
+    def update(self):
+        super().update()
 
     def render(self, surf, offset):
+        self.update()
         surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))
