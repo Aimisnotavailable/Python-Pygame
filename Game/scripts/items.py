@@ -8,14 +8,14 @@ from scripts.sparks import Sparks
 BASE_IMG_PATH = 'data/images/'
 
 class Weapon(PhysicsEntities):
-    def __init__(self, game, name, w_type, w_path, p_path, size=(16, 16), is_dropped=False):
+    def __init__(self, game, name, w_type, w_path, p_path, size=(16, 16), is_dropped=False, color=(255, 255, 255)):
         super().__init__(game, name, size=size)
         self.name = name
         self.type = w_type
         self.atk = 1
         self.is_dropped = False
-        self.velocity = [0, 0]
-
+        
+        self.color = color
         self.weapon_path = w_path
         self.particle_path = p_path
 
@@ -55,12 +55,12 @@ class Weapon(PhysicsEntities):
             surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))   
 
 class Sword(Weapon):
-    def __init__(self, game, name, is_dropped=False):
+    def __init__(self, game, name, is_dropped=False, color=(255, 255, 255)):
         type = 'swords'
         w_path = f'items/weapons/{type}/weapon_animation/{name}/'
         p_path = f'items/weapons/{type}/particle_animation/{name}/'
 
-        super().__init__(game, name, type ,w_path, p_path)
+        super().__init__(game, name, type ,w_path, p_path, color=color)
         self.atk = 1
         self.is_dropped = False
         self.velocity = [0, 0]
@@ -90,7 +90,7 @@ class Sword(Weapon):
             for i in range(4):
                 angle = (random.random() - 0.5)  + (math.pi if self.velocity[0] > 0 else 0)
                 speed = (random.random() + 0.5) * 2
-                self.game.sparks.append(Sparks(angle, speed, self.rect().center))
+                self.game.sparks.append(Sparks(angle, speed, self.rect().center, self.color))
 
             self.set_drop_status(self.pos, is_dropped=True)    
             self.set_throw_status(self.pos, is_thrown=False)

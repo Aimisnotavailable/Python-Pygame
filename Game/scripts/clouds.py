@@ -18,7 +18,7 @@ class Cloud:
 
     def render(self, surf, offset=(0,0)):
         render_pos = ((self.pos[0] - offset[0] * self.depth), (self.pos[1] - offset[1] * self.depth)) 
-        surf.blit(pygame.transform.scale(self.img, self.size), (render_pos[0] % (surf.get_width() + self.size[0]), render_pos[1] % (surf.get_height() + self.size[1])))
+        surf.blit(pygame.transform.scale(self.img, self.size), (render_pos[0] % (surf.get_width() + self.size[0]) - self.size[0], render_pos[1] % (surf.get_height() + self.size[1]) - self.size[1]))
 
 class Clouds:
 
@@ -27,7 +27,6 @@ class Clouds:
 
         for i in range(count):
             self.clouds.append(Cloud(img, random.random() * 0.2 + 0.3, random.random() * 0.6 + 0.2, pos=(random.random() * 99999, random.random() * 99999)))
-        
         self.clouds.sort(key=lambda x : x.size)
 
     def update(self):

@@ -28,23 +28,24 @@ class PhysicsEntities:
     def set_action(self, action):
         if action != self.action:
             self.action = action
-            if action == 'attack':
-                if self.atk_type == "normal_attack" or self.atk_type == "charged_attack":
-                    self.objects.append({'img': self.game.current_weapon.particle_animation()[self.atk_type].copy(), 'pos' : self.pos, 'type' : 'attack_radius'})
-                    self.objects.append({'img' : self.game.current_weapon.weapon_animation()[self.atk_type].copy(), 'pos' : self.pos, 'type' : 'weapon'})
-                elif self.atk_type == "throw_meele_attack":
-                    return
-                elif self.atk_type == "shoot_attack":
-                    self.objects.append({'img' : self.game.current_weapon.weapon_animation().copy(), 'pos' : (self.rect().centerx + (-7 if self.flip else -3), self.rect().centery), 'type' : 'weapon'})
-                    for i in range(4):
-                        angle = (random.random() - 0.5) + (math.pi if self.flip else 0)
-                        speed = random.random() + 2
-                        self.game.sparks.append(Sparks(angle, speed, (self.rect().centerx + (-23 if self.flip else 23), self.rect().centery)))
-                    self.game.projectiles.append(Projectiles(self.game.current_weapon.particle_animation()[self.atk_type].copy().img(), (-5 if self.flip else 5), 360, (self.rect().centerx + (-25 if self.flip else 25), self.rect().centery - 3)))
-            else:
+            if self.action != 'attack':
                 self.animation = self.game.assets[self.type + '/' + self.action].copy()
 
+    def perform_attack(self, atk_type, current_weapon):
+        self.current_weapon = current_weapon
+        self.atk_type = atk_type
+        self.initialize_weapon(atk_type, current_weapon)
 
+    def initialize_weapon(self, atk_type, current_weapon):
+        if atk_type == "normal_attack" or atk_type == "charged_attack":
+            self.objects.append({'img': current_weapon.particle_animation()[atk_type].copy(), 'pos' : self.pos, 'type' : 'attack_radius'})
+            self.objects.append({'img' : current_weapon.weapon_animation()[atk_type].copy(), 'pos' : self.pos, 'type' : 'weapon'})
+        elif atk_type == "throw_meele_attack":
+            return
+        elif atk_type == "shoot_attack":
+            self.objects.append({'img' : current_weapon.weapon_animation().copy(), 'pos' : (self.rect().centerx + (-7 if self.flip else -3), self.rect().centery), 'type' : 'weapon'})
+            self.game.projectiles.append(Projectiles(current_weapon.particle_animation()[atk_type].copy().img(), speed=(-5 if self.flip else 5), life=1000, pos=self.rect().center))
+    
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
     
@@ -160,29 +161,26 @@ class Player(PhysicsEntities):
         self.atk_type_count_meele = 2
         self.shooting = False
 
-    def set_attack(self, is_initialized=False):
+    def start_charge(self, is_initialized=False):
         self.is_initialized = is_initialized
     
     def dash(self):
-        if self.dashing <= self.dash_duration * self.dash_multiplier:
+        if self.dashing >= 1:
             self.velocity[0] = -8  if self.flip else 8
-            if self.dashing == 0 or self.dashing == int((self.dash_duration * self.dash_multiplier)):
+            if self.dashing == 1 or self.dashing == int((self.dash_duration * self.dash_multiplier)):
                 for i in range(30):
                     angle = (random.random() + 0.5) * math.pi * 2
                     speed = (random.random() + 0.5) * 2
-                    self.game.sparks.append(Sparks(angle, speed, self.rect().center))
+                    self.game.sparks.append(Sparks(angle, speed, self.rect().center, self.current_weapon.color))
                 
             else:
                 for i in range(4):
                     angle = (random.random() - 0.5) * math.pi * 0.5 + (math.pi if not self.flip else 0)
                     speed = (random.random() + 0.5) * 2
-                    self.game.sparks.append(Sparks(angle, speed, self.rect().center))
+                    self.game.sparks.append(Sparks(angle, speed, self.rect().center, self.current_weapon.color))
 
-                # if i % 2 == 0:
-                #     self.game.particles.append(Particles(self.game, 'particles', angle, speed, self.rect().center))
-            self.dashing += 1
-        else:
-            self.velocity[0] = 0
+            self.dashing -= 1
+        return self.dashing
 
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
@@ -196,26 +194,24 @@ class Player(PhysicsEntities):
         if self.collisions['down']:
             self.air_time = 0
 
-        if self.action == "attack":
-            if self.attacking > 0:
-                if self.attacking == 1:
-                    self.set_attack(is_initialized=False)
-                    self.atk_type = ''
-                    self.dash_multiplier = 1
-                    self.dashing = 0
-                    self.set_action('idle')
+        if self.attacking > 0:
+            if self.attacking == 1:
+                self.start_charge(is_initialized=False)
+                self.set_action('idle')
 
-                if self.atk_type == "charged_attack":
-                    if self.attacking == 29:
-                        self.dash_multiplier = 1 + ((self.attack_type - self.charge_duration) / self.charge_duration) * 0.5
-                        self.attack_type = 0
+            if self.atk_type == "charged_attack":
+                if self.attacking == 29:
+                    self.dashing = int(self.dash_duration * (1 + ((self.attack_type - self.charge_duration) / self.charge_duration) * 0.5))
+                    self.attack_type = 0
+                if self.dashing:
                     self.dash()
+                else:
+                    self.velocity[0] = 0
         elif self.air_time > 4:
             self.set_action('jump')
         elif self.movement[0] != 0:
             self.set_action('run')
         else:
-            print("hehe")
             self.set_action('idle')
 
     def render(self, surf, offset=(0,0)):
@@ -223,15 +219,14 @@ class Player(PhysicsEntities):
         if self.is_initialized and self.attacking == 0:
             pygame.draw.rect(surf, (255, 0, 0) if self.attack_type < self.charge_duration else (0, 255, 0) if self.attack_type < self.charge_duration * self.atk_type_count_meele - 1 else (0, 0, 255), pygame.Rect(self.pos[0] - offset[0] - (self.charge_duration * self.atk_type_count_meele - 1 - self.attack_type) //5, self.pos[1] - offset[1] - 10, self.attack_type //5, 3))
 
-        if(self.action == "attack"):
+        if(self.attacking != 0):
             for object in self.objects:
                 if self.dashing <= 0:
                     surf.blit(pygame.transform.flip(object['img'].img(), self.flip, False), (object['pos'][0] - offset[0] + (-10 if self.flip else 10), object['pos'][1] - offset[1] - 5))
                 if (object['type'] == 'attack_radius'):
                     self.game.attack_rect = pygame.Rect(object['pos'][0] + (-10 if self.flip else 10), object['pos'][1], 16, 16)
-
                 object['img'].update()
                 if object['img'].done:
                     self.objects.remove(object)
-        if self.dashing <= 0:
+        if not self.dashing:
             super().render(surf, offset)

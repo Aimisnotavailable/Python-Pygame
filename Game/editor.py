@@ -21,22 +21,29 @@ class Game:
 
         self.render_scroll = [0, 0]
 
-        self.assets = {"grass" : load_images("tiles/grass")}
+        self.assets = {"grass" : load_images("tiles/grass"),
+                       "stone" : load_images("tiles/stone")}
+        
+
         self.tilemap = TileMap(self)
         self.tilemap.load("data/maps/map.json")
+        self.tile_list = list(self.assets)
 
+        self.tile_group = 0
         self.tile_variant = 0
+
+        self.shift = False
         self.clicking = False
         self.right_clicking = False
 
         self.font = pygame.font.Font(size=15)
+
         
     def run(self):
         running = True
 
         while running:
-
-            self.display.fill((25, 201, 224))
+            self.display.fill((255, 255, 255))
             self.render_scroll[0] += self.movement[0] * RENDER_SCALE
             self.render_scroll[1] += self.movement[1] * RENDER_SCALE
 
@@ -45,21 +52,18 @@ class Game:
 
             tile_pos =(int((mpos[0] + self.render_scroll[0])//self.tilemap.tile_size), int((mpos[1] + self.render_scroll[1])//self.tilemap.tile_size))
 
-            current_image = self.assets['grass'][self.tile_variant].copy()
+            current_image = self.assets[self.tile_list[self.tile_group]][self.tile_variant].copy()
             current_image.set_alpha(100)
 
-            text  = self.font.render(str(mpos[0] + self.render_scroll[0]) + ';' + str(mpos[1] + self.render_scroll[1]), True, (0, 0, 0))
-            self.display.blit(text, (0, 32))
-
-            self.display.blit(current_image, (tile_pos[0] * self.tilemap.tile_size - self.render_scroll[0], tile_pos[1] * self.tilemap.tile_size - self.render_scroll[1]))
-            self.display.blit(current_image, (5,5))
-
+            # for x in range(self.render_scroll[0] // self.tilemap.tile_size, (self.render_scroll[0] + self.display.get_width()) // self.tilemap.tile_size + 1):
+            #     for y in range(self.render_scroll[1] // self.tilemap.tile_size, (self.render_scroll[1] + self.display.get_height()) // self.tilemap.tile_size + 1):
+            #         pygame.draw.rect(self.display, (255, 255, 255), (x * self.tilemap.tile_size - self.render_scroll[0], y * self.tilemap.tile_size - self.render_scroll[1], self.tilemap.tile_size , self.tilemap.tile_size), 1)
+                    
             key = str(tile_pos[0]) + ";" + str(tile_pos[1])
             
-            print(key)
             if self.clicking:
                 if not (key in self.tilemap.tilemap):
-                    self.tilemap.tilemap[key] = {"type": "grass", "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
+                    self.tilemap.tilemap[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
             
             if self.right_clicking:
                 if key in self.tilemap.tilemap:
@@ -78,10 +82,16 @@ class Game:
                         self.right_clicking = True
                     
                     if event.button == 4:
-                        self.tile_variant = (self.tile_variant + 1) % len(self.assets['grass'])
+                        if self.shift:
+                            self.tile_group = (self.tile_group + 1) % len(self.tile_list)
+                        else:
+                            self.tile_variant = (self.tile_variant + 1) % len(self.assets['grass'])
                     
                     if event.button == 5:
-                        self.tile_variant = ((self.tile_variant - 1)+ len(self.assets['grass'])) % len(self.assets['grass'])
+                        if self.shift:
+                            self.tile_group = ((self.tile_group -1) + len(self.tile_list)) % len(self.tile_list)
+                        else:
+                            self.tile_variant = ((self.tile_variant - 1)+ len(self.assets['grass'])) % len(self.assets['grass'])
                 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -106,7 +116,14 @@ class Game:
                     
                     if event.key == pygame.K_t:
                         self.tilemap.auto_tile()
-                
+
+                    if event.key == pygame.K_r:
+                        self.tilemap.tilemap = {}
+
+                    if event.key == pygame.K_LSHIFT:
+                        self.tile_group = 0
+                        self.shift = True
+
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_a:
                         self.movement[0] = 0
@@ -117,9 +134,17 @@ class Game:
                         self.movement[1] = 0
                     if event.key == pygame.K_s:
                         self.movement[1] = 0
-                
                     
-            self.tilemap.render(self.display, offset=self.render_scroll)
+                    if event.key == pygame.K_LSHIFT:
+                        self.shift = False
+                
+            self.tilemap.render(self.display, offset=self.render_scroll, grid_enabled=True)
+            text  = self.font.render(str(mpos[0] + self.render_scroll[0]) + ';' + str(mpos[1] + self.render_scroll[1]), True, (255, 0, 255))
+            self.display.blit(text, (0, 32))
+
+            self.display.blit(current_image, (tile_pos[0] * self.tilemap.tile_size - self.render_scroll[0], tile_pos[1] * self.tilemap.tile_size - self.render_scroll[1]))
+            self.display.blit(current_image, (5,5))
+
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
 
             pygame.display.update()

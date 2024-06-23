@@ -12,6 +12,8 @@ from scripts.clouds import Clouds
 from scripts.sparks import Sparks
 from scripts.particles import Particles
 
+BASE_IMG_PATH = 'data/images/'
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -35,6 +37,7 @@ class Game:
                        "inventory_slot" : load_images("inventory/slot"),
                        "clouds" : load_image("clouds\cloud.png"),
                        "grass" : load_images("tiles/grass"),
+                       "stone" : load_images("tiles/stone"),
                        "player" : load_image("entities/player/player1.png"),
                        "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                        "player/jump" : Animation(load_images("entities/player/jump")),
@@ -43,10 +46,11 @@ class Game:
                        "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),
                        "enemy/damaged" : Animation(load_images("entities/enemy/damaged")),
                        "enemy/run" : Animation(load_images("entities/enemy/run"), image_dur=5),
+                       "enemy/attack" : Animation(load_images("entities/enemy/attack"), image_dur=6),
                        "particles/particles" : Animation(load_images("particles/particles"))
                     }
         
-        self.current_weapon = Gun(self, 'dirt_gun') #Sword(self, 'dirt_stick')
+        self.current_weapon =  Sword(self, 'dirt_stick', color=(150, 75, 0))
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
         self.weapon_pos = self.pos
@@ -58,9 +62,10 @@ class Game:
 
         self.inventory = Inventory(self.assets['inventory_slot'])
         self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
-        self.clouds = Clouds(self.assets['clouds'], count=30)
+        self.inventory.item_list[1] = Sword(self,  'slime_stick', color=(10, 255, 10))
 
-        self.gun = Gun(self, 'dirt_gun')
+        self.clouds = Clouds(self.assets['clouds'], count=15)
+
         self.sparks = []
         self.projectiles = []
 
@@ -105,13 +110,13 @@ class Game:
                         self.current_weapon = self.inventory.item_list[self.inventory.current_selected ]
 
                     if event.key == pygame.K_x and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
-                        self.player.set_attack(is_initialized=True)
+                        self.player.start_charge(is_initialized=True)
                     
                     if event.key == pygame.K_c and self.current_weapon is not None and self.current_weapon.type == 'guns' and self.player.attacking == 0:
                         self.player.shooting = True
                         self.player.attacking = 10
-                        self.player.atk_type = 'shoot_attack'
-                        self.player.set_action('attack')
+                        atk_type = 'shoot_attack'
+                        self.player.perform_attack(atk_type, self.current_weapon)
 
                     if event.key == pygame.K_e and self.current_weapon is not None and self.player.attacking == 0:
                         self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
@@ -128,7 +133,8 @@ class Game:
                         self.current_weapon.set_throw_status(self.player.pos.copy(), is_thrown=True)
 
                         self.items_nearby.append(self.current_weapon)
-                        self.player.set_action('attack')
+                        atk_type = 'throw_meele_attack'
+                        self.player.perform_attack(atk_type, self.current_weapon)
 
                         self.player.attacking = 50
                         self.current_weapon = None
@@ -155,8 +161,8 @@ class Game:
                     if event.key == pygame.K_x and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
                         if event.key == pygame.K_x and self.player.attacking <= 0 and self.current_weapon is not None:
                             self.player.attacking = 30
-                            self.player.atk_type = 'normal_attack' if self.player.attack_type < self.player.charge_duration else 'charged_attack'
-                            self.player.set_action('attack')
+                            atk_type = 'normal_attack' if self.player.attack_type < self.player.charge_duration else 'charged_attack'
+                            self.player.perform_attack(atk_type, self.current_weapon)
                     
                     if event.key == pygame.K_c and self.current_weapon is not None and self.current_weapon.type == 'guns':
                         self.player.shooting = False
@@ -164,10 +170,9 @@ class Game:
             self.tilemap.render(self.display, offset=render_scroll)
 
             if self.player.shooting and self.player.attacking == 1:
-                print(self.player.animation)
                 self.player.attacking = 10
-                self.player.atk_type = 'shoot_attack'
-                self.player.set_action('attack')
+                atk_type = 'shoot_attack'
+                self.player.perform_attack(atk_type, self.current_weapon)
 
             for spark in self.sparks.copy():
                 spark.render(self.display, render_scroll)
@@ -197,7 +202,7 @@ class Game:
                             enemy.flip = not enemy.flip
 
                         if enemy.current_hp <= 0:
-                            dropped_item = Sword(self, 'slime_stick')
+                            dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
                             dropped_item.set_drop_status(enemy.pos,is_dropped=True)
                             self.items_nearby.append(dropped_item)
                             self.enemies.remove(enemy)
@@ -220,7 +225,7 @@ class Game:
                 enemy.render(self.display, offset=render_scroll)
                 pygame.draw.circle(self.display, (0, 0 if not self.tilemap.solid_check((enemy.rect().centerx + (-7 if enemy.flip else 7), enemy.pos[1] + 23)) else 255, 0), (enemy.rect().centerx + (-7 if enemy.flip else 7) - render_scroll[0], enemy.pos[1] + 23 - render_scroll[1]), 1)
             
-            if self.player.attacking != 0 and self.player.atk_type != 'shoot_attack' and self.player.atk_type != '':
+            if self.player.attacking != 0 and self.player.atk_type != 'shoot_attack':
                 for enemy in self.enemies.copy():
                     if enemy.rect().colliderect(self.attack_rect):
                         if enemy.attacked == 0:
@@ -243,12 +248,11 @@ class Game:
 
             display_mask = pygame.mask.from_surface(self.display)
             display_sillhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0))
-                        
+
             for offset in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
                 self.display_2.blit(display_sillhouette, offset)
 
             self.display_2.blit(self.display, (0, 0))
-            self.gun.render(self.display_2, render_scroll)
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60)   

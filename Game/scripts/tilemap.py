@@ -17,7 +17,7 @@ AUTO_TILE_MAP = {
     tuple(sorted([(-1, 0), (0, -1)])) : 8
 }
 
-AUTO_TILE_TYPES = {'grass'}
+AUTO_TILE_TYPES = {'grass', 'stone'}
 
 class TileMap:
     def __init__(self, game, tile_size=16):
@@ -26,10 +26,13 @@ class TileMap:
         self.tilemap = {}
         self.offgrid_tiles = []
 
-    def render(self, surf, offset=(0,0)):
+    def render(self, surf, offset=(0,0), grid_enabled=False):
         for x in range(offset[0] // self.tile_size, (offset[0] + surf.get_width()) // self.tile_size + 1):
             for y in range(offset[1] // self.tile_size, (offset[1] + surf.get_height()) // self.tile_size + 1):
                 loc = str(x) + ';' + str(y)
+                if grid_enabled:
+                    pygame.draw.rect(surf, (0, 0, 0), (x * self.tile_size - offset[0], y * self.tile_size - offset[1], self.tile_size , self.tile_size), 1)
+
                 if loc in self.tilemap:
                     tile = self.tilemap[loc]
                     surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
