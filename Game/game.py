@@ -42,6 +42,7 @@ class Game:
                        "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                        "player/jump" : Animation(load_images("entities/player/jump")),
                        "player/run" : Animation(load_images("entities/player/run"), image_dur=5),
+                       "player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
                        "enemy" : load_image("entities/enemy/enemy.png"),
                        "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),
                        "enemy/damaged" : Animation(load_images("entities/enemy/damaged")),
@@ -114,7 +115,6 @@ class Game:
                     
                     if event.key == pygame.K_c and self.current_weapon is not None and self.current_weapon.type == 'guns' and self.player.attacking == 0:
                         self.player.shooting = True
-                        self.player.attacking = 10
                         atk_type = 'shoot_attack'
                         self.player.perform_attack(atk_type, self.current_weapon)
 
@@ -136,7 +136,6 @@ class Game:
                         atk_type = 'throw_meele_attack'
                         self.player.perform_attack(atk_type, self.current_weapon)
 
-                        self.player.attacking = 50
                         self.current_weapon = None
 
                     if event.key == pygame.K_q:
@@ -160,7 +159,6 @@ class Game:
                     
                     if event.key == pygame.K_x and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
                         if event.key == pygame.K_x and self.player.attacking <= 0 and self.current_weapon is not None:
-                            self.player.attacking = 30
                             atk_type = 'normal_attack' if self.player.attack_type < self.player.charge_duration else 'charged_attack'
                             self.player.perform_attack(atk_type, self.current_weapon)
                     
