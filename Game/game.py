@@ -42,7 +42,7 @@ class Game:
                        "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                        "player/jump" : Animation(load_images("entities/player/jump")),
                        "player/run" : Animation(load_images("entities/player/run"), image_dur=5),
-                       "player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
+                       #"player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
                        "enemy" : load_image("entities/enemy/enemy.png"),
                        "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),
                        "enemy/damaged" : Animation(load_images("entities/enemy/damaged")),
