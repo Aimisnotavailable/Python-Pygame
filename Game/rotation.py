@@ -2,8 +2,9 @@ import pygame
 import math
 import sys
 import random
-from scripts.utils import load_image
+from scripts.utils import load_image, load_images, Animation
 from scripts.sparks import Sparks
+from scripts.particles import Particles
 
 QUADRANTS = {(1, 0) : 0,
              (0, 0) : 180,
@@ -18,7 +19,9 @@ class Rotation:
     def run(self):
         self.screen = pygame.display.set_mode((600, 400))
         self.display = pygame.Surface((300, 200))
+        self.assets = {'particles/slash' : Animation(load_images('test/slash'), image_dur=10, loop=True)}
         self.img = load_image('items/weapons/guns/weapon_animation/dirt_gun/0.png')
+        self.particles = []
         pygame.init()
 
         self.clock = pygame.time.Clock()
@@ -27,6 +30,7 @@ class Rotation:
         mpos = (400, 372)
         self.flip_x = 0
         self.flip_y = 0
+
         original_size = self.img.get_size()
 
         self.img_pos = midpoint
@@ -86,9 +90,20 @@ class Rotation:
                         s_speed = random.random() + 2
                         self.sparks.append(Sparks(s_angle ,s_speed, (sp_x, sp_y)))
                     self.projectiles.append([[sp_x, sp_y], 2, ((-angle if self.flip_x else angle) * math.pi)/180, 300])
-                    #self.cd = 10
+                    p_angle = ((-angle if self.flip_x else angle) * math.pi)/180
+                    p_speed = random.random() + 4
+                    self.particles.append(Particles(self, 'slash', p_angle, p_speed, (sp_x, sp_y)))
+                    self.cd = 10
 
             self.cd = max(0, self.cd - 1)
+
+            for particle in self.particles.copy():
+                particle.render(self.display)
+                if particle.update():
+                    self.particles.remove(particle)
+
+
+
             for spark in self.sparks.copy():
                 spark.render(self.display)
                 if spark.update():

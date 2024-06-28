@@ -1,3 +1,4 @@
+import pygame
 import math
 
 class Particles:
@@ -18,5 +19,7 @@ class Particles:
         return not self.speed
 
     def render(self, surf, offset=(0, 0)):
-        surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))
+        rotated_img = pygame.transform.rotate(self.animation.img(), -self.angle * 180/math.pi)
+        img_rect = rotated_img.get_rect(center=((self.pos[0] - offset[0], self.pos[1] - offset[1])))
+        surf.blit(rotated_img, img_rect)
         self.animation.update()
