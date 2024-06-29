@@ -32,14 +32,14 @@ class PhysicsEntities:
             self.animation = self.game.assets[self.type + '/' + self.action].copy()
 
     def perform_attack(self, atk_type, current_weapon):
-        if(self.air_time < 4):
-            self.attacking = self.attack_cooldowns[atk_type]
-            self.current_weapon = current_weapon
-            self.atk_type = atk_type
-            self.initialize_weapon(atk_type, current_weapon)
-            self.set_action('attack')
-        else:
-            self.set_action('jump')
+        #if(self.air_time < 4):
+        self.attacking = self.attack_cooldowns[atk_type]
+        self.current_weapon = current_weapon
+        self.atk_type = atk_type
+        self.initialize_weapon(atk_type, current_weapon)
+        #self.set_action('attack')
+        #else:
+           # self.set_action('jump')
 
     def initialize_weapon(self, atk_type, current_weapon):
         if atk_type == "normal_attack" or atk_type == "charged_attack":
@@ -150,7 +150,7 @@ class Player(PhysicsEntities):
 
     def __init__(self, game, pos, size=(12,16)):
         super().__init__(game,'player', pos, size)
-        self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attck' : 10}
+        self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attack' : 10}
         self.set_action('idle')
 
         self.attack_type = 0

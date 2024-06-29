@@ -19,7 +19,9 @@ class Rotation:
     def run(self):
         self.screen = pygame.display.set_mode((600, 400))
         self.display = pygame.Surface((300, 200))
-        self.assets = {'particles/slash' : Animation(load_images('test/slash'), image_dur=10, loop=True)}
+        self.assets = {'particles/slash' : Animation(load_images('test/slash'), image_dur=10),
+                       'particles/bullets' : Animation(load_images('test/bullets'), image_dur=4),
+                       'cursor' : Animation(load_images('cursor'), image_dur=6)}
         self.img = load_image('items/weapons/guns/weapon_animation/dirt_gun/0.png')
         self.particles = []
         pygame.init()
@@ -33,10 +35,13 @@ class Rotation:
 
         original_size = self.img.get_size()
 
+        self.cursor = self.assets['cursor'].copy()
+
         self.img_pos = midpoint
         self.sparks = []
         self.projectiles = []
         self.clicking = False
+        pygame.mouse.set_visible(False)
 
         self.cd = 0
         while True:
@@ -92,30 +97,35 @@ class Rotation:
                     self.projectiles.append([[sp_x, sp_y], 2, ((-angle if self.flip_x else angle) * math.pi)/180, 300])
                     p_angle = ((-angle if self.flip_x else angle) * math.pi)/180
                     p_speed = random.random() + 4
-                    self.particles.append(Particles(self, 'slash', p_angle, p_speed, (sp_x, sp_y)))
-                    self.cd = 10
+                    #self.particles.append(Particles(self, 'slash', p_angle, p_speed, (sp_x, sp_y)))
+                    self.particles.append(Particles(self, 'bullets', p_angle, p_speed, (sp_x, sp_y)))
+                    #self.cd = 10
 
             self.cd = max(0, self.cd - 1)
 
             for particle in self.particles.copy():
+                self.sparks.append(Sparks(particle.angle, particle.speed, particle.pos))
                 particle.render(self.display)
                 if particle.update():
                     self.particles.remove(particle)
 
+            cursor_rect = self.cursor.img().get_rect(center=mpos)
 
+            self.display.blit(self.cursor.img(), cursor_rect)
+            self.cursor.update()
 
             for spark in self.sparks.copy():
                 spark.render(self.display)
                 if spark.update():
                     self.sparks.remove(spark)
             
-            for projectile in self.projectiles.copy():
-                projectile[0][0] += math.cos(projectile[2]) * projectile[1]
-                projectile[0][1] += math.sin(projectile[2]) * projectile[1]
-                pygame.draw.circle(self.display, (0, 0, 0), projectile[0], 3)
-                projectile[-1] -= 1
-                if not projectile[-1]:
-                    self.projectiles.remove(projectile)
+            # for projectile in self.projectiles.copy():
+            #     projectile[0][0] += math.cos(projectile[2]) * projectile[1]
+            #     projectile[0][1] += math.sin(projectile[2]) * projectile[1]
+            #     pygame.draw.rect(self.display, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), (projectile[0][0], projectile[0][1], 5, 3))
+            #     projectile[-1] -= 1
+            #     if not projectile[-1]:
+            #         self.projectiles.remove(projectile)
 
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
             pygame.display.update()

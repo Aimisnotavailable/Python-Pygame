@@ -42,7 +42,7 @@ class Game:
                        "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                        "player/jump" : Animation(load_images("entities/player/jump")),
                        "player/run" : Animation(load_images("entities/player/run"), image_dur=5),
-                       #"player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
+                       #player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
                        "enemy" : load_image("entities/enemy/enemy.png"),
                        "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),
                        "enemy/damaged" : Animation(load_images("entities/enemy/damaged")),
@@ -51,7 +51,7 @@ class Game:
                        "particles/particles" : Animation(load_images("particles/particles"))
                     }
         
-        self.current_weapon =  Sword(self, 'dirt_stick', color=(150, 75, 0))
+        self.current_weapon = Sword(self, 'dirt_stick', color=(150, 75, 0))
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
         self.weapon_pos = self.pos
