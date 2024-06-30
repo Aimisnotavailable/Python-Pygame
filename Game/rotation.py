@@ -5,6 +5,7 @@ import random
 from scripts.utils import load_image, load_images, Animation
 from scripts.sparks import Sparks
 from scripts.particles import Particles
+from scripts.entities import Player
 
 QUADRANTS = {(1, 0) : 0,
              (0, 0) : 180,
@@ -19,9 +20,13 @@ class Rotation:
     def run(self):
         self.screen = pygame.display.set_mode((600, 400))
         self.display = pygame.Surface((300, 200))
-        self.assets = {'particles/slash' : Animation(load_images('test/slash'), image_dur=10),
+        self.assets = {
+                       'player' : load_image('entities/temp_player/player.png'),
+                       'player/idle' : Animation(load_images('entities/temp_player/idle'), image_dur=5),
+                       'particles/slash' : Animation(load_images('test/slash'), image_dur=10),
                        'particles/bullets' : Animation(load_images('test/bullets'), image_dur=4),
                        'cursor' : Animation(load_images('cursor'), image_dur=6)}
+        
         self.img = load_image('items/weapons/guns/weapon_animation/dirt_gun/0.png')
         self.particles = []
         pygame.init()
@@ -41,6 +46,8 @@ class Rotation:
         self.sparks = []
         self.projectiles = []
         self.clicking = False
+
+        self.player = Player(self, (100, 100))
         pygame.mouse.set_visible(False)
 
         self.cd = 0
@@ -102,7 +109,9 @@ class Rotation:
                     #self.cd = 10
 
             self.cd = max(0, self.cd - 1)
-
+            
+            self.player.render(self.display)
+            self.player.animation.update()
             for particle in self.particles.copy():
                 self.sparks.append(Sparks(particle.angle, particle.speed, particle.pos))
                 particle.render(self.display)

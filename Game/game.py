@@ -38,7 +38,7 @@ class Game:
                        "clouds" : load_image("clouds\cloud.png"),
                        "grass" : load_images("tiles/grass"),
                        "stone" : load_images("tiles/stone"),
-                       "player" : load_image("entities/player/player1.png"),
+                       "player" : load_image("entities/player/player.png"),
                        "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                        "player/jump" : Animation(load_images("entities/player/jump")),
                        "player/run" : Animation(load_images("entities/player/run"), image_dur=5),

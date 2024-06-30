@@ -55,7 +55,7 @@ class PhysicsEntities:
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
     
     def render(self, surf, offset=(0,0)):
-        surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0], self.pos[1] - offset[1]))
+        surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
 
     def update(self, tilemap, movement=(0,0)):
         self.movement = movement
@@ -105,7 +105,7 @@ class PhysicsEntities:
         self.animation.update()
 
 class Enemy(PhysicsEntities):
-    def __init__(self, game, pos, size=(16,16)):
+    def __init__(self, game, pos, size=(16,15)):
         super().__init__(game, 'enemy', pos, size)
         self.set_action('idle')
         self.walking = 0
@@ -148,7 +148,7 @@ class Enemy(PhysicsEntities):
 
 class Player(PhysicsEntities):
 
-    def __init__(self, game, pos, size=(12,16)):
+    def __init__(self, game, pos, size=(8, 16)):
         super().__init__(game,'player', pos, size)
         self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attack' : 10}
         self.set_action('idle')
