@@ -11,6 +11,7 @@ from scripts.inventory import Inventory
 from scripts.clouds import Clouds
 from scripts.sparks import Sparks
 from scripts.particles import Particles
+from scripts.water import Water
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -57,7 +58,7 @@ class Game:
         self.weapon_pos = self.pos
 
         self.player = Player(self, self.pos)
-        self.enemies = [Enemy(self, self.pos)]
+        self.enemies = []
         self.items_nearby = []
         self.attack_rect = None
 
@@ -70,9 +71,11 @@ class Game:
         self.sparks = []
         self.projectiles = []
 
-        for loc in self.tilemap.tilemap:
-            if random.randint(0, 20) == 1:
-                self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
+        self.water = Water()
+
+        # for loc in self.tilemap.tilemap:
+        #     if random.randint(0, 20) == 1:
+        #         self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
 
     def run(self):
         running = True
@@ -244,6 +247,20 @@ class Game:
                     
             self.inventory.render(self.display)
 
+            if self.water.velocity == 0:
+                if self.water.rect().collidepoint(self.player.pos):
+                    if not self.water.collide:
+                        self.water.velocity = 10
+                        self.water.x_pos = self.player.pos[0] - 160
+                    self.water.collide = True
+                    
+                else:
+                    if self.water.collide:
+                        self.water.velocity = 10
+                        self.water.x_pos = self.player.pos[0] - 160
+                    self.water.collide = False
+
+            
             display_mask = pygame.mask.from_surface(self.display)
             display_sillhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0))
 
@@ -251,6 +268,7 @@ class Game:
                 self.display_2.blit(display_sillhouette, offset)
 
             self.display_2.blit(self.display, (0, 0))
+            self.water.render(self.display_2, render_scroll)
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60)   

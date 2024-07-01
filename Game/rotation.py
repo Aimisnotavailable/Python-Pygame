@@ -98,11 +98,13 @@ class Rotation:
                     sp_x = math.cos(((-angle if self.flip_x else angle) * math.pi)/180) * 10 + (midpoint[0])
                     sp_y = math.sin(((-angle if self.flip_x else angle) * math.pi)/180) * 10 + (midpoint[1])
                     for i in range(2):
-                        s_angle = ((-angle if self.flip_x else angle) * math.pi)/180 + random.random() - 0.5
+                        s_angle = ((-angle if self.flip_x else angle) * math.pi)/180 + (random.random() - 0.5)
                         s_speed = random.random() + 2
                         self.sparks.append(Sparks(s_angle ,s_speed, (sp_x, sp_y)))
+
                     self.projectiles.append([[sp_x, sp_y], 2, ((-angle if self.flip_x else angle) * math.pi)/180, 300])
-                    p_angle = ((-angle if self.flip_x else angle) * math.pi)/180
+
+                    p_angle = ((-angle if self.flip_x else angle) * math.pi)/180 + (random.random() - 0.5)/8
                     p_speed = random.random() + 4
                     #self.particles.append(Particles(self, 'slash', p_angle, p_speed, (sp_x, sp_y)))
                     self.particles.append(Particles(self, 'bullets', p_angle, p_speed, (sp_x, sp_y)))
@@ -112,8 +114,9 @@ class Rotation:
             
             self.player.render(self.display)
             self.player.animation.update()
+
             for particle in self.particles.copy():
-                self.sparks.append(Sparks(particle.angle, particle.speed, particle.pos))
+                #self.sparks.append(Sparks(particle.angle, particle.speed, particle.pos))
                 particle.render(self.display)
                 if particle.update():
                     self.particles.remove(particle)
