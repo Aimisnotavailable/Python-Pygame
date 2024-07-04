@@ -13,8 +13,8 @@ class Sparks:
         self.is_spread = is_spread
     
     def update(self):
-        if not self.is_spread and random.randint(0, 1) :
-            self.spread.append(Sparks(self.angle if random.randint(0, 1) else self.angle - (random.random() - 0.5), self.speed / 2, self.pos, (0, 0, 0), True))
+        # if not self.is_spread and random.randint(0, 1) :
+        #     self.spread.append(Sparks((random.random() - 0.5) * math.pi, self.speed / 2, self.pos, (0, 0, 0), True))
 
         self.pos[0] += math.cos(self.angle) * self.speed
         self.pos[1] += math.sin(self.angle) * self.speed
@@ -25,11 +25,11 @@ class Sparks:
     
     def render(self, surf, offset=(0, 0)):
 
-        for spread in self.spread.copy():
-            spread.render(surf, offset)
-            if spread.update():
-                self.spread.remove(spread)
-            print("HEHE")
+        # for spread in self.spread.copy():
+        #     spread.render(surf, offset)
+        #     print(spread.angle)
+        #     if spread.update():
+        #         self.spread.remove(spread)
 
         render_points = [
             (self.pos[0] - offset[0] + math.cos(self.angle) * self.speed * 3, self.pos[1] - offset[1] + math.sin(self.angle) * self.speed * 3),

@@ -10,13 +10,16 @@ class Spring:
         self.display = pygame.Surface((400, 300))
 
         self.resting_length = 100
-        self.displacement = 0
         self.current_length = self.resting_length
+
+        self.displacement = 0
+        
         self.stiffness = 0.3
         self.force = 0
         self.mass = 1
+        self.damping = 0.98
+
         self.clicking = False
-        self.time = 0
         self.pos=[200, 100]
         self.velocity = 0
         pygame.init()
@@ -51,17 +54,10 @@ class Spring:
 
             if self.clicking:
                 self.current_length+=1
-                self.time = (self.time + 1)
             else:
                 self.force = (-self.stiffness * self.displacement)
-                acceleration = self.force/1
-                self.velocity = self.velocity + acceleration * self.time / 5
-                self.current_length += self.velocity
-                self.time = max(0, self.time - 1)
-            print(self.time)
-            if self.time == 0:
-                self.velocity = 0
-                self.current_length = self.resting_length
+                self.current_length += self.force
+                print(self.current_length)
 
             pygame.draw.rect(self.display, (0, 0, 0), (*mpos, 4, 4))
             
