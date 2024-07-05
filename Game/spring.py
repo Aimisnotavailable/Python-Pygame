@@ -21,6 +21,7 @@ class Spring:
 
         self.clicking = False
         self.pos=[200, 100]
+        self.bob_pos = [200, 200]
         self.velocity = 0
         pygame.init()
 
@@ -55,15 +56,20 @@ class Spring:
             if self.clicking:
                 self.current_length+=1
             else:
-                self.force = (-self.stiffness * self.displacement)
-                self.current_length += self.force
-                print(self.current_length)
+                spring_force = (-self.stiffness * self.displacement)
+                damping_force = self.damping * self.velocity
+
+                total_force = spring_force + damping_force
+                
+                self.velocity += total_force
+
+                self.bob_pos[1] += self.velocity
 
             pygame.draw.rect(self.display, (0, 0, 0), (*mpos, 4, 4))
             
-            pygame.draw.line(self.display, (0, 0, 255), (200, self.pos[1]), (self.pos[0], self.pos[1] + self.current_length))
+            pygame.draw.line(self.display, (0, 0, 255), (200, self.pos[1]), (self.bob_pos))
             pygame.draw.circle(self.display, (255, 0, 0), self.pos, 5)
-            pygame.draw.circle(self.display, (0, 255, 0), (self.pos[0], self.pos[1] + self.current_length), 5)
+            pygame.draw.circle(self.display, (0, 255, 0), (self.bob_pos[0], self.bob_pos[1]), 5)
 
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
             pygame.display.update()
