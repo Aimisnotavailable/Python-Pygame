@@ -15,13 +15,14 @@ class Bounce:
         self.ball_pos = [100, 5]
         self.ball_velocity = [0, 0]
         self.damping = 0.95
-        self.gravity = 0.05
+        self.gravity = 1
 
         self.resting_length = 100
-        self.spring_const = 0.04
+        self.spring_const = 0.06
         self.displacement = 0
         self.clicking = False
         self.pull_force = 0
+
     def run(self):
 
         while True:
@@ -69,11 +70,10 @@ class Bounce:
             # pygame.draw.circle(self.display, (0, 0, 0), (self.ball_pos[0], 100), 5)
 
             for i in range(0, 100, 5):
-                pygame.draw.circle(self.display, (255, 255, 255), (self.ball_pos[0] + i * (2*i)/5, self.ball_pos[1]), 5)
+                pygame.draw.circle(self.display, (255, 255, 255), (self.ball_pos[0] + i * (2*i)/5, self.ball_pos[1]/ max(1, (i / 5))), 5)
 
             self.ball_pos = [self.ball_pos[0] + self.ball_velocity[0], self.ball_pos[1] + self.ball_velocity[1]]
             
-            print(self.ball_velocity)
 
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
             pygame.display.update()

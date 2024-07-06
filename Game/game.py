@@ -11,7 +11,7 @@ from scripts.inventory import Inventory
 from scripts.clouds import Clouds
 from scripts.sparks import Sparks
 from scripts.particles import Particles
-from scripts.water import Water
+from water1 import Water
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -215,7 +215,12 @@ class Game:
 
             self.player.update(self.tilemap, self.movement)
             self.player.render(self.display, offset=render_scroll)
-
+            
+            
+            for i in range(len(self.water.springs)):
+                if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and not self.player.air_time <= 0:
+                    self.water.wave(i)
+                
             for item in self.items_nearby.copy():
                 item.render(self.display, render_scroll)
                 if item.life == 0:
@@ -246,20 +251,6 @@ class Game:
                                 self.sparks.append(Sparks(angle, speed, enemy.pos))
                     
             self.inventory.render(self.display)
-
-            if self.water.velocity == 0:
-                if self.water.rect().collidepoint(self.player.pos):
-                    if not self.water.collide:
-                        self.water.velocity = 10
-                        self.water.x_pos = self.player.pos[0] - 160
-                    self.water.collide = True
-                    
-                else:
-                    if self.water.collide:
-                        self.water.velocity = 10
-                        self.water.x_pos = self.player.pos[0] - 160
-                    self.water.collide = False
-
             
             display_mask = pygame.mask.from_surface(self.display)
             display_sillhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0))
@@ -269,6 +260,7 @@ class Game:
 
             self.display_2.blit(self.display, (0, 0))
             self.water.render(self.display_2, render_scroll)
+
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60)   

@@ -29,6 +29,7 @@ class Water:
             self.x_pos = min(160, (self.x_pos + 1))
 
         self.velocity = max(0, self.velocity - 0.1)
+        
         render_points = [
             *wave_points,
             (160, 32),
