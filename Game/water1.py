@@ -18,9 +18,9 @@ class Water:
             right = min(len(self.springs), right + 1)
             
             if left != -1:
-                self.springs[left].update((self.springs[left+1].total_force * 0.2) + 0.4)
+                self.springs[left].update((self.springs[left+1].total_force * 0.08))
             if right != len(self.springs):
-                self.springs[right].update((self.springs[right-1].total_force * 0.2) + 0.4)
+                self.springs[right].update((self.springs[right-1].total_force * 0.08))
 
     def update(self):
         for spring in self.springs:
@@ -37,7 +37,7 @@ class Water:
         render_points.append((0, 32))
 
         pygame.draw.polygon(self.water_surf, (0, 0, 255, 100), render_points)
-        pygame.draw.aalines(self.water_surf, (255, 255, 255, 200), False, render_points[0 : -2])
+        pygame.draw.aalines(self.water_surf, (255, 255, 255), False, render_points[0 : -2])
 
         surf.blit(self.water_surf, (160 - offset[0], 96 - offset[1]))
         self.update()

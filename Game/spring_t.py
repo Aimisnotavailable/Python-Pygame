@@ -7,14 +7,13 @@ class Spring:
 
     def __init__(self, pos, velocity=(0,0)):
         self.resting_length = 16
-        self.current_length = self.resting_length
 
         self.pos = list(pos)
         self.velocity = list(velocity)
         self.damping = 0.95
-        self.gravity = 0.5
+        self.gravity = 0.8
         
-        self.spring_const = 0.09
+        self.spring_const = 0.1
         self.displacement = 0
         self.total_force = 0
         

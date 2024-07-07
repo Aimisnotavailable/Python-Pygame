@@ -72,6 +72,7 @@ class Game:
         self.projectiles = []
 
         self.water = Water()
+        self.under_water = False
 
         # for loc in self.tilemap.tilemap:
         #     if random.randint(0, 20) == 1:
@@ -216,10 +217,11 @@ class Game:
             self.player.update(self.tilemap, self.movement)
             self.player.render(self.display, offset=render_scroll)
             
-            
             for i in range(len(self.water.springs)):
-                if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and not self.player.air_time <= 0:
+                if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and not self.under_water:
                     self.water.wave(i)
+
+
                 
             for item in self.items_nearby.copy():
                 item.render(self.display, render_scroll)
