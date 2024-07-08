@@ -218,8 +218,10 @@ class Game:
             self.player.render(self.display, offset=render_scroll)
             
             for i in range(len(self.water.springs)):
-                if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and not self.under_water:
+                if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and self.player.action != "idle":
+                    self.water.springs[i].update(3)
                     self.water.wave(i)
+                    break
 
 
                 

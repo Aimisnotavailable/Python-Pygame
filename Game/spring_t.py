@@ -17,17 +17,17 @@ class Spring:
         self.displacement = 0
         self.total_force = 0
         
-    def update(self, force=0):
+    def update(self, displacement=0):
         
         self.displacement = self.pos[1] - self.resting_length
 
         spring_force = -self.spring_const * self.displacement 
-        self.total_force = spring_force + self.gravity + force
+        
+        self.total_force = spring_force + self.gravity 
 
         self.velocity[1] = self.velocity[1] * self.damping + self.total_force
 
-        self.pos = [self.pos[0] + self.velocity[0], self.pos[1] + self.velocity[1]]
-
+        self.pos = [self.pos[0] + self.velocity[0], self.pos[1] + self.velocity[1] - displacement]
 
     def render(self, surf):
         pygame.draw.circle(surf, (255, 255, 255), (self.pos[0], self.pos[1]), 5)

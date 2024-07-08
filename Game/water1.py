@@ -5,22 +5,21 @@ class Water:
     def __init__(self):
         self.water_surf = pygame.Surface((160, 32), pygame.SRCALPHA)
         self.pull_force = 0
-        self.springs=[Spring([x, 16]) for x in range(0, 164, 4)]
+        self.springs=[Spring([x, 16]) for x in range(0, 161, 4)]
 
     def wave(self, index=0):
         
-        self.springs[index].update(5)
         left = index
         right = index
-
-        while right != len(self.springs) or left != -1:
-            left = max(-1, left-1)
-            right = min(len(self.springs), right + 1)
-            
-            if left != -1:
-                self.springs[left].update((self.springs[left+1].total_force * 0.08))
-            if right != len(self.springs):
-                self.springs[right].update((self.springs[right-1].total_force * 0.08))
+       # Propagate wave to the left
+        while left >= 0:
+            self.springs[left].update(self.springs[left+1].displacement * 0.1 + 0.02)
+            left -= 1
+        
+        # Propagate wave to the right
+        while right < len(self.springs):
+            self.springs[right].update(self.springs[right-1].displacement * 0.1 + 0.02)
+            right += 1
 
     def update(self):
         for spring in self.springs:
