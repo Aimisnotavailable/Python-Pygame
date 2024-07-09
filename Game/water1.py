@@ -9,18 +9,19 @@ class Water:
 
     def wave(self, index=0):
         
-        left = index
-        right = index
+        self.springs[index].force = 1
+        left = index - 1
+        right = index + 1
        # Propagate wave to the left
         while left >= 0:
-            self.springs[left].update(self.springs[left+1].displacement * 0.1 + 0.02)
+            self.springs[left].force = self.springs[left+1].force * 0.1
             left -= 1
         
         # Propagate wave to the right
         while right < len(self.springs):
-            self.springs[right].update(self.springs[right-1].displacement * 0.1 + 0.02)
+            self.springs[right].force = self.springs[right-1].force * 0.1
             right += 1
-
+        
     def update(self):
         for spring in self.springs:
             spring.update()
