@@ -18,7 +18,7 @@ class Spring:
         self.total_force = 0
         self.force = 0
         
-    def update(self, displacement=0):
+    def update(self):
         
         self.displacement = self.pos[1] - self.resting_length
 

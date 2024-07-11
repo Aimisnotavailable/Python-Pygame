@@ -11,7 +11,7 @@ from scripts.inventory import Inventory
 from scripts.clouds import Clouds
 from scripts.sparks import Sparks
 from scripts.particles import Particles
-from water1 import Water
+from test_scripts.water1 import Water
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -20,6 +20,7 @@ class Game:
         pygame.init()
 
         pygame.display.set_caption("Game")
+        pygame.mouse.set_visible(False)
 
         self.time = 0
 
@@ -35,6 +36,7 @@ class Game:
 
         self.scroll = [0, 0]
         self.assets = {"background" : load_image("background.png"),
+                       "cursor" : Animation(load_images("cursor"), image_dur=7),
                        "inventory_slot" : load_images("inventory/slot"),
                        "clouds" : load_image("clouds\cloud.png"),
                        "grass" : load_images("tiles/grass"),
@@ -52,6 +54,8 @@ class Game:
                        "particles/particles" : Animation(load_images("particles/particles"))
                     }
         
+        self.cursor = self.assets['cursor'].copy()
+
         self.current_weapon = Sword(self, 'dirt_stick', color=(150, 75, 0))
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
@@ -84,7 +88,11 @@ class Game:
         while running:
             self.display.fill((0,0,0,0))
             self.display_2.blit(self.assets['background'], (0, 0))
-        
+
+            mpos = list(pygame.mouse.get_pos())
+            mpos[0] = mpos[0] // 2
+            mpos[1] = mpos[1] // 2
+
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
@@ -99,11 +107,11 @@ class Game:
 
                 if event.type == pygame.KEYDOWN:
                     
-                    if event.key == pygame.K_LEFT:
+                    if event.key == pygame.K_a:
                         self.movement[0] = -2
-                    if event.key == pygame.K_RIGHT:
+                    if event.key == pygame.K_d:
                         self.movement[0] = 2
-                    if event.key == pygame.K_UP:
+                    if event.key == pygame.K_w:
                         self.player.velocity[1] = -3
                     
                     if event.key == pygame.K_1 and self.player.attacking == 0:
@@ -114,9 +122,6 @@ class Game:
                         self.inventory.current_selected = 1
                         self.current_weapon = self.inventory.item_list[self.inventory.current_selected ]
 
-                    if event.key == pygame.K_x and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
-                        self.player.start_charge(is_initialized=True)
-                    
                     if event.key == pygame.K_c and self.current_weapon is not None and self.current_weapon.type == 'guns' and self.player.attacking == 0:
                         self.player.shooting = True
                         atk_type = 'shoot_attack'
@@ -155,20 +160,26 @@ class Game:
                                 break
 
                 if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_LEFT:
+                    if event.key == pygame.K_a:
                         self.movement[0] = 0
 
-                    if event.key == pygame.K_RIGHT:
+                    if event.key == pygame.K_d:
                         self.movement[0] = 0
-                    
-                    if event.key == pygame.K_x and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
-                        if event.key == pygame.K_x and self.player.attacking <= 0 and self.current_weapon is not None:
+
+                    if event.key == pygame.K_c and self.current_weapon is not None and self.current_weapon.type == 'guns':
+                        self.player.shooting = False
+
+                if event.type == pygame.MOUSEBUTTONDOWN: 
+                    if event.button == 1 and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
+                        self.player.start_charge(is_initialized=True)
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1 and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
+                        if event.button == 1 and self.player.attacking <= 0 and self.current_weapon is not None:
                             atk_type = 'normal_attack' if self.player.attack_type < self.player.charge_duration else 'charged_attack'
                             self.player.perform_attack(atk_type, self.current_weapon)
                     
-                    if event.key == pygame.K_c and self.current_weapon is not None and self.current_weapon.type == 'guns':
-                        self.player.shooting = False
-            
+                   
             self.tilemap.render(self.display, offset=render_scroll)
 
             if self.player.shooting and self.player.attacking == 1:
@@ -260,10 +271,14 @@ class Game:
 
             for offset in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
                 self.display_2.blit(display_sillhouette, offset)
-
+            
             self.display_2.blit(self.display, (0, 0))
             self.water.render(self.display_2, render_scroll)
-
+            
+            cursor_rect = self.cursor.img().get_rect(center=mpos)
+            self.display_2.blit(self.cursor.img(), cursor_rect)
+            self.cursor.update()
+            
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60)   

@@ -1,5 +1,5 @@
 import pygame
-from spring_t import Spring
+from test_scripts.spring_t import Spring
 
 class Water:
     def __init__(self):
@@ -14,12 +14,12 @@ class Water:
         right = index + 1
        # Propagate wave to the left
         while left >= 0:
-            self.springs[left].force = self.springs[left+1].force * 0.1
+            self.springs[left].force = -self.springs[left+1].force * 0.4
             left -= 1
         
         # Propagate wave to the right
         while right < len(self.springs):
-            self.springs[right].force = self.springs[right-1].force * 0.1
+            self.springs[right].force = -self.springs[right-1].force * 0.4
             right += 1
         
     def update(self):
