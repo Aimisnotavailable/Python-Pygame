@@ -97,6 +97,7 @@ class Rotation:
                     # midpoint[1] += math.sin((-(angle + 180) * math.pi)/180) * 3
                     sp_x = math.cos(((-angle if self.flip_x else angle) * math.pi)/180) * 10 + (midpoint[0])
                     sp_y = math.sin(((-angle if self.flip_x else angle) * math.pi)/180) * 10 + (midpoint[1])
+                    
                     for i in range(2):
                         s_angle = ((-angle if self.flip_x else angle) * math.pi)/180 + (random.random() - 0.5)
                         s_speed = random.random() + 2

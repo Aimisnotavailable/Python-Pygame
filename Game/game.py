@@ -12,6 +12,7 @@ from scripts.clouds import Clouds
 from scripts.sparks import Sparks
 from scripts.particles import Particles
 from test_scripts.water1 import Water
+from scripts.rotation import Rotation
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -77,6 +78,7 @@ class Game:
 
         self.water = Water()
         self.under_water = False
+        self.rotation = Rotation()
 
         # for loc in self.tilemap.tilemap:
         #     if random.randint(0, 20) == 1:
@@ -99,6 +101,13 @@ class Game:
 
             self.clouds.render(self.display_2, render_scroll)
             self.clouds.update()
+
+            p_pos = [(self.player.pos[0] - render_scroll[0]), (self.player.pos[1] - render_scroll[1])]
+            img = self.rotation.img(Sword(self, 'slime_stick').animation.img(), p_pos , mpos)
+                                    
+            img_rect = img.get_rect(center=p_pos)
+            
+            self.display.blit(img, img_rect)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -271,6 +280,8 @@ class Game:
 
             for offset in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
                 self.display_2.blit(display_sillhouette, offset)
+            
+            
             
             self.display_2.blit(self.display, (0, 0))
             self.water.render(self.display_2, render_scroll)
