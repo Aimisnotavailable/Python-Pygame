@@ -69,7 +69,7 @@ class Game:
 
         self.inventory = Inventory(self.assets['inventory_slot'])
         self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
-        self.inventory.item_list[1] = Sword(self,  'slime_stick', color=(10, 255, 10))
+        self.inventory.item_list[1] = Sword(self,  'sword', color=(10, 255, 10))
 
         self.clouds = Clouds(self.assets['clouds'], count=15)
 
@@ -101,13 +101,6 @@ class Game:
 
             self.clouds.render(self.display_2, render_scroll)
             self.clouds.update()
-
-            p_pos = [(self.player.pos[0] - render_scroll[0]), (self.player.pos[1] - render_scroll[1])]
-            img = self.rotation.img(Sword(self, 'slime_stick').animation.img(), p_pos , mpos)
-                                    
-            img_rect = img.get_rect(center=p_pos)
-            
-            self.display.blit(img, img_rect)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -236,6 +229,21 @@ class Game:
 
             self.player.update(self.tilemap, self.movement)
             self.player.render(self.display, offset=render_scroll)
+
+            p_pos = [(self.player.pos[0] - render_scroll[0]), (self.player.pos[1] - render_scroll[1])]
+            img = self.rotation.img(Sword(self, 'sword').animation.img(), p_pos , mpos)
+
+            print(self.rotation.angle)
+            
+            if self.rotation.angle > 90 and self.rotation.angle < 270:
+                self.player.flip = True
+            else:
+                self.player.flip = False
+
+            # img_rect = img.get_rect(left=p_pos[0] + (-7 if self.player.flip else 12), top = p_pos[1] + 5)
+            
+            # self.display.blit(img, img_rect)
+            
             
             for i in range(len(self.water.springs)):
                 if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and self.player.action != "idle":

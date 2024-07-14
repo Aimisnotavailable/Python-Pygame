@@ -37,8 +37,8 @@ class Rotation:
             self.angle = int((math.atan(y/x) * (-1 if self.flip_x else 1) * (180 / math.pi) ) + QUADRANTS[quad])
         else:
             self.angle = 90 if self.flip_y else 270
-        
-        img = pygame.transform.rotate(self.image , self.angle)
+        img = pygame.transform.scale(self.image, (16, 8))
+        img = pygame.transform.flip(pygame.transform.rotate(img , self.angle), False, not self.flip_x)
 
         return img
     

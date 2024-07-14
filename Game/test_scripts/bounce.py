@@ -65,7 +65,6 @@ class Bounce:
 
             self.ball_velocity[1] = self.ball_velocity[1] * self.damping + total_force
             
-
             # pygame.draw.line(self.display, (0, 255, 0), (self.ball_pos[0], 100), self.ball_pos)
             # pygame.draw.circle(self.display, (0, 0, 0), (self.ball_pos[0], 100), 5)
 
