@@ -86,7 +86,7 @@ class Rotation:
 
             pygame.draw.line(self.display, (255, 255, 255), midpoint, (mpos[0], mpos[1]))
 
-            img_rect = img.get_rect(center=(self.img_pos))
+            img_rect = img.get_rect(center=(self.img_pos[0] + math.cos(math.radians(angle * (-1 if self.flip_x else 1)))  * 15, self.img_pos[1] + math.sin(math.radians(angle * (-1 if self.flip_x else 1))) * 15))
 
             self.display.blit(pygame.transform.flip(img, False ,  not self.flip_x), img_rect)
             print(angle)

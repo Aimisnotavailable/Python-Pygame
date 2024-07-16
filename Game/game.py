@@ -230,7 +230,7 @@ class Game:
             self.player.update(self.tilemap, self.movement)
             self.player.render(self.display, offset=render_scroll)
 
-            p_pos = [(self.player.pos[0] - render_scroll[0]), (self.player.pos[1] - render_scroll[1])]
+            p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
             img = self.rotation.img(Sword(self, 'sword').animation.img(), p_pos , mpos)
 
             print(self.rotation.angle)
@@ -242,7 +242,8 @@ class Game:
 
             # img_rect = img.get_rect(left=p_pos[0] + (-7 if self.player.flip else 12), top = p_pos[1] + 5)
             
-            # self.display.blit(img, img_rect)
+            img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.rotation.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.rotation.angle * (-1 if self.rotation.flip_x else 1))) * 8))
+            self.display.blit(img, img_rect)
             
             
             for i in range(len(self.water.springs)):
