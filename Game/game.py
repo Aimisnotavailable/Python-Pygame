@@ -34,7 +34,7 @@ class Game:
         self.tilemap = TileMap(self)
         self.tilemap.load("data/maps/map.json")
         self.movement = [0, 0]
-
+ 
         self.scroll = [0, 0]
         self.assets = {"background" : load_image("background.png"),
                        "cursor" : Animation(load_images("cursor"), image_dur=7),
@@ -57,7 +57,7 @@ class Game:
         
         self.cursor = self.assets['cursor'].copy()
 
-        self.current_weapon = Sword(self, 'dirt_stick', color=(150, 75, 0))
+        self.current_weapon = Sword(self,  'sword', color=(10, 255, 10)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
         self.weapon_pos = self.pos
@@ -69,7 +69,7 @@ class Game:
 
         self.inventory = Inventory(self.assets['inventory_slot'])
         self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
-        self.inventory.item_list[1] = Sword(self,  'sword', color=(10, 255, 10))
+        # self.inventory.item_list[1] = 
 
         self.clouds = Clouds(self.assets['clouds'], count=15)
 
@@ -231,19 +231,20 @@ class Game:
             self.player.render(self.display, offset=render_scroll)
 
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
-            img = self.rotation.img(Sword(self, 'sword').animation.img(), p_pos , mpos)
+            if self.current_weapon is not None and not self.player.attacking:
+                img = self.rotation.img(self.current_weapon.animation.img(), p_pos , mpos)
 
-            print(self.rotation.angle)
-            
-            if self.rotation.angle > 90 and self.rotation.angle < 270:
-                self.player.flip = True
-            else:
-                self.player.flip = False
+                # print(self.rotation.angle)
+                
+                if self.rotation.angle > 90 and self.rotation.angle < 270:
+                    self.player.flip = True
+                else:
+                    self.player.flip = False
 
-            # img_rect = img.get_rect(left=p_pos[0] + (-7 if self.player.flip else 12), top = p_pos[1] + 5)
-            
-            img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.rotation.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.rotation.angle * (-1 if self.rotation.flip_x else 1))) * 8))
-            self.display.blit(img, img_rect)
+                # img_rect = img.get_rect(left=p_pos[0] + (-7 if self.player.flip else 12), top = p_pos[1] + 5)
+                
+                img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.rotation.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.rotation.angle * (-1 if self.rotation.flip_x else 1))) * 8))
+                self.display.blit(img, img_rect)
             
             
             for i in range(len(self.water.springs)):
@@ -289,7 +290,6 @@ class Game:
 
             for offset in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
                 self.display_2.blit(display_sillhouette, offset)
-            
             
             
             self.display_2.blit(self.display, (0, 0))

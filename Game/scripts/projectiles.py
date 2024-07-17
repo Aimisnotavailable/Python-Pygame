@@ -1,13 +1,16 @@
+import math
 class Projectiles:
 
-    def __init__(self, img, speed, life, pos=(0, 0)):
+    def __init__(self, img, speed, angle, life, pos=(0, 0)):
         self.img = img
         self.speed = speed
         self.pos = list(pos)
+        self.angle = angle
         self.life = life
 
     def update(self):
-        self.pos[0] += self.speed
+        self.pos[0] += math.cos(self.angle) * self.speed
+        self.pos[1] += math.sin(self.angle) * self.speed
         self.life -=1
 
         return not self.life

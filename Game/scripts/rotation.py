@@ -14,7 +14,7 @@ QUADRANTS = {(1, 0) : 0,
              }
 
 class Rotation:
-
+    
     def rect(self, pos, size):
         return pygame.Rect(pos[0], pos[1], size[0], size[1])
 

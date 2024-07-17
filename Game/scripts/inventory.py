@@ -1,3 +1,4 @@
+import pygame
 
 class Inventory:
 
@@ -20,7 +21,10 @@ class Inventory:
         for i in range(self.max_slot):
             pos = (i* tile_size, 0)
             if self.item_list[i]:
-                surf.blit(self.item_list[i].animation.img(), pos)
+                # print(pos)
+                img = pygame.transform.scale(self.item_list[i].animation.img(), (16, 8))
+                img_rect = img.get_rect(center=(pos[0] + tile_size // 2, tile_size // 2))
+                surf.blit(img, img_rect)
                 self.item_list[i].animation.update()
 
             img = self.slot_img[1 if i == self.current_selected else 0]

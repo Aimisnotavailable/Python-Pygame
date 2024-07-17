@@ -26,31 +26,6 @@ class PhysicsEntities:
         self.objects = []
         self.attacking = 0
 
-    def set_action(self, action):
-        if action != self.action:
-            self.action = action
-            self.animation = self.game.assets[self.type + '/' + self.action].copy()
-
-    def perform_attack(self, atk_type, current_weapon):
-        #if(self.air_time < 4):
-        self.attacking = self.attack_cooldowns[atk_type]
-        self.current_weapon = current_weapon
-        self.atk_type = atk_type
-        self.initialize_weapon(atk_type, current_weapon)
-        #self.set_action('attack')
-        #else:
-           # self.set_action('jump')
-
-    def initialize_weapon(self, atk_type, current_weapon):
-        if atk_type == "normal_attack" or atk_type == "charged_attack":
-            self.objects.append({'img': current_weapon.particle_animation()[atk_type].copy(), 'pos' : self.pos, 'type' : 'attack_radius'})
-            self.objects.append({'img' : current_weapon.weapon_animation()[atk_type].copy(), 'pos' : self.pos, 'type' : 'weapon'})
-        elif atk_type == "throw_meele_attack":
-            return
-        elif atk_type == "shoot_attack":
-            self.objects.append({'img' : current_weapon.weapon_animation().copy(), 'pos' : (self.rect().centerx + (-7 if self.flip else -3), self.rect().centery), 'type' : 'weapon'})
-            self.game.projectiles.append(Projectiles(current_weapon.particle_animation()[atk_type].copy().img(), speed=(-5 if self.flip else 5), life=1000, pos=self.rect().center))
-    
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
     
@@ -104,7 +79,37 @@ class PhysicsEntities:
 
         self.animation.update()
 
-class Enemy(PhysicsEntities):
+class NonobjEntities(PhysicsEntities):
+    
+    def set_action(self, action):
+        if action != self.action:
+            self.action = action
+            self.animation = self.game.assets[self.type + '/' + self.action].copy()
+
+    def perform_attack(self, atk_type, current_weapon):
+        #if(self.air_time < 4):
+        self.attacking = self.attack_cooldowns[atk_type]
+        self.current_weapon = current_weapon
+        pass
+        # self.initialize_weapon(atk_type, current_weapon)
+        #self.set_action('attack')
+        #else:
+           # self.set_action('jump')
+
+    # def load_atk_type(self, atk_type, current_weapon):
+    #     pass 
+
+    # def initialize_weapon(self, atk_type, current_weapon):
+    #     if atk_type == "normal_attack" or atk_type == "charged_attack":
+    #         self.objects.append({'img': current_weapon.particle_animation()[atk_type].copy(), 'pos' : self.pos, 'type' : 'attack_radius'})
+    #         self.objects.append({'img' : current_weapon.weapon_animation()[atk_type].copy(), 'pos' : self.pos, 'type' : 'weapon'})
+    #     elif atk_type == "throw_meele_attack":
+    #         return
+    #     elif atk_type == "shoot_attack":
+    #         self.objects.append({'img' : current_weapon.weapon_animation().copy(), 'pos' : (self.rect().centerx + (-7 if self.flip else -3), self.rect().centery), 'type' : 'weapon'})
+    #         self.game.projectiles.append(Projectiles(current_weapon.particle_animation()[atk_type].copy().img(), speed=(-5 if self.flip else 5), life=1000, pos=self.rect().center))
+
+class Enemy(NonobjEntities):
     def __init__(self, game, pos, size=(16,15)):
         super().__init__(game, 'enemy', pos, size)
         self.set_action('idle')
@@ -146,7 +151,7 @@ class Enemy(PhysicsEntities):
         pygame.draw.rect(surf, (0, 255, 0), pygame.Rect(self.pos[0] - offset[0] + (5 * (self.max_hp - self.current_hp)), self.pos[1] - offset[1], 5 * self.current_hp, 5))
         pygame.draw.rect(surf, (255, 0, 0), pygame.Rect(self.pos[0] - offset[0], self.pos[1] - offset[1], 5 * (self.max_hp - self.current_hp), 5))
 
-class Player(PhysicsEntities):
+class Player(NonobjEntities):
 
     def __init__(self, game, pos, size=(8, 16)):
         super().__init__(game,'player', pos, size)
@@ -187,6 +192,13 @@ class Player(PhysicsEntities):
             self.dashing -= 1
         return self.dashing
 
+    def perform_attack(self, atk_type, current_weapon):
+        super().perform_attack(atk_type, current_weapon)
+        
+        if atk_type == "normal_attack":
+            self.game.projectiles.append(Projectiles(current_weapon.particle_animation()[atk_type].copy().img(), speed=2, angle=math.radians(-self.game.rotation.angle), life=15, pos=self.rect().center))
+
+    
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
 
@@ -224,14 +236,14 @@ class Player(PhysicsEntities):
         if self.is_initialized and self.attacking == 0:
             pygame.draw.rect(surf, (255, 0, 0) if self.attack_type < self.charge_duration else (0, 255, 0) if self.attack_type < self.charge_duration * self.atk_type_count_meele - 1 else (0, 0, 255), pygame.Rect(self.pos[0] - offset[0] - (self.charge_duration * self.atk_type_count_meele - 1 - self.attack_type) //5, self.pos[1] - offset[1] - 10, self.attack_type //5, 3))
 
-        if(self.attacking != 0):
-            for object in self.objects:
-                if self.dashing <= 0:
-                    surf.blit(pygame.transform.flip(object['img'].img(), self.flip, False), (object['pos'][0] - offset[0] + (-10 if self.flip else 10), object['pos'][1] - offset[1] - 5))
-                if (object['type'] == 'attack_radius'):
-                    self.game.attack_rect = pygame.Rect(object['pos'][0] + (-10 if self.flip else 10), object['pos'][1], 16, 16)
-                object['img'].update()
-                if object['img'].done:
-                    self.objects.remove(object)
+        # if(self.attacking != 0):
+        #     for object in self.objects:
+        #         if self.dashing <= 0:
+        #             surf.blit(pygame.transform.flip(object['img'].img(), self.flip, False), (object['pos'][0] - offset[0] + (-10 if self.flip else 10), object['pos'][1] - offset[1] - 5))
+        #         if (object['type'] == 'attack_radius'):
+        #             self.game.attack_rect = pygame.Rect(object['pos'][0] + (-10 if self.flip else 10), object['pos'][1], 16, 16)
+        #         object['img'].update()
+        #         if object['img'].done:
+        #             self.objects.remove(object)
         if not self.dashing:
             super().render(surf, offset)
