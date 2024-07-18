@@ -196,7 +196,11 @@ class Player(NonobjEntities):
         super().perform_attack(atk_type, current_weapon)
         
         if atk_type == "normal_attack":
-            self.game.projectiles.append(Projectiles(current_weapon.particle_animation()[atk_type].copy().img(), speed=2, angle=math.radians(-self.game.rotation.angle), life=15, pos=self.rect().center))
+            a_r = self.game.rotation.angle * (-1 if self.game.rotation.flip_x else 1)
+            angle = math.radians(a_r)
+            print(a_r)
+            img = pygame.transform.rotate(current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
+            self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=15, pos=self.rect().center))
 
     
     def update(self, tilemap, movement=(0,0)):
