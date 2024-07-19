@@ -18,8 +18,7 @@ class Rotation:
     def rect(self, pos, size):
         return pygame.Rect(pos[0], pos[1], size[0], size[1])
 
-    def img(self, img, midpoint=(0, 0), mpos=(0, 0)):
-        self.image = img
+    def get_angle(self, midpoint=(0, 0), mpos=(0, 0)):
         self.midpoint = midpoint
         self.mpos = mpos
         self.flip_x = 0
@@ -34,11 +33,17 @@ class Rotation:
         y = (self.mpos[1] - self.midpoint[1])
 
         if x != 0:
-            self.angle = int((math.atan(y/x) * (-1 if self.flip_x else 1) * (180 / math.pi) ) + QUADRANTS[quad])
+            angle = int((math.atan(y/x) * (-1 if self.flip_x else 1) * (180 / math.pi) ) + QUADRANTS[quad])
         else:
-            self.angle = 90 if self.flip_y else 270
+            angle = 90 if self.flip_y else 270
+
+        return angle
+    
+    def img(self, img, angle):
+        self.image = img
+        
         img = pygame.transform.scale(self.image, (16, 8))
-        img = pygame.transform.flip(pygame.transform.rotate(img , self.angle), False, not self.flip_x)
+        img = pygame.transform.flip(pygame.transform.rotate(img , angle), False, not self.flip_x)
 
         return img
     

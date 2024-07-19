@@ -118,6 +118,12 @@ class Enemy(NonobjEntities):
         self.max_hp = 5
         self.attacked =0
 
+    def damage(self):
+        self.current_hp -=1
+        self.attacked = 30
+        self.velocity[1] = -2
+        self.flip = not self.flip
+
     def update(self, tilemap, movement=(0,0)):
         if self.walking and self.action != 'damaged':
             if tilemap.solid_check((self.rect().centerx + (-7 if self.flip else 7), self.pos[1] + 23)):
@@ -176,7 +182,8 @@ class Player(NonobjEntities):
     
     def dash(self):
         if self.dashing >= 1:
-            self.velocity[0] = -8  if self.flip else 8
+            self.velocity[0] = self.dash_velocity[0]
+            self.velocity[1] = self.dash_velocity[1]
             if self.dashing == 1 or self.dashing == int((self.dash_duration * self.dash_multiplier)):
                 for i in range(30):
                     angle = (random.random() + 0.5) * math.pi * 2
@@ -194,15 +201,17 @@ class Player(NonobjEntities):
 
     def perform_attack(self, atk_type, current_weapon):
         super().perform_attack(atk_type, current_weapon)
-        
+        self.atk_type = atk_type
         if atk_type == "normal_attack":
-            a_r = self.game.rotation.angle * (-1 if self.game.rotation.flip_x else 1)
+            a_r = self.game.angle * (-1 if self.game.rotation.flip_x else 1)
             angle = math.radians(a_r)
-            print(a_r)
             img = pygame.transform.rotate(current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
             self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=15, pos=self.rect().center))
-
-    
+        
+        elif self.atk_type == "charged_attack":
+            self.dash_angle = self.game.angle * (1 if self.game.rotation.flip_x else -1)
+            self.dash_velocity = (math.cos(math.radians(self.dash_angle)) * 8, -math.sin(math.radians(self.dash_angle)) * 5)
+        
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
 
@@ -228,6 +237,7 @@ class Player(NonobjEntities):
                     self.dash()
                 else:
                     self.velocity[0] = 0
+                    self.velocity[1] = 0
         elif self.air_time > 4:
             self.set_action('jump')
         elif self.movement[0] != 0:
@@ -238,6 +248,7 @@ class Player(NonobjEntities):
     def render(self, surf, offset=(0,0)):
         # Charge tooltip
         if self.is_initialized and self.attacking == 0:
+            pygame.draw.rect(surf, (255, 255, 255), (self.pos[0] - offset[0], self.pos[1] - offset[1] - 10, self.attack_type // 5, 3), 0, 2)
             pygame.draw.rect(surf, (255, 0, 0) if self.attack_type < self.charge_duration else (0, 255, 0) if self.attack_type < self.charge_duration * self.atk_type_count_meele - 1 else (0, 0, 255), pygame.Rect(self.pos[0] - offset[0] - (self.charge_duration * self.atk_type_count_meele - 1 - self.attack_type) //5, self.pos[1] - offset[1] - 10, self.attack_type //5, 3))
 
         # if(self.attacking != 0):
@@ -249,5 +260,6 @@ class Player(NonobjEntities):
         #         object['img'].update()
         #         if object['img'].done:
         #             self.objects.remove(object)
+
         if not self.dashing:
             super().render(surf, offset)

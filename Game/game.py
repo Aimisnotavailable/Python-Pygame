@@ -57,6 +57,7 @@ class Game:
         
         self.cursor = self.assets['cursor'].copy()
 
+        self.angle = 0
         self.current_weapon = Sword(self,  'sword', color=(10, 255, 10)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
@@ -80,9 +81,9 @@ class Game:
         self.under_water = False
         self.rotation = Rotation()
 
-        # for loc in self.tilemap.tilemap:
-        #     if random.randint(0, 20) == 1:
-        #         self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
+        for loc in self.tilemap.tilemap:
+            if random.randint(0, 20) == 1:
+                self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
 
     def run(self):
         running = True
@@ -202,19 +203,33 @@ class Game:
                         speed = (random.random() + 2)
                         self.sparks.append(Sparks(angle, speed, projectile.pos))
                     self.projectiles.remove(projectile)
-                    
                     continue
                 if projectile.update():
                     self.projectiles.remove(projectile)
+                    continue
 
                 for enemy in self.enemies.copy():
-                    if enemy.rect().collidepoint(projectile.pos):
+                    if enemy.rect().colliderect(pygame.Rect(projectile.pos, projectile.img.get_size())):
                         self.projectiles.remove(projectile)
                         if enemy.attacked == 0:
-                            enemy.current_hp -=1
-                            enemy.attacked = 30
-                            enemy.velocity[1] = -2
-                            enemy.flip = not enemy.flip
+                            enemy.damage()
+
+                        if enemy.current_hp <= 0:
+                            dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
+                            dropped_item.set_drop_status(enemy.pos,is_dropped=True)
+                            self.items_nearby.append(dropped_item)
+                            self.enemies.remove(enemy)
+                            for i in range(30):
+                                angle = (random.random() + 0.5) * math.pi * 2
+                                speed = (random.random() + 0.5) + 1
+                                self.sparks.append(Sparks(angle, speed, enemy.pos))
+                        break
+                
+            if self.player.dashing >= 1:
+                for enemy in self.enemies.copy():
+                    if enemy.rect().colliderect(self.player.rect()):
+                        if enemy.attacked == 0:
+                            enemy.damage()
 
                         if enemy.current_hp <= 0:
                             dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
@@ -231,19 +246,21 @@ class Game:
             self.player.render(self.display, offset=render_scroll)
 
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
+            self.angle = self.rotation.get_angle(p_pos, mpos)
+
             if self.current_weapon is not None and not self.player.attacking:
-                img = self.rotation.img(self.current_weapon.animation.img(), p_pos , mpos)
+                img = self.rotation.img(self.current_weapon.animation.img(), self.angle)
 
                 # print(self.rotation.angle)
                 
-                if self.rotation.angle > 90 and self.rotation.angle < 270:
+                if self.angle > 90 and self.angle < 270:
                     self.player.flip = True
                 else:
                     self.player.flip = False
 
                 # img_rect = img.get_rect(left=p_pos[0] + (-7 if self.player.flip else 12), top = p_pos[1] + 5)
                 
-                img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.rotation.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.rotation.angle * (-1 if self.rotation.flip_x else 1))) * 8))
+                img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.angle * (-1 if self.rotation.flip_x else 1))) * 8))
                 self.display.blit(img, img_rect)
             
             
@@ -251,8 +268,6 @@ class Game:
                 if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and self.player.action != "idle":
                     self.water.wave(i)
                     break
-
-
                 
             for item in self.items_nearby.copy():
                 item.render(self.display, render_scroll)
@@ -264,24 +279,26 @@ class Game:
                 enemy.render(self.display, offset=render_scroll)
                 pygame.draw.circle(self.display, (0, 0 if not self.tilemap.solid_check((enemy.rect().centerx + (-7 if enemy.flip else 7), enemy.pos[1] + 23)) else 255, 0), (enemy.rect().centerx + (-7 if enemy.flip else 7) - render_scroll[0], enemy.pos[1] + 23 - render_scroll[1]), 1)
             
-            if self.player.attacking != 0 and self.player.atk_type != 'shoot_attack':
-                for enemy in self.enemies.copy():
-                    if enemy.rect().colliderect(self.attack_rect):
-                        if enemy.attacked == 0:
-                            enemy.current_hp -=1
-                            enemy.attacked = 30
-                            enemy.velocity[1] = -2
-                            enemy.flip = not enemy.flip
+            # if self.projectiles:
+            #     pygame.draw.rect(self.display, (255, 255, 255), pygame.Rect(self.projectiles[0].pos[0] - render_scroll[0], self.projectiles[0].pos[1] - render_scroll[1], *self.projectiles[0].img.get_size()))
+            # if self.player.attacking != 0 and self.player.atk_type != 'shoot_attack':
+            #     for enemy in self.enemies.copy():
+            #         if enemy.rect().colliderect():
+            #             if enemy.attacked == 0:
+            #                 enemy.current_hp -=1
+            #                 enemy.attacked = 30
+            #                 enemy.velocity[1] = -2
+            #                 enemy.flip = not enemy.flip
 
-                        if enemy.current_hp <= 0:
-                            dropped_item = Sword(self, 'slime_stick')
-                            dropped_item.set_drop_status(enemy.pos,is_dropped=True)
-                            self.items_nearby.append(dropped_item)
-                            self.enemies.remove(enemy)
-                            for i in range(30):
-                                angle = (random.random() + 0.5) * math.pi * 2
-                                speed = (random.random() + 0.5) + 1
-                                self.sparks.append(Sparks(angle, speed, enemy.pos))
+            #             if enemy.current_hp <= 0:
+            #                 dropped_item = Sword(self, 'slime_stick')
+            #                 dropped_item.set_drop_status(enemy.pos,is_dropped=True)
+            #                 self.items_nearby.append(dropped_item)
+            #                 self.enemies.remove(enemy)
+            #                 for i in range(30):
+            #                     angle = (random.random() + 0.5) * math.pi * 2
+            #                     speed = (random.random() + 0.5) + 1
+            #                     self.sparks.append(Sparks(angle, speed, enemy.pos))
                     
             self.inventory.render(self.display)
             
