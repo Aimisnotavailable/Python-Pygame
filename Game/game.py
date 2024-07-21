@@ -58,7 +58,7 @@ class Game:
         self.cursor = self.assets['cursor'].copy()
 
         self.angle = 0
-        self.current_weapon = Sword(self,  'sword', color=(10, 255, 10)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
+        self.current_weapon = Gun(self, 'dirt_gun') # Sword(self,  'sword', color=(100, 100, 100)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
         self.weapon_pos = self.pos
@@ -199,7 +199,7 @@ class Game:
                 projectile.render(self.display, render_scroll)
                 if self.tilemap.solid_check(projectile.pos):
                     for i in range(4):
-                        angle = (random.random() - 0.5) + (math.pi if projectile.speed > 0 else 0)
+                        angle = (random.random() - 0.5) + (math.pi if projectile.speed > 0 else 0) + projectile.angle
                         speed = (random.random() + 2)
                         self.sparks.append(Sparks(angle, speed, projectile.pos))
                     self.projectiles.remove(projectile)
@@ -248,20 +248,21 @@ class Game:
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
             self.angle = self.rotation.get_angle(p_pos, mpos)
 
-            if self.current_weapon is not None and not self.player.attacking:
-                img = self.rotation.img(self.current_weapon.animation.img(), self.angle)
+            if self.current_weapon is not None:
+                if not self.player.attacking or self.current_weapon.type == "guns":
+                    img = self.rotation.img(self.current_weapon.animation.img(), self.angle)
 
-                # print(self.rotation.angle)
-                
-                if self.angle > 90 and self.angle < 270:
-                    self.player.flip = True
-                else:
-                    self.player.flip = False
+                    # print(self.rotation.angle)
+                    
+                    if self.angle > 90 and self.angle < 270:
+                        self.player.flip = True
+                    else:
+                        self.player.flip = False
 
-                # img_rect = img.get_rect(left=p_pos[0] + (-7 if self.player.flip else 12), top = p_pos[1] + 5)
-                
-                img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.angle * (-1 if self.rotation.flip_x else 1))) * 8))
-                self.display.blit(img, img_rect)
+                    # img_rect = img.get_rect(left=p_pos[0] + (-7 if self.player.flip else 12), top = p_pos[1] + 5)
+                    
+                    img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.angle * (-1 if self.rotation.flip_x else 1))) * 8))
+                    self.display.blit(img, img_rect)
             
             
             for i in range(len(self.water.springs)):

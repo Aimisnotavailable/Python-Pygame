@@ -202,15 +202,16 @@ class Player(NonobjEntities):
     def perform_attack(self, atk_type, current_weapon):
         super().perform_attack(atk_type, current_weapon)
         self.atk_type = atk_type
+        a_r = self.game.angle * (-1 if self.game.rotation.flip_x else 1)
+        angle = math.radians(a_r)
+        img = pygame.transform.rotate(current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
+
         if atk_type == "normal_attack":
-            a_r = self.game.angle * (-1 if self.game.rotation.flip_x else 1)
-            angle = math.radians(a_r)
-            img = pygame.transform.rotate(current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
             self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=15, pos=self.rect().center))
-        
         elif self.atk_type == "charged_attack":
-            self.dash_angle = self.game.angle * (1 if self.game.rotation.flip_x else -1)
-            self.dash_velocity = (math.cos(math.radians(self.dash_angle)) * 8, -math.sin(math.radians(self.dash_angle)) * 5)
+            self.dash_velocity = (math.cos(math.radians(angle)) * 8, -math.sin(math.radians(angle)) * 5)
+        elif self.atk_type == "shoot_attack":
+            self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=100, pos=self.rect().center))
         
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
