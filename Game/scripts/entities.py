@@ -209,9 +209,14 @@ class Player(NonobjEntities):
         if atk_type == "normal_attack":
             self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=15, pos=self.rect().center))
         elif self.atk_type == "charged_attack":
-            self.dash_velocity = (math.cos(math.radians(angle)) * 8, -math.sin(math.radians(angle)) * 5)
+            self.dash_velocity = (math.cos(math.radians(a_r)) * 8, math.sin(math.radians(a_r)) * 5)
         elif self.atk_type == "shoot_attack":
-            self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=100, pos=self.rect().center))
+            for i in range(4):
+                s_angle = random.random() - 0.5 + angle
+                speed = random.random() + 2
+                self.game.sparks.append(Sparks(angle=s_angle, speed=speed, pos=(math.cos(angle) * 15 + self.rect().center[0], math.sin(angle) * 15 + self.rect().center[1])))
+
+            self.game.projectiles.append(Projectiles(img, speed=5, angle=angle, life=100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
         
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
@@ -239,7 +244,7 @@ class Player(NonobjEntities):
                 else:
                     self.velocity[0] = 0
                     self.velocity[1] = 0
-        elif self.air_time > 4:
+        if self.air_time > 4:
             self.set_action('jump')
         elif self.movement[0] != 0:
             self.set_action('run')

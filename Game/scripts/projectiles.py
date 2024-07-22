@@ -7,10 +7,12 @@ class Projectiles:
         self.pos = list(pos)
         self.angle = angle
         self.life = life
+        self.y_vel = 0
 
     def update(self):
+        self.y_vel = min(5, self.y_vel + 0.01) 
         self.pos[0] += math.cos(self.angle) * self.speed
-        self.pos[1] += math.sin(self.angle) * self.speed
+        self.pos[1] += math.sin(self.angle) * self.speed + self.y_vel
         self.life -=1
 
         return not self.life
