@@ -214,9 +214,9 @@ class Player(NonobjEntities):
             for i in range(4):
                 s_angle = random.random() - 0.5 + angle
                 speed = random.random() + 2
-                self.game.sparks.append(Sparks(angle=s_angle, speed=speed, pos=(math.cos(angle) * 15 + self.rect().center[0], math.sin(angle) * 15 + self.rect().center[1])))
+                self.game.sparks.append(Sparks(angle=s_angle, speed=speed, pos=(math.cos(angle) * 15 + self.rect().center[0], math.sin(angle) * 15 + self.rect().center[1]), color=(255, 165, 30)))
 
-            self.game.projectiles.append(Projectiles(img, speed=5, angle=angle, life=100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
+            self.game.projectiles.append(Projectiles(img, speed=10, angle=angle, life=100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
         
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)

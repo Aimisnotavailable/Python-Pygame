@@ -125,10 +125,6 @@ class Game:
                         self.inventory.current_selected = 1
                         self.current_weapon = self.inventory.item_list[self.inventory.current_selected ]
 
-                    if event.key == pygame.K_c and self.current_weapon is not None and self.current_weapon.type == 'guns' and self.player.attacking == 0:
-                        self.player.shooting = True
-                        atk_type = 'shoot_attack'
-                        self.player.perform_attack(atk_type, self.current_weapon)
 
                     if event.key == pygame.K_e and self.current_weapon is not None and self.player.attacking == 0:
                         self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
@@ -169,24 +165,30 @@ class Game:
                     if event.key == pygame.K_d:
                         self.movement[0] = 0
 
-                    if event.key == pygame.K_c and self.current_weapon is not None and self.current_weapon.type == 'guns':
-                        self.player.shooting = False
-
                 if event.type == pygame.MOUSEBUTTONDOWN: 
-                    if event.button == 1 and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
-                        self.player.start_charge(is_initialized=True)
+                    if event.button == 1 and self.current_weapon is not None and self.player.attacking == 0:
+                        if self.current_weapon.type == 'swords':
+                            self.player.start_charge(is_initialized=True)
+                        elif self.current_weapon.type == 'guns':
+                            self.player.shooting = True
+                            atk_type = 'shoot_attack'
+                            self.player.perform_attack(atk_type, self.current_weapon)
 
                 if event.type == pygame.MOUSEBUTTONUP:
-                    if event.button == 1 and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
-                        if event.button == 1 and self.player.attacking <= 0 and self.current_weapon is not None:
-                            atk_type = 'normal_attack' if self.player.attack_type < self.player.charge_duration else 'charged_attack'
-                            self.player.perform_attack(atk_type, self.current_weapon)
+                    if event.button == 1 and self.current_weapon is not None:
+                        if self.current_weapon.type == 'swords':
+                            if self.player.attacking <= 0:
+                                atk_type = 'normal_attack' if self.player.attack_type < self.player.charge_duration else 'charged_attack'
+                                self.player.perform_attack(atk_type, self.current_weapon)
+                        elif self.current_weapon.type == 'guns':
+                            self.player.shooting = False
+                        
                     
                    
             self.tilemap.render(self.display, offset=render_scroll)
 
             if self.player.shooting and self.player.attacking == 1:
-                self.player.attacking = 10
+                self.player.attacking = 1
                 atk_type = 'shoot_attack'
                 self.player.perform_attack(atk_type, self.current_weapon)
 
@@ -209,11 +211,13 @@ class Game:
                     continue
 
                 for enemy in self.enemies.copy():
+                    if enemy.attacked:
+                        continue
+
                     if enemy.rect().colliderect(pygame.Rect(projectile.pos, projectile.img.get_size())):
                         self.projectiles.remove(projectile)
                         if enemy.attacked == 0:
                             enemy.damage()
-
                         if enemy.current_hp <= 0:
                             dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
                             dropped_item.set_drop_status(enemy.pos,is_dropped=True)
