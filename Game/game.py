@@ -70,6 +70,7 @@ class Game:
 
         self.inventory = Inventory(self.assets['inventory_slot'])
         self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
+        self.inventory.item_list[1] = Sword(self, 'sword', color=(100, 100, 100))
         # self.inventory.item_list[1] = 
 
         self.clouds = Clouds(self.assets['clouds'], count=15)
@@ -172,6 +173,7 @@ class Game:
                         elif self.current_weapon.type == 'guns':
                             self.player.shooting = True
                             atk_type = 'shoot_attack'
+                            self.player.velocity[0] = 1 if self.player.flip else -1
                             self.player.perform_attack(atk_type, self.current_weapon)
 
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -186,10 +188,10 @@ class Game:
                     
                    
             self.tilemap.render(self.display, offset=render_scroll)
-
             if self.player.shooting and self.player.attacking == 1:
                 self.player.attacking = 1
                 atk_type = 'shoot_attack'
+                self.player.velocity[0] = 1 if self.player.flip else -1
                 self.player.perform_attack(atk_type, self.current_weapon)
 
             for spark in self.sparks.copy():
