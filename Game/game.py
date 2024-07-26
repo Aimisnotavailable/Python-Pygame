@@ -173,8 +173,6 @@ class Game:
                         elif self.current_weapon.type == 'guns':
                             self.player.shooting = True
                             atk_type = 'shoot_attack'
-                            self.player.velocity[0] = - math.cos(math.radians(self.angle)) * 2
-                            self.player.velocity[1] = math.sin(math.radians(self.angle * (1 if self.rotation.flip_x else -1))) * 2
                             self.player.perform_attack(atk_type, self.current_weapon)
 
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -185,6 +183,9 @@ class Game:
                                 self.player.perform_attack(atk_type, self.current_weapon)
                         elif self.current_weapon.type == 'guns':
                             self.player.shooting = False
+                    if event.button == 2 and self.current_weapon is not None:
+                        if self.current_weapon.type == 'guns':
+                            self.player.shooting = False
                         
                     
                    
@@ -193,15 +194,9 @@ class Game:
             if self.player.shooting and self.player.attacking == 1:
                 self.player.attacking = 1
                 atk_type = 'shoot_attack'
-                self.player.velocity[0] = - math.cos(math.radians(self.angle)) * 2
-                y_vel = math.sin(math.radians(self.angle * (1 if self.rotation.flip_x else -1))) * 2
-                if y_vel >= 0:
-                    self.player.velocity[1] += y_vel
-                else:
-                    self.player.velocity[1] = y_vel 
-                self.player.perform_attack(atk_type, self.current_weapon)
+                self.player.perform_attack(atk_type, self.current_weapon)  
 
-            print(self.player.velocity[1])
+
             for spark in self.sparks.copy():
                 spark.render(self.display, render_scroll)
                 if spark.update():
@@ -261,7 +256,7 @@ class Game:
 
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
             self.angle = self.rotation.get_angle(p_pos, mpos)
-
+            
             
             if self.current_weapon is not None:
                 if not self.player.attacking or self.current_weapon.type == "guns":
