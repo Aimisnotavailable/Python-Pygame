@@ -119,6 +119,6 @@ class Gun(Weapon):
     def update(self):
         super().update()
 
-    def render(self, surf, offset):
+    def render(self, surf, offset=(0, 0)):
         self.update()
         surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))

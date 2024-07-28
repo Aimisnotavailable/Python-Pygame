@@ -1,7 +1,9 @@
 import pygame
 import sys
 
+from scripts.assets import Assets
 from scripts.rotation import Rotation
+from scripts.items import Gun, Sword
 from scripts.tilemap import *
 
 
@@ -17,8 +19,11 @@ class Game:
         self.clock = pygame.time.Clock()
         self.rotation = Rotation()
 
+        self.assets = Assets().fetch()
         self.tilemap = TileMap(self)
-        
+        self.tilemap.load('data/maps/map.json')
+
+        self.gun = Gun(self, 'dirt_gun')
     
     def run(self):
 
@@ -30,6 +35,7 @@ class Game:
                     sys.exit()
 
             self.display.fill((255, 255, 255))
+            self.gun.render(self.display)
             self.tilemap.render(self.display)
 
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()) , (0, 0))
