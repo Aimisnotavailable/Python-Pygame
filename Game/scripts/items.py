@@ -52,7 +52,8 @@ class Weapon(PhysicsEntities):
     def render(self, surf, offset=(0,0)):
         if self.is_dropped:
             self.life -= 1
-            surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))   
+            surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))
+
 
 class Sword(Weapon):
     def __init__(self, game, name, is_dropped=False, color=(255, 255, 255)):

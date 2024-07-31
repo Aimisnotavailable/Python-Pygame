@@ -1,4 +1,5 @@
 import math
+import pygame
 class Projectiles:
 
     def __init__(self, img, speed, angle, life, pos=(0, 0)):
@@ -17,5 +18,7 @@ class Projectiles:
 
         return not self.life
 
-    def render(self, surf, offset):
-        surf.blit(self.img, (self.pos[0] - offset[0], self.pos[1] - offset[1]))
+    def render(self, surf, offset=(0, 0)):
+        img_rect = self.img.get_rect(center=(self.pos[0] - offset[0], self.pos[1] - offset[1]))
+        surf.blit(self.img, img_rect)
+    

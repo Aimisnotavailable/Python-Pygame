@@ -240,7 +240,7 @@ class Game:
 
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
             self.angle = self.rotation.get_angle(p_pos, mpos)
-            
+            self.rotation.draw_curve(self.display, p_pos, math.radians(self.angle * (-1 if self.rotation.flip_x else 1)), 10)
             
             if self.current_weapon is not None:
                 if not self.player.attacking or self.current_weapon.type == "guns":

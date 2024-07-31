@@ -51,7 +51,15 @@ class Rotation:
 
         # self.display.blit(pygame.transform.flip(img, False ,  not self.flip_x), img_rect)
 
-        
+    def draw_curve(self, surf, origin, angle, speed):
+        m_points = list(origin).copy()
+        y_vel = 0
+
+        for i in range(5):
+            y_vel = min(5, y_vel + 0.01) 
+            m_points[0] += math.cos(angle) * speed
+            m_points[1] += math.sin(angle) * speed + y_vel
+            pygame.draw.circle(surf, (255, 255, 255), m_points, 1)       
 
 
 #     def run(self):
