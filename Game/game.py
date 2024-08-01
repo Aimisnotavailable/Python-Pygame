@@ -14,6 +14,7 @@ from scripts.particles import Particles
 from test_scripts.water1 import Water
 from scripts.rotation import Rotation
 from scripts.assets import Assets
+from scripts.projectiles import Projectiles
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -158,6 +159,12 @@ class Game:
                             self.player.shooting = True
                             atk_type = 'shoot_attack'
                             self.player.perform_attack(atk_type, self.current_weapon)
+                    
+                    if event.button == 3 and self.current_weapon is not None and self.player.attacking == 0:
+                        if self.current_weapon.type == 'guns':
+                            atk_type='splash_attack'
+                            self.player.perform_attack(atk_type, self.current_weapon)
+                                    
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1 and self.current_weapon is not None:

@@ -90,7 +90,6 @@ class NonobjEntities(PhysicsEntities):
         #if(self.air_time < 4):
         self.attacking = self.attack_cooldowns[atk_type]
         self.current_weapon = current_weapon
-        pass
         # self.initialize_weapon(atk_type, current_weapon)
         #self.set_action('attack')
         #else:
@@ -161,7 +160,7 @@ class Player(NonobjEntities):
 
     def __init__(self, game, pos, size=(8, 16)):
         super().__init__(game,'player', pos, size)
-        self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attack' : 10}
+        self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attack' : 10, 'splash_attack' : 10}
         self.set_action('idle')
 
         self.attack_type = 0
@@ -215,12 +214,28 @@ class Player(NonobjEntities):
                 s_angle = random.random() - 0.5 + angle
                 speed = random.random() + 2
                 self.game.sparks.append(Sparks(angle=s_angle, speed=speed, pos=(math.cos(angle) * 15 + self.rect().center[0], math.sin(angle) * 15 + self.rect().center[1]), color=(255, 165, 30)))
-            self.recoil()
+            self.recoil(2, 0.5)
             self.game.projectiles.append(Projectiles(img, speed=10, angle=angle, life=100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
+        elif self.atk_type == "splash_attack":
+            a_r -= 10
+            speed = random.random() + 10
+            for i in range(3):
+                img = pygame.transform.rotate(current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
+                a = math.radians(a_r)
+                
+                self.game.projectiles.append(Projectiles(img, speed, a, 100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
+                a_r += 10
+            for i in range(12):
+                s_angle = random.random() - 0.5 + angle
+                speed = random.random() + 2
+                self.game.sparks.append(Sparks(angle=s_angle, speed=speed, pos=(math.cos(angle) * 15 + self.rect().center[0], math.sin(angle) * 15 + self.rect().center[1]), color=(255, 165, 30)))
+            
+            self.recoil(5, 4)
+                
 
-    def recoil(self):
-        self.velocity[0] = - math.cos(math.radians(self.game.angle)) * 2
-        y_vel = math.sin(math.radians(self.game.angle * (1 if self.game.rotation.flip_x else -1))) * 0.5
+    def recoil(self, x_recoil, y_recoil):
+        self.velocity[0] = - math.cos(math.radians(self.game.angle)) * x_recoil
+        y_vel = math.sin(math.radians(self.game.angle * (1 if self.game.rotation.flip_x else -1))) * y_recoil
         self.velocity[1] += y_vel 
           
     def update(self, tilemap, movement=(0,0)):
