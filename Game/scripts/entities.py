@@ -175,6 +175,7 @@ class Player(NonobjEntities):
 
         self.atk_type_count_meele = 2
         self.shooting = False
+        self.jumps = 1
 
     def start_charge(self, is_initialized=False):
         self.is_initialized = is_initialized
@@ -241,6 +242,9 @@ class Player(NonobjEntities):
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
 
+        if self.collisions['down']:
+            self.jumps = 1
+            
         self.air_time += 1
         self.attack_type = min(self.attack_type + 1, self.charge_duration * self.atk_type_count_meele - 1)
         self.attacking = max(0, self.attacking - 1)

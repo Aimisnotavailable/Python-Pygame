@@ -100,8 +100,9 @@ class Game:
                         self.movement[0] = -2
                     if event.key == pygame.K_d:
                         self.movement[0] = 2
-                    if event.key == pygame.K_w:
+                    if event.key == pygame.K_w and self.player.jumps: 
                         self.player.velocity[1] = -3
+                        self.player.jumps -= 1
                     
                     if event.key == pygame.K_1 and self.player.attacking == 0:
                         self.inventory.current_selected = 0
