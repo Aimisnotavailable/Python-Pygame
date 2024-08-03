@@ -160,7 +160,7 @@ class Player(NonobjEntities):
 
     def __init__(self, game, pos, size=(8, 16)):
         super().__init__(game,'player', pos, size)
-        self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attack' : 10, 'splash_attack' : 10}
+        self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attack' : 15, 'splash_attack' : 60}
         self.set_action('idle')
 
         self.attack_type = 0
@@ -238,7 +238,11 @@ class Player(NonobjEntities):
         self.velocity[0] = - math.cos(math.radians(self.game.angle)) * x_recoil
         y_vel = math.sin(math.radians(self.game.angle * (1 if self.game.rotation.flip_x else -1))) * y_recoil
         self.velocity[1] += y_vel 
-          
+    
+    def cooldown(self, surf, offset=(0, 0)):
+        pos = self.rect().topleft
+        pygame.draw.rect(surf, (255, 255, 255), (pos[0] - offset[0], pos[1] - offset[1] - 10, (self.attacking/self.attack_cooldowns[self.atk_type]) * 20 , 5))
+
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)
 
@@ -255,6 +259,7 @@ class Player(NonobjEntities):
             self.air_time = 0
 
         if self.attacking > 0:
+            
             if self.attacking == 1:
                 self.start_charge(is_initialized=False)
                 self.set_action('idle')
@@ -276,6 +281,10 @@ class Player(NonobjEntities):
             self.set_action('idle')
 
     def render(self, surf, offset=(0,0)):
+        
+        if self.attacking:
+            self.cooldown(surf, offset)
+
         # Charge tooltip
         if self.is_initialized and self.attacking == 0:
             pygame.draw.rect(surf, (255, 255, 255), (self.pos[0] - offset[0], self.pos[1] - offset[1] - 10, self.attack_type // 5, 3), 0, 2)
