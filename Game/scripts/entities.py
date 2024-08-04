@@ -88,7 +88,8 @@ class NonobjEntities(PhysicsEntities):
 
     def perform_attack(self, atk_type, current_weapon):
         #if(self.air_time < 4):
-        self.attacking = self.attack_cooldowns[atk_type]
+        self.cooldown_time = current_weapon.attack_cooldowns[atk_type]
+        self.attacking = self.cooldown_time
         self.current_weapon = current_weapon
         # self.initialize_weapon(atk_type, current_weapon)
         #self.set_action('attack')
@@ -160,7 +161,7 @@ class Player(NonobjEntities):
 
     def __init__(self, game, pos, size=(8, 16)):
         super().__init__(game,'player', pos, size)
-        self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attack' : 15, 'splash_attack' : 60}
+        
         self.set_action('idle')
 
         self.attack_type = 0
@@ -241,7 +242,7 @@ class Player(NonobjEntities):
     
     def cooldown(self, surf, offset=(0, 0)):
         pos = self.rect().topleft
-        pygame.draw.rect(surf, (255, 255, 255), (pos[0] - offset[0], pos[1] - offset[1] - 10, (self.attacking/self.attack_cooldowns[self.atk_type]) * 20 , 5))
+        pygame.draw.rect(surf, (255, 255, 255), (pos[0] - offset[0], pos[1] - offset[1] - 10, (self.attacking/self.cooldown_time) * 20 , 5))
 
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement)

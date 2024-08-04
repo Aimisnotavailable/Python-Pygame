@@ -1,14 +1,19 @@
+import pygame
 from scripts.utils import load_image, load_images, Animation
 
 class Assets:
 
     def __init__(self):
+        water = []
+        water.append(pygame.Surface((16, 16)))
+        water[0].fill((0, 0, 255))
         self.assets = {"background" : load_image("background.png"),
                        "cursor" : Animation(load_images("cursor"), image_dur=7),
                        "inventory_slot" : load_images("inventory/slot"),
                        "clouds" : load_image("clouds\cloud.png"),
                        "grass" : load_images("tiles/grass"),
                        "stone" : load_images("tiles/stone"),
+                       "water" : water,
                        "player" : load_image("entities/player/player.png"),
                        "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                        "player/jump" : Animation(load_images("entities/player/jump")),

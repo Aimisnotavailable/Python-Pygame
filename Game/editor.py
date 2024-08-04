@@ -21,8 +21,12 @@ class Game:
 
         self.render_scroll = [0, 0]
 
+        water = []
+        water.append(pygame.Surface((16, 16)))
+        water[0].fill((0, 0, 255))
         self.assets = {"grass" : load_images("tiles/grass"),
-                       "stone" : load_images("tiles/stone")}
+                       "stone" : load_images("tiles/stone"),
+                       "water" : water}
         
 
         self.tilemap = TileMap(self)

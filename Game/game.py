@@ -203,6 +203,7 @@ class Game:
                         self.sparks.append(Sparks(angle, speed, projectile.pos))
                     self.projectiles.remove(projectile)
                     continue
+                
                 if projectile.update():
                     self.projectiles.remove(projectile)
                     continue

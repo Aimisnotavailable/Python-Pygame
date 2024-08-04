@@ -3,6 +3,7 @@ import json
 
 NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0,0), (-1, 1), (0, 1), (1, 1)]
 
+
 AUTO_TILE_MAP = {
     tuple(sorted([(1, 0), (0, 1)])) : 0,
     tuple(sorted([(-1,0), (1, 0),(0, 1)])) : 1,
@@ -17,6 +18,7 @@ AUTO_TILE_MAP = {
     tuple(sorted([(-1, 0), (0, -1)])) : 8
 }
 
+PHYSICS_TILES = {'grass', 'stone'}
 AUTO_TILE_TYPES = {'grass', 'stone'}
 
 class TileMap:
@@ -42,14 +44,16 @@ class TileMap:
         tile_loc = (int((pos[0])//self.tile_size), int((pos[1])//self.tile_size))
         for offset in NEIGHBOR_OFFSETS:
             key = str(tile_loc[0] + offset[0]) + ';' + str(tile_loc[1] + offset[1])
-            if key in self.tilemap:
+            if key in self.tilemap and self.tilemap[key]['type'] in PHYSICS_TILES:
                 physics_tiles.append(self.tilemap[key])
         return physics_tiles
     
     def solid_check(self, pos):
         tile_loc = str(int((pos[0] //self.tile_size))) + ";" + str(int((pos[1]//self.tile_size)))
         if tile_loc in self.tilemap:
-            return self.tilemap[tile_loc]
+            if self.tilemap[tile_loc]['type'] in PHYSICS_TILES:
+                return True
+            return False
 
     def tiles_rect_around(self, pos):
         rects = []
