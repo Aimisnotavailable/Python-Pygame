@@ -66,12 +66,16 @@ class Game:
             key = str(tile_pos[0]) + ";" + str(tile_pos[1])
             
             if self.clicking:
-                if not (key in self.tilemap.tilemap):
+                if self.tile_list[self.tile_group] == "water":
+                    self.tilemap.water_map[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
+                elif not (key in self.tilemap.tilemap):
                     self.tilemap.tilemap[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
             
             if self.right_clicking:
                 if key in self.tilemap.tilemap:
                     del self.tilemap.tilemap[key]
+                if key in self.tilemap.water_map:
+                    del self.tilemap.water_map[key]
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -88,14 +92,16 @@ class Game:
                     if event.button == 4:
                         if self.shift:
                             self.tile_group = (self.tile_group + 1) % len(self.tile_list)
+                            self.tile_variant = 0
                         else:
-                            self.tile_variant = (self.tile_variant + 1) % len(self.assets['grass'])
+                            self.tile_variant = (self.tile_variant + 1) % len(self.assets[self.tile_list[self.tile_group]])
                     
                     if event.button == 5:
                         if self.shift:
                             self.tile_group = ((self.tile_group -1) + len(self.tile_list)) % len(self.tile_list)
+                            self.tile_variant = 0
                         else:
-                            self.tile_variant = ((self.tile_variant - 1)+ len(self.assets['grass'])) % len(self.assets['grass'])
+                            self.tile_variant = ((self.tile_variant - 1)+ len(self.assets[self.tile_list[self.tile_group]])) % len(self.assets[self.tile_list[self.tile_group]])
                 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
