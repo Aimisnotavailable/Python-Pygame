@@ -28,6 +28,7 @@ class TileMap:
         self.tilemap = {}
         self.offgrid_tiles = []
         self.water_map = {}
+        self.interactive_water = []
 
     def render(self, surf, offset=(0,0), grid_enabled=False):
         for x in range(offset[0] // self.tile_size, (offset[0] + surf.get_width()) // self.tile_size + 1):
@@ -42,7 +43,8 @@ class TileMap:
 
                 if loc in self.water_map:
                     tile = self.water_map[loc]
-                    surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
+                    img = self.game.assets[tile['type']][tile['variant']] if tile['interactive'] else self.game.assets['water2'][tile['variant']]
+                    surf.blit(img,(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
 
     def tiles_around(self, pos):   
         physics_tiles = []
@@ -81,10 +83,26 @@ class TileMap:
 
             if (tile['type'] in AUTO_TILE_TYPES) and (neighbours in AUTO_TILE_MAP):
                 tile['variant'] = AUTO_TILE_MAP[neighbours]
+    
+    def validate_water_blocks(self):
+
+        for loc in self.water_map.copy():
+            water = self.water_map[loc]
+            check_loc = str(water['pos'][0]) + ';' + str(water['pos'][1] -1)
+
+            if  not check_loc in self.water_map:
+                water['interactive'] = True
+            else:
+                water['interactive'] = False
+
+                
+    def group_water(self):
+        pass
+
 
     def save(self, path):
         f = open(path, 'w')
-        json.dump({'tilemap' : self.tilemap, 'tile_size' : self.tile_size, 'offgrid' : self.offgrid_tiles, 'watermap' : self.water_map}, f)
+        json.dump({'tilemap' : self.tilemap, 'tile_size' : self.tile_size, 'offgrid' : self.offgrid_tiles, 'watermap' : self.water_map, 'interactive_water' : self.interactive_water}, f)
         f.close()
 
     def load(self, path):
@@ -96,6 +114,7 @@ class TileMap:
         self.tile_size = map_data['tile_size']
         self.offgrid_tiles = map_data['offgrid']
         self.water_map = map_data['watermap']
+        self.interactive_water = map_data['interactive_water']
             
         
        

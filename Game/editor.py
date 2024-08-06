@@ -24,9 +24,13 @@ class Game:
         water = []
         water.append(pygame.Surface((16, 16)))
         water[0].fill((0, 0, 255))
+        water2 = []
+        water2.append(pygame.Surface((16, 16)))
+        water2[0].fill((0, 255, 0))
         self.assets = {"grass" : load_images("tiles/grass"),
                        "stone" : load_images("tiles/stone"),
-                       "water" : water}
+                       "water" : water,
+                       "water2" : water2}
         
 
         self.tilemap = TileMap(self)
@@ -67,7 +71,7 @@ class Game:
             
             if self.clicking:
                 if self.tile_list[self.tile_group] == "water":
-                    self.tilemap.water_map[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
+                    self.tilemap.water_map[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]], "interactive" : False}
                 elif not (key in self.tilemap.tilemap):
                     self.tilemap.tilemap[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
             
@@ -126,6 +130,7 @@ class Game:
                     
                     if event.key == pygame.K_t:
                         self.tilemap.auto_tile()
+                        self.tilemap.validate_water_blocks()
 
                     if event.key == pygame.K_r:
                         self.tilemap.tilemap = {}
