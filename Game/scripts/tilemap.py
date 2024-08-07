@@ -1,5 +1,6 @@
 import pygame
 import json
+from scripts.water import Water
 
 NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0,0), (-1, 1), (0, 1), (1, 1)]
 
@@ -21,6 +22,8 @@ AUTO_TILE_MAP = {
 PHYSICS_TILES = {'grass', 'stone'}
 AUTO_TILE_TYPES = {'grass', 'stone'}
 
+TILE_TYPES = {'solid' : PHYSICS_TILES, 'liquid' : 'water'}
+
 class TileMap:
     def __init__(self, game, tile_size=16):
         self.game = game
@@ -28,7 +31,7 @@ class TileMap:
         self.tilemap = {}
         self.offgrid_tiles = []
         self.water_map = {}
-        self.interactive_water = []
+        self.interactive_water = {}
 
     def render(self, surf, offset=(0,0), grid_enabled=False):
         for x in range(offset[0] // self.tile_size, (offset[0] + surf.get_width()) // self.tile_size + 1):
@@ -43,16 +46,22 @@ class TileMap:
 
                 if loc in self.water_map:
                     tile = self.water_map[loc]
-                    img = self.game.assets[tile['type']][tile['variant']] if tile['interactive'] else self.game.assets['water2'][tile['variant']]
-                    surf.blit(img,(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
+                    if tile['interactive']:
+                        water = self.interactive_water[loc]
+                        water.render(surf, pos=(x * self.tile_size, y * self.tile_size), offset=offset)
+                    else:
+                        surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
+                    
 
-    def tiles_around(self, pos):   
+    def tiles_around(self, pos, type):   
         physics_tiles = []
         tile_loc = (int((pos[0])//self.tile_size), int((pos[1])//self.tile_size))
         for offset in NEIGHBOR_OFFSETS:
             key = str(tile_loc[0] + offset[0]) + ';' + str(tile_loc[1] + offset[1])
-            if key in self.tilemap and self.tilemap[key]['type'] in PHYSICS_TILES:
-                physics_tiles.append(self.tilemap[key])
+
+            if type == 'solid':
+                if key in self.tilemap and self.tilemap[key]['type'] in PHYSICS_TILES:
+                    physics_tiles.append(self.tilemap[key])
         return physics_tiles
     
     def solid_check(self, pos):
@@ -62,14 +71,15 @@ class TileMap:
                 return True
             return False
 
-    def tiles_rect_around(self, pos):
+    def tiles_rect_around(self, pos, type='solid'):
         rects = []
-        for tile in self.tiles_around(pos):
+        for tile in self.tiles_around(pos, type):
             rects.append(pygame.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
         return rects
+
     
     def auto_tile(self):
-        
+
         for loc in self.tilemap:
             tile = self.tilemap[loc]
             neighbours = set()
@@ -90,19 +100,28 @@ class TileMap:
             water = self.water_map[loc]
             check_loc = str(water['pos'][0]) + ';' + str(water['pos'][1] -1)
 
-            if  not check_loc in self.water_map:
+            if not check_loc in self.water_map:
                 water['interactive'] = True
             else:
                 water['interactive'] = False
-
+        
+        self.group_interactive_water()
+    
+    def group_interactive_water(self):
+        for loc in self.water_map.copy():
+            water = self.water_map[loc]
+            
+            if water['interactive']:
+                if not loc in self.interactive_water:
+                    self.interactive_water[loc] = Water()
+            else:
+                if loc in self.interactive_water:
+                    del self.interactive_water[loc]
                 
-    def group_water(self):
-        pass
-
 
     def save(self, path):
         f = open(path, 'w')
-        json.dump({'tilemap' : self.tilemap, 'tile_size' : self.tile_size, 'offgrid' : self.offgrid_tiles, 'watermap' : self.water_map, 'interactive_water' : self.interactive_water}, f)
+        json.dump({'tilemap' : self.tilemap, 'tile_size' : self.tile_size, 'offgrid' : self.offgrid_tiles, 'watermap' : self.water_map}, f)
         f.close()
 
     def load(self, path):
@@ -114,7 +133,7 @@ class TileMap:
         self.tile_size = map_data['tile_size']
         self.offgrid_tiles = map_data['offgrid']
         self.water_map = map_data['watermap']
-        self.interactive_water = map_data['interactive_water']
+        self.group_interactive_water()
             
         
        

@@ -11,7 +11,8 @@ from scripts.inventory import Inventory
 from scripts.clouds import Clouds
 from scripts.sparks import Sparks
 from scripts.particles import Particles
-from test_scripts.water1 import Water
+#from test_scripts.water1 import Water
+from scripts.water import Water
 from scripts.rotation import Rotation
 from scripts.assets import Assets
 from scripts.projectiles import Projectiles
@@ -268,10 +269,10 @@ class Game:
                     self.display.blit(img, img_rect)
             
             
-            for i in range(len(self.water.springs)):
-                if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and self.player.action != "idle":
-                    self.water.wave(i)
-                    break
+            # for i in range(len(self.water.springs)):
+            #     if self.player.rect().collidepoint((self.water.springs[i].pos[0] + 160, self.water.springs[i].pos[1] + 96)) and self.player.action != "idle":
+            #         self.water.wave(i)
+            #         break
                 
             for item in self.items_nearby.copy():
                 item.render(self.display, render_scroll)
@@ -314,7 +315,7 @@ class Game:
             
             
             self.display_2.blit(self.display, (0, 0))
-            self.water.render(self.display_2, render_scroll)
+            # self.water.render(self.display_2, render_scroll)
             
             cursor_rect = self.cursor.img().get_rect(center=mpos)
             self.display_2.blit(self.cursor.img(), cursor_rect)

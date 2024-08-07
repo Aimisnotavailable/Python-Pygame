@@ -4,6 +4,7 @@ import os
 import random
 from scripts.utils import load_image, load_images
 from scripts.tilemap import TileMap
+from scripts.water import Water
 
 RENDER_SCALE = 2
 class Game:
@@ -24,15 +25,13 @@ class Game:
         water = []
         water.append(pygame.Surface((16, 16)))
         water[0].fill((0, 0, 255))
-        water2 = []
-        water2.append(pygame.Surface((16, 16)))
-        water2[0].fill((0, 255, 0))
+
         self.assets = {"grass" : load_images("tiles/grass"),
                        "stone" : load_images("tiles/stone"),
-                       "water" : water,
-                       "water2" : water2}
+                       "water" : water}
         
 
+        self.water = Water()
         self.tilemap = TileMap(self)
         self.tilemap.load("data/maps/map.json")
         self.tile_list = list(self.assets)
@@ -80,6 +79,8 @@ class Game:
                     del self.tilemap.tilemap[key]
                 if key in self.tilemap.water_map:
                     del self.tilemap.water_map[key]
+                if key in self.tilemap.interactive_water:
+                    del self.tilemap.interactive_water[key]
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -153,7 +154,7 @@ class Game:
                     if event.key == pygame.K_LSHIFT:
                         self.shift = False
                 
-            self.tilemap.render(self.display, offset=self.render_scroll, grid_enabled=True)
+            self.tilemap.render(self.display, offset=self.render_scroll, grid_enabled=False)
             text  = self.font.render(str(mpos[0] + self.render_scroll[0]) + ';' + str(mpos[1] + self.render_scroll[1]), True, (255, 0, 255))
             self.display.blit(text, (0, 32))
 

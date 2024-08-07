@@ -63,6 +63,13 @@ class PhysicsEntities:
                     self.collisions['up'] = True
                 self.pos[1] = entity_rect.y
 
+        tile_loc = str(int((self.pos[0] //self.game.tilemap.tile_size))) + ";" + str(int((self.pos[1]//self.game.tilemap.tile_size)))
+        if tile_loc in tilemap.water_map:
+            tile = tilemap.water_map[tile_loc]
+            if tile['interactive']:
+                tilemap.interactive_water[tile_loc].wave()
+        
+
         if movement[0] > 0:
             self.flip = False
         elif movement[0] < 0:
