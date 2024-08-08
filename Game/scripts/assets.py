@@ -5,8 +5,8 @@ class Assets:
 
     def __init__(self):
         water = []
-        water.append(pygame.Surface((16, 16)))
-        water[0].fill((0, 0, 255))
+        water.append(pygame.Surface((16, 16), pygame.SRCALPHA))
+        water[0].fill((0, 0, 255, 100))
         self.assets = {"background" : load_image("background.png"),
                        "cursor" : Animation(load_images("cursor"), image_dur=7),
                        "inventory_slot" : load_images("inventory/slot"),

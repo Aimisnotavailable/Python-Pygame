@@ -16,13 +16,12 @@ class WaterSpring:
     def update(self):
         
         self.displacement = self.pos[1] - self.resting_length
-
+        
         spring_force = -self.spring_const * self.displacement 
         
         self.total_force = spring_force + self.gravity + self.force
 
         self.velocity[1] = self.velocity[1] * self.damping + self.total_force
-
+        
         self.pos = [self.pos[0] + self.velocity[0], self.pos[1] + self.velocity[1]]
-
         self.force = 0

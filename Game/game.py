@@ -181,7 +181,8 @@ class Game:
                             self.player.shooting = False
                         
                     
-                   
+            self.player.update(self.tilemap, self.movement, offset=render_scroll)
+            self.player.render(self.display, offset=render_scroll)       
             self.tilemap.render(self.display, offset=render_scroll)
 
             if self.player.shooting and self.player.attacking == 1:
@@ -245,8 +246,7 @@ class Game:
                                 self.sparks.append(Sparks(angle, speed, enemy.pos))
                         break
 
-            self.player.update(self.tilemap, self.movement)
-            self.player.render(self.display, offset=render_scroll)
+            
 
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
             self.angle = self.rotation.get_angle(p_pos, mpos)
@@ -280,7 +280,7 @@ class Game:
                     self.items_nearby.remove(item)
 
             for enemy in self.enemies:
-                enemy.update(self.tilemap)
+                enemy.update(self.tilemap, offset=render_scroll)
                 enemy.render(self.display, offset=render_scroll)
                 pygame.draw.circle(self.display, (0, 0 if not self.tilemap.solid_check((enemy.rect().centerx + (-7 if enemy.flip else 7), enemy.pos[1] + 23)) else 255, 0), (enemy.rect().centerx + (-7 if enemy.flip else 7) - render_scroll[0], enemy.pos[1] + 23 - render_scroll[1]), 1)
             
@@ -307,6 +307,7 @@ class Game:
                     
             self.inventory.render(self.display)
             
+            self.tilemap.render_water(self.display_2, render_scroll)
             display_mask = pygame.mask.from_surface(self.display)
             display_sillhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0))
 

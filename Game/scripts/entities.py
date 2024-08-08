@@ -32,7 +32,7 @@ class PhysicsEntities:
     def render(self, surf, offset=(0,0)):
         surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
 
-    def update(self, tilemap, movement=(0,0)):
+    def update(self, tilemap, movement=(0,0), offset=(0,0)):
         self.movement = movement
         self.collisions = {'up' : False, 'down' : False, 'right' : False, 'left' : False}
         frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
@@ -63,11 +63,35 @@ class PhysicsEntities:
                     self.collisions['up'] = True
                 self.pos[1] = entity_rect.y
 
-        tile_loc = str(int((self.pos[0] //self.game.tilemap.tile_size))) + ";" + str(int((self.pos[1]//self.game.tilemap.tile_size)))
+        tile_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]
+        tile_loc = str(tile_loc_int[0]) + ";" + str(tile_loc_int[1])
+
         if tile_loc in tilemap.water_map:
             tile = tilemap.water_map[tile_loc]
+            
             if tile['interactive']:
-                tilemap.interactive_water[tile_loc].wave()
+                water = tilemap.interactive_water[tile_loc]
+                print(self.velocity[0])
+                for i in range(len(water.springs)):
+                    pos = water.springs[i].pos
+                    if entity_rect.collidepoint((pos[0] + tile['pos'][0] * tilemap.tile_size + offset[0], pos[1] + tile['pos'][1] * tilemap.tile_size + offset[1])):
+                        water.wave(i, push_force=self.velocity[0] * 0.8, upward_force=-self.velocity[1])
+                        
+                    
+                if(abs(water.springs[-1].force) > 0.01):
+                    right_tile_loc = str(tile_loc_int[0] + 1) + ";" + str(tile_loc_int[1])
+                    if right_tile_loc in tilemap.water_map:
+                        right_water = tilemap.interactive_water[right_tile_loc]
+                        right_water.wave(0, push_force=self.velocity[0] * 0.8, upward_force=water.springs[-1].force)
+                if(abs(water.springs[0].force) > 0.001):
+                    left_tile_loc = str(tile_loc_int[0] - 1) + ";" + str(tile_loc_int[1])
+                    if left_tile_loc in tilemap.water_map:
+                        left_water = tilemap.interactive_water[left_tile_loc]
+                        left_water.wave(-1, push_force=self.velocity[0] * 0.8, upward_force=water.springs[0].force)
+                
+                
+                    
+
         
 
         if movement[0] > 0:
@@ -131,7 +155,7 @@ class Enemy(NonobjEntities):
         self.velocity[1] = -2
         self.flip = not self.flip
 
-    def update(self, tilemap, movement=(0,0)):
+    def update(self, tilemap, movement=(0,0), offset=(0, 0)):
         if self.walking and self.action != 'damaged':
             if tilemap.solid_check((self.rect().centerx + (-7 if self.flip else 7), self.pos[1] + 23)):
                 if(self.collisions['right'] or self.collisions['left']):
@@ -251,7 +275,7 @@ class Player(NonobjEntities):
         pos = self.rect().topleft
         pygame.draw.rect(surf, (255, 255, 255), (pos[0] - offset[0], pos[1] - offset[1] - 10, (self.attacking/self.cooldown_time) * 20 , 5))
 
-    def update(self, tilemap, movement=(0,0)):
+    def update(self, tilemap, movement=(0,0), offset=(0, 0)):
         super().update(tilemap, movement)
 
         if self.collisions['down']:
