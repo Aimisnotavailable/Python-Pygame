@@ -9,7 +9,9 @@ class Water:
         self.horizontal_damping = 0.8
 
     def wave(self, index=0, push_force = 0, upward_force=1):
-        
+        if index == -1:
+            index = len(self.springs) - 1
+            
         self.springs[index].force = upward_force
         # self.springs[index].velocity[0] = push_force
         left = index - 1

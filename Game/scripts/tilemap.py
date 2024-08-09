@@ -46,18 +46,19 @@ class TileMap:
                     surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
 
                 if loc in self.water_map:
-                    tile = self.water_map[loc]
-                    if tile['interactive']:
-                        self.nearby_water[loc] = (x, y)
-                    else:
-                        surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
-
+                    self.nearby_water[loc] = (x, y)
+            
     def render_water(self, surf, offset=(0, 0)):
 
         for loc in self.nearby_water.copy():
             x, y = self.nearby_water[loc]
-            water = self.interactive_water[loc]
-            water.render(surf, pos=(x * self.tile_size, y * self.tile_size), offset=offset)
+            tile = self.water_map[loc]
+
+            if tile['interactive']:
+                water = self.interactive_water[loc]
+                water.render(surf, pos=(x * self.tile_size, y * self.tile_size), offset=offset)
+            else:
+                surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
 
             del self.nearby_water[loc]
             

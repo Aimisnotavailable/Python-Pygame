@@ -69,10 +69,11 @@ class Game:
             key = str(tile_pos[0]) + ";" + str(tile_pos[1])
             
             if self.clicking:
-                if self.tile_list[self.tile_group] == "water":
-                    self.tilemap.water_map[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]], "interactive" : False}
-                elif not (key in self.tilemap.tilemap):
-                    self.tilemap.tilemap[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
+                if not (key in self.tilemap.tilemap) and not (key in self.tilemap.water_map):
+                    if self.tile_list[self.tile_group] == "water":
+                        self.tilemap.water_map[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]], "interactive" : False}
+                    else:
+                        self.tilemap.tilemap[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
             
             if self.right_clicking:
                 if key in self.tilemap.tilemap:
@@ -128,6 +129,7 @@ class Game:
 
                     if event.key == pygame.K_k:
                         self.tilemap.save("data/maps/map.json")
+                        self.tilemap.validate_water_blocks()
                     
                     if event.key == pygame.K_t:
                         self.tilemap.auto_tile()
@@ -135,6 +137,8 @@ class Game:
 
                     if event.key == pygame.K_r:
                         self.tilemap.tilemap = {}
+                        self.tilemap.water_map = {}
+                        self.tilemap.interactive_water = {}
 
                     if event.key == pygame.K_LSHIFT:
                         self.tile_group = 0
@@ -155,6 +159,8 @@ class Game:
                         self.shift = False
                 
             self.tilemap.render(self.display, offset=self.render_scroll, grid_enabled=False)
+            self.tilemap.render_water(self.display, offset=self.render_scroll)
+
             text  = self.font.render(str(mpos[0] + self.render_scroll[0]) + ';' + str(mpos[1] + self.render_scroll[1]), True, (255, 0, 255))
             self.display.blit(text, (0, 32))
 

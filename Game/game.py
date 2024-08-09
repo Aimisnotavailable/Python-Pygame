@@ -307,21 +307,22 @@ class Game:
                     
             self.inventory.render(self.display)
             
-            self.tilemap.render_water(self.display_2, render_scroll)
+            
             display_mask = pygame.mask.from_surface(self.display)
             display_sillhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0))
 
             for offset in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
                 self.display_2.blit(display_sillhouette, offset)
-            
-            
+            print(self.player.air_time)
+
             self.display_2.blit(self.display, (0, 0))
             # self.water.render(self.display_2, render_scroll)
             
             cursor_rect = self.cursor.img().get_rect(center=mpos)
             self.display_2.blit(self.cursor.img(), cursor_rect)
             self.cursor.update()
-            
+            self.tilemap.render_water(self.display_2, render_scroll)
+
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             pygame.display.update()
             self.clock.tick(60)   

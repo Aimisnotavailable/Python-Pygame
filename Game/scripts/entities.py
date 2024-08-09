@@ -25,6 +25,7 @@ class PhysicsEntities:
 
         self.objects = []
         self.attacking = 0
+        self.drag = 1
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -35,9 +36,9 @@ class PhysicsEntities:
     def update(self, tilemap, movement=(0,0), offset=(0,0)):
         self.movement = movement
         self.collisions = {'up' : False, 'down' : False, 'right' : False, 'left' : False}
-        frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
+        frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1] )
 
-        self.pos[0] += frame_movement[0]
+        self.pos[0] += frame_movement[0] * self.drag
         entity_rect = self.rect()
         for rect in tilemap.tiles_rect_around(self.pos):
             if entity_rect.colliderect(rect):
@@ -50,7 +51,7 @@ class PhysicsEntities:
                     self.collisions['left'] = True
                 self.pos[0] = entity_rect.x
 
-        self.pos[1] += frame_movement[1]
+        self.pos[1] += frame_movement[1] * self.drag
         entity_rect = self.rect()
         for rect in tilemap.tiles_rect_around(self.pos):
             if entity_rect.colliderect(rect):
@@ -68,14 +69,15 @@ class PhysicsEntities:
 
         if tile_loc in tilemap.water_map:
             tile = tilemap.water_map[tile_loc]
+            self.drag = 0.6
             
             if tile['interactive']:
                 water = tilemap.interactive_water[tile_loc]
-                print(self.velocity[0])
                 for i in range(len(water.springs)):
                     pos = water.springs[i].pos
                     if entity_rect.collidepoint((pos[0] + tile['pos'][0] * tilemap.tile_size + offset[0], pos[1] + tile['pos'][1] * tilemap.tile_size + offset[1])):
                         water.wave(i, push_force=self.velocity[0] * 0.8, upward_force=-self.velocity[1])
+                        
                         
                     
                 if(abs(water.springs[-1].force) > 0.01):
@@ -88,18 +90,16 @@ class PhysicsEntities:
                     if left_tile_loc in tilemap.water_map:
                         left_water = tilemap.interactive_water[left_tile_loc]
                         left_water.wave(-1, push_force=self.velocity[0] * 0.8, upward_force=water.springs[0].force)
-                
-                
-                    
+        else:
+            self.drag = min(1, self.drag + 0.01)
 
         
-
         if movement[0] > 0:
             self.flip = False
         elif movement[0] < 0:
             self.flip = True
         
-        self.velocity[1] = min(5, self.velocity[1] + 0.1)
+        self.velocity[1] = min(5 * self.drag, self.velocity[1] + 0.1)
         if self.collisions['up'] or self.collisions['down']:
             self.velocity[1] = 0
         
@@ -305,7 +305,7 @@ class Player(NonobjEntities):
                 else:
                     self.velocity[0] = 0
                     self.velocity[1] = 0
-        if self.air_time > 4:
+        if self.air_time > 4 + (4 * 1 - self.drag):
             self.set_action('jump')
         elif self.movement[0] != 0:
             self.set_action('run')
