@@ -16,6 +16,7 @@ from scripts.water import Water
 from scripts.rotation import Rotation
 from scripts.assets import Assets
 from scripts.projectiles import Projectiles
+from scripts.screenshake import ScreenShake
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -67,6 +68,7 @@ class Game:
         self.water = Water()
         self.under_water = False
         self.rotation = Rotation()
+        self.screen_shake = ScreenShake()
 
         for loc in self.tilemap.tilemap:
             if random.randint(0, 20) == 1:
@@ -85,10 +87,7 @@ class Game:
 
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
-            render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
-
-            self.clouds.render(self.display_2, render_scroll)
-            self.clouds.update()
+            render_scroll = [int(self.scroll[0]), int(self.scroll[1])]
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -161,26 +160,36 @@ class Game:
                             self.player.shooting = True
                             atk_type = 'shoot_attack'
                             self.player.perform_attack(atk_type, self.current_weapon)
+                            self.screen_shake.set_shake_config(strength=4, dur=4)
                     
                     if event.button == 3 and self.current_weapon is not None and self.player.attacking == 0:
                         if self.current_weapon.type == 'guns':
                             atk_type='splash_attack'
                             self.player.perform_attack(atk_type, self.current_weapon)
+                            self.screen_shake.set_shake_config(strength=7, dur=15)
                                     
 
                 if event.type == pygame.MOUSEBUTTONUP:
-                    if event.button == 1 and self.current_weapon is not None:
-                        if self.current_weapon.type == 'swords':
-                            if self.player.attacking <= 0:
-                                atk_type = 'normal_attack' if self.player.attack_type < self.player.charge_duration else 'charged_attack'
-                                self.player.perform_attack(atk_type, self.current_weapon)
-                        elif self.current_weapon.type == 'guns':
-                            self.player.shooting = False
-                    if event.button == 2 and self.current_weapon is not None:
-                        if self.current_weapon.type == 'guns':
-                            self.player.shooting = False
+                    if self.current_weapon is not None:
+                        if event.button == 1:
+                            if self.current_weapon.type == 'swords':
+                                if self.player.attacking <= 0:
+                                    atk_type = 'normal_attack' if self.player.attack_type < self.player.charge_duration else 'charged_attack'
+                                    self.player.perform_attack(atk_type, self.current_weapon)
+                            elif self.current_weapon.type == 'guns':
+                                self.player.shooting = False
+                        if event.button == 3:
+                            if self.current_weapon.type == 'guns':
+                                self.player.shooting = False
+
+            if self.screen_shake.dur:
+                shake_offset = self.screen_shake.screen_shake()
+                render_scroll = (int(render_scroll[0] + shake_offset[0]), int(render_scroll[1] + shake_offset[1]))
+
                         
-                    
+            self.clouds.render(self.display_2, render_scroll)
+            self.clouds.update()
+
             self.player.update(self.tilemap, self.movement, offset=render_scroll)
             self.player.render(self.display, offset=render_scroll)       
             self.tilemap.render(self.display, offset=render_scroll)
@@ -188,7 +197,8 @@ class Game:
             if self.player.shooting and self.player.attacking == 1:
                 self.player.attacking = 1
                 atk_type = 'shoot_attack'
-                self.player.perform_attack(atk_type, self.current_weapon)  
+                self.player.perform_attack(atk_type, self.current_weapon)
+                self.screen_shake.set_shake_config(strength=2, dur=4) 
 
 
             for spark in self.sparks.copy():
@@ -313,7 +323,7 @@ class Game:
 
             for offset in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
                 self.display_2.blit(display_sillhouette, offset)
-            print(self.player.air_time)
+            
 
             self.display_2.blit(self.display, (0, 0))
             # self.water.render(self.display_2, render_scroll)
@@ -324,6 +334,7 @@ class Game:
             self.tilemap.render_water(self.display_2, render_scroll)
 
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
+            print(self.clock.get_rawtime())
             pygame.display.update()
             self.clock.tick(60)   
     
