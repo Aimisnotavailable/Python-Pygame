@@ -5,6 +5,7 @@ import random
 from scripts.utils import load_image, load_images
 from scripts.tilemap import TileMap
 from scripts.water import Water
+from scripts.assets import Assets
 
 RENDER_SCALE = 2
 class Game:
@@ -22,15 +23,8 @@ class Game:
 
         self.render_scroll = [0, 0]
 
-        water = []
-        water.append(pygame.Surface((16, 16)))
-        water[0].fill((0, 0, 255))
-
-        self.assets = {"grass" : load_images("tiles/grass"),
-                       "stone" : load_images("tiles/stone"),
-                       "water" : water}
+        self.assets = Assets().fetch(['blocks', 'spawner'])
         
-
         self.water = Water()
         self.tilemap = TileMap(self)
         self.tilemap.load("data/maps/map.json")
@@ -43,7 +37,7 @@ class Game:
         self.clicking = False
         self.right_clicking = False
 
-        self.font = pygame.font.Font(size=15)
+        self.font = pygame.font.Font(size=15)   
 
         
     def run(self):

@@ -40,7 +40,7 @@ class Game:
         self.movement = [0, 0]
  
         self.scroll = [0, 0]
-        self.assets = Assets().fetch()
+        self.assets = Assets().fetch(fetch_all=True)
         
         self.cursor = self.assets['cursor'].copy()
 
@@ -48,9 +48,8 @@ class Game:
         self.current_weapon = Gun(self, 'dirt_gun') # Sword(self,  'sword', color=(100, 100, 100)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
 
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
-        self.weapon_pos = self.pos
-
-        self.player = Player(self, self.pos)
+        # self.weapon_pos = self.pos
+        
         self.enemies = []
         self.items_nearby = []
         self.attack_rect = None
@@ -70,9 +69,22 @@ class Game:
         self.rotation = Rotation()
         self.screen_shake = ScreenShake()
 
-        for loc in self.tilemap.tilemap:
-            if random.randint(0, 20) == 1:
-                self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
+        for loc in self.tilemap.tilemap.copy():
+            tile = self.tilemap.tilemap[loc]
+            print(tile['type'])
+            if tile['type'] == 'entity_spawner':
+                
+                pos = (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)
+                if tile['variant'] == 0:
+                    self.enemies.append(Enemy(self, pos))
+                else:
+                    self.player = Player(self, pos)
+                
+                del self.tilemap.tilemap[loc]
+
+        # for loc in self.tilemap.tilemap:
+        #     if random.randint(0, 20) == 1:
+        #         self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
 
     def run(self):
         running = True
@@ -334,7 +346,7 @@ class Game:
             self.tilemap.render_water(self.display_2, render_scroll)
 
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
-            print(self.clock.get_rawtime())
+            # print(self.clock.get_rawtime())
             pygame.display.update()
             self.clock.tick(60)   
     
