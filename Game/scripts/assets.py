@@ -17,6 +17,7 @@ class Assets:
 
             "blocks"     : { "grass"  : load_images("tiles/grass"),
                              "stone"  : load_images("tiles/stone"),
+                             "sand"   : load_images("tiles/sand"),
                              "water"  : water
                            },
 

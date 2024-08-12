@@ -19,8 +19,8 @@ AUTO_TILE_MAP = {
     tuple(sorted([(-1, 0), (0, -1)])) : 8
 }
 
-PHYSICS_TILES = {'grass', 'stone'}
-AUTO_TILE_TYPES = {'grass', 'stone'}
+PHYSICS_TILES = {'grass', 'stone', 'sand'}
+AUTO_TILE_TYPES = {'grass', 'stone', 'sand'}
 
 TILE_TYPES = {'solid' : PHYSICS_TILES, 'liquid' : 'water'}
 
