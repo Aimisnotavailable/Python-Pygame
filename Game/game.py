@@ -69,18 +69,13 @@ class Game:
         self.rotation = Rotation()
         self.screen_shake = ScreenShake()
 
-        for loc in self.tilemap.tilemap.copy():
-            tile = self.tilemap.tilemap[loc]
-            print(tile['type'])
-            if tile['type'] == 'entity_spawner':
-                
-                pos = (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)
-                if tile['variant'] == 0:
-                    self.enemies.append(Enemy(self, pos))
-                else:
-                    self.player = Player(self, pos)
-                
-                del self.tilemap.tilemap[loc]
+
+        for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
+            pos = entity['pos']
+            if entity['variant'] == 1:
+                self.player = Player(self, pos)
+            else:
+                self.enemies.append(Enemy(self, pos))
 
         # for loc in self.tilemap.tilemap:
         #     if random.randint(0, 20) == 1:

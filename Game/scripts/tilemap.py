@@ -34,6 +34,24 @@ class TileMap:
         self.interactive_water = {}
         self.nearby_water = {}
 
+    def extract(self, id_pairs, keep=True):
+        results = []
+        for loc in self.tilemap.copy():
+            tile = self.tilemap[loc]
+            
+            if (tile['type'], tile['variant']) in id_pairs:
+                results.append(tile.copy())
+                results[-1]['pos'] = tile['pos'].copy()
+                results[-1]['pos'][0] *= self.tile_size
+                results[-1]['pos'][1] *= self.tile_size
+
+                if not keep:
+                    del self.tilemap[loc]
+
+        return results
+            
+
+
     def render(self, surf, offset=(0,0), grid_enabled=False):
         for x in range(offset[0] // self.tile_size, (offset[0] + surf.get_width()) // self.tile_size + 1):
             for y in range(offset[1] // self.tile_size, (offset[1] + surf.get_height()) // self.tile_size + 1):
@@ -63,7 +81,6 @@ class TileMap:
             del self.nearby_water[loc]
             
             
-
     def tiles_around(self, pos, type):   
         physics_tiles = []
         tile_loc = (int((pos[0])//self.tile_size), int((pos[1])//self.tile_size))
