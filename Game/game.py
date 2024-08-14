@@ -17,6 +17,7 @@ from scripts.rotation import Rotation
 from scripts.assets import Assets
 from scripts.projectiles import Projectiles
 from scripts.screenshake import ScreenShake
+from scripts.transition import Transition
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -68,6 +69,7 @@ class Game:
         self.under_water = False
         self.rotation = Rotation()
         self.screen_shake = ScreenShake()
+        self.transition = Transition()
 
 
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
@@ -111,6 +113,9 @@ class Game:
                         self.player.velocity[1] = -3
                         self.player.jumps -= 1
                     
+                    if event.key == pygame.K_o:
+                        self.transition.transition = True
+
                     if event.key == pygame.K_1 and self.player.attacking == 0:
                         self.inventory.current_selected = 0
                         self.current_weapon = self.inventory.item_list[self.inventory.current_selected ]
@@ -339,6 +344,9 @@ class Game:
             self.display_2.blit(self.cursor.img(), cursor_rect)
             self.cursor.update()
             self.tilemap.render_water(self.display_2, render_scroll)
+
+            if self.transition.transition:
+                self.transition.render(self.display_2)
 
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             # print(self.clock.get_rawtime())
