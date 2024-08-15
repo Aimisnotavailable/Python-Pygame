@@ -53,15 +53,24 @@ class PhysicsEntities:
 
         self.pos[1] += frame_movement[1] * self.drag
         entity_rect = self.rect()
+        
         for rect in tilemap.tiles_rect_around(self.pos):
             if entity_rect.colliderect(rect):
                 if frame_movement[1] > 0:
                     entity_rect.bottom = rect.top
                     self.collisions['down'] = True
+                    for i in range(4):
+                        angle = ((random.random() - 0.5) * math.pi) + math.pi
+                        speed = random.random() + 2
+                        self.game.sparks.append(Sparks(angle, speed, (rect.centerx, rect.top)))
 
                 if frame_movement[1] < 0:
                     entity_rect.top = rect.bottom
                     self.collisions['up'] = True
+                    for i in range(4):
+                        angle = ((random.random()) * math.pi)
+                        speed = random.random() + 2
+                        self.game.sparks.append(Sparks(angle, speed, (rect.top, rect.centerx)))
                 self.pos[1] = entity_rect.y
 
         tile_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]
