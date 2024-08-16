@@ -64,6 +64,7 @@ class Game:
 
         self.sparks = []
         self.projectiles = []
+        self.particles = []
 
         self.water = Water()
         self.under_water = False
@@ -212,12 +213,16 @@ class Game:
                 self.player.perform_attack(atk_type, self.current_weapon)
                 self.screen_shake.set_shake_config(strength=2, dur=4) 
 
+            for particle in self.particles.copy():
+                particle.render(self.display, render_scroll)
+                if particle.update():
+                    self.particles.remove(particle)
 
             for spark in self.sparks.copy():
                 spark.render(self.display, render_scroll)
                 if spark.update():
                     self.sparks.remove(spark)
-
+            print(self.assets[self.tilemap.tilemap['-11;2']['type']][self.tilemap.tilemap['-11;2']['variant']])
             for projectile in self.projectiles.copy():
                 projectile.render(self.display, render_scroll)
                 if self.tilemap.solid_check(projectile.pos):

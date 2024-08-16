@@ -17,6 +17,7 @@ class PhysicsEntities:
         self.collisions = {'up' : False, 'down' : False, 'right' : False, 'left' : False}
 
         self.action = ''
+        self.last_action = ''
         self.anim_offset = (-3, -3)
         self.flip = False
         self.air_time = 0
@@ -59,18 +60,20 @@ class PhysicsEntities:
                 if frame_movement[1] > 0:
                     entity_rect.bottom = rect.top
                     self.collisions['down'] = True
-                    for i in range(4):
-                        angle = ((random.random() - 0.5) * math.pi) + math.pi
-                        speed = random.random() + 2
-                        self.game.sparks.append(Sparks(angle, speed, (rect.centerx, rect.top)))
+                    if self.action != 'idle':
+                        for i in range(2):
+                            angle = ((random.random()) * math.pi) + math.pi
+                            speed = random.random() + 2
+                            self.game.particles.append(Particles(angle, speed, (self.pos[0], rect.top)))
 
                 if frame_movement[1] < 0:
                     entity_rect.top = rect.bottom
                     self.collisions['up'] = True
-                    for i in range(4):
-                        angle = ((random.random()) * math.pi)
-                        speed = random.random() + 2
-                        self.game.sparks.append(Sparks(angle, speed, (rect.top, rect.centerx)))
+                    if self.action != 'idle':
+                        for i in range(2):
+                            angle = ((random.random()) * math.pi)
+                            speed = random.random() + 2
+                            self.game.particles.append(Particles(angle, speed, (self.pos[0], rect.bottom)))
                 self.pos[1] = entity_rect.y
 
         tile_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]

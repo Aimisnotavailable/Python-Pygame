@@ -4,11 +4,11 @@ import random
 
 class Particles:
 
-    def __init__(self, game, type, angle, speed, pos=(0, 0)):
+    def __init__(self, angle, speed, pos=(0, 0)):
         self.pos = list(pos)
         self.angle = angle
         self.speed = speed
-        self.animation = game.assets['particles' + '/' + type]
+        # self.animation = game.assets['particles' + '/' + type]
 
     def update(self):
         
@@ -19,8 +19,15 @@ class Particles:
 
         return not self.speed
 
-    def render(self, surf, offset=(0, 0)):
-        rotated_img = pygame.transform.rotate(self.animation.img(), -self.angle * 180/math.pi)
-        img_rect = rotated_img.get_rect(center=((self.pos[0] - offset[0], self.pos[1] - offset[1])))
-        surf.blit(rotated_img, img_rect)
-        self.animation.update()
+    def render(self, surf, offset=(0, 0), color_key=(255, 255, 255)):
+        
+        render_points = [
+            (self.pos[0] - offset[0] + math.cos(self.angle) * self.speed , self.pos[1] - offset[1] + math.sin(self.angle) * self.speed ),
+            (self.pos[0] - offset[0] + math.cos(self.angle + math.pi * 0.5) * self.speed , self.pos[1] - offset[1] + math.sin(self.angle) * self.speed ),
+            (self.pos[0] - offset[0] + math.cos(self.angle + math.pi * 0.5) * self.speed , self.pos[1] - offset[1] + math.sin(self.angle + math.pi) * self.speed ),
+            (self.pos[0] - offset[0] + math.cos(self.angle) * self.speed , self.pos[1] - offset[1] + math.sin(self.angle + math.pi) * self.speed ),
+        ]
+
+        pygame.draw.polygon(surf, color_key, render_points)
+        # surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))
+        # self.animation.update()
