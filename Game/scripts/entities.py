@@ -41,7 +41,11 @@ class PhysicsEntities:
 
         self.pos[0] += frame_movement[0] * self.drag
         entity_rect = self.rect()
-        for rect in tilemap.tiles_rect_around(self.pos):
+        tile_data = tilemap.tiles_rect_around(self.pos)
+
+        for i in range(len(tile_data['rects'])):
+            rect = tile_data['rects'][i]
+            color = tile_data['color'][i]
             if entity_rect.colliderect(rect):
                 if frame_movement[0] > 0:
                     entity_rect.right = rect.left
@@ -54,26 +58,35 @@ class PhysicsEntities:
 
         self.pos[1] += frame_movement[1] * self.drag
         entity_rect = self.rect()
-        
-        for rect in tilemap.tiles_rect_around(self.pos):
+        tile_data = tilemap.tiles_rect_around(self.pos)
+
+        for i in range(len(tile_data['rects'])):
+            rect = tile_data['rects'][i]
+            color = tile_data['color'][i]
+
             if entity_rect.colliderect(rect):
+                spawn_particles = random.randint(0, 1) + int(abs(self.velocity[1]))
                 if frame_movement[1] > 0:
                     entity_rect.bottom = rect.top
                     self.collisions['down'] = True
-                    if self.action != 'idle':
-                        for i in range(2):
-                            angle = ((random.random()) * math.pi) + math.pi
-                            speed = random.random() + 2
-                            self.game.particles.append(Particles(angle, speed, (self.pos[0], rect.top)))
 
                 if frame_movement[1] < 0:
                     entity_rect.top = rect.bottom
                     self.collisions['up'] = True
+
+                if spawn_particles:
                     if self.action != 'idle':
-                        for i in range(2):
+                        x = self.pos[0]
+                        if self.collisions['down']:
+                            y = rect.top
+                            angle = ((random.random() * math.pi) + math.pi)
+                        elif self.collisions['up']:
+                            y = rect.bottom
                             angle = ((random.random()) * math.pi)
-                            speed = random.random() + 2
-                            self.game.particles.append(Particles(angle, speed, (self.pos[0], rect.bottom)))
+
+                        speed = random.random() + 1.5
+                        self.game.particles.append(Particles(angle, speed, (x, y), color_key=color))
+                        
                 self.pos[1] = entity_rect.y
 
         tile_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]

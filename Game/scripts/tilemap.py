@@ -1,5 +1,6 @@
 import pygame
 import json
+import random
 from scripts.water import Water
 
 NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0,0), (-1, 1), (0, 1), (1, 1)]
@@ -22,7 +23,25 @@ AUTO_TILE_MAP = {
 PHYSICS_TILES = {'grass', 'stone', 'sand'}
 AUTO_TILE_TYPES = {'grass', 'stone', 'sand'}
 
+COLORS = {
+            'grass' : [(95, 193, 0 ),
+                       (86, 170, 5),
+                       (67, 136, 0),
+                       (181, 110, 76),
+                       (96, 59, 42),
+                       (143, 86, 59),],
+            'stone' : [(194, 194, 209),
+                       (126, 126, 143),
+                       (67, 67, 79),
+                       (96, 96, 112),],
+            'sand'  : [(186, 163, 74),
+                        (216, 188, 80),
+                        (160, 137, 49),],
+
+}
+
 TILE_TYPES = {'solid' : PHYSICS_TILES, 'liquid' : 'water'}
+
 
 class TileMap:
     def __init__(self, game, tile_size=16):
@@ -86,7 +105,6 @@ class TileMap:
         tile_loc = (int((pos[0])//self.tile_size), int((pos[1])//self.tile_size))
         for offset in NEIGHBOR_OFFSETS:
             key = str(tile_loc[0] + offset[0]) + ';' + str(tile_loc[1] + offset[1])
-
             if type == 'solid':
                 if key in self.tilemap and self.tilemap[key]['type'] in PHYSICS_TILES:
                     physics_tiles.append(self.tilemap[key])
@@ -100,10 +118,11 @@ class TileMap:
             return False
 
     def tiles_rect_around(self, pos, type='solid'):
-        rects = []
+        tile_data = {'rects' : [], 'color' : []}
         for tile in self.tiles_around(pos, type):
-            rects.append(pygame.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
-        return rects
+            tile_data['rects'].append(pygame.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
+            tile_data['color'].append(random.choice(COLORS[tile['type']]))
+        return tile_data
 
     
     def auto_tile(self):
