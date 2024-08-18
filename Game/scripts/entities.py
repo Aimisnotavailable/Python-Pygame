@@ -74,7 +74,7 @@ class PhysicsEntities:
                     entity_rect.top = rect.bottom
                     self.collisions['up'] = True
 
-                if spawn_particles:
+                if spawn_particles and (self.collisions['down'] or self.collisions['up']):
                     if self.action != 'idle':
                         x = self.pos[0]
                         if self.collisions['down']:
@@ -86,6 +86,7 @@ class PhysicsEntities:
 
                         speed = random.random() + 1.5
                         self.game.particles.append(Particles(angle, speed, (x, y), color_key=color))
+                        
                         
                 self.pos[1] = entity_rect.y
 
@@ -101,10 +102,8 @@ class PhysicsEntities:
                 for i in range(len(water.springs)):
                     pos = water.springs[i].pos
                     if entity_rect.collidepoint((pos[0] + tile['pos'][0] * tilemap.tile_size + offset[0], pos[1] + tile['pos'][1] * tilemap.tile_size + offset[1])):
-                        water.wave(i, push_force=self.velocity[0] * 0.8, upward_force=-self.velocity[1])
-                        
-                        
-                    
+                        water.wave(i, push_force=self.velocity[0] * 0.8, upward_force=-self.velocity[1] * 2)
+
                 if(abs(water.springs[-1].force) > 0.01):
                     right_tile_loc = str(tile_loc_int[0] + 1) + ";" + str(tile_loc_int[1])
                     if right_tile_loc in tilemap.water_map:

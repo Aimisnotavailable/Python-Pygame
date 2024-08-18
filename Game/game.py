@@ -95,8 +95,8 @@ class Game:
             mpos[0] = mpos[0] // 2
             mpos[1] = mpos[1] // 2
 
-            self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
-            self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
+            self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 15
+            self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 15
             render_scroll = [int(self.scroll[0]), int(self.scroll[1])]
 
             for event in pygame.event.get():
@@ -203,8 +203,6 @@ class Game:
             self.clouds.render(self.display_2, render_scroll)
             self.clouds.update()
 
-            self.player.update(self.tilemap, self.movement, offset=render_scroll)
-            self.player.render(self.display, offset=render_scroll)       
             self.tilemap.render(self.display, offset=render_scroll)
 
             if self.player.shooting and self.player.attacking == 1:
@@ -222,7 +220,7 @@ class Game:
                 spark.render(self.display, render_scroll)
                 if spark.update():
                     self.sparks.remove(spark)
-            print(self.assets[self.tilemap.tilemap['-11;2']['type']][self.tilemap.tilemap['-11;2']['variant']])
+            # print(self.assets[self.tilemap.tilemap['-11;2']['type']][self.tilemap.tilemap['-11;2']['variant']])
             for projectile in self.projectiles.copy():
                 projectile.render(self.display, render_scroll)
                 if self.tilemap.solid_check(projectile.pos):
@@ -333,7 +331,8 @@ class Game:
             #                     self.sparks.append(Sparks(angle, speed, enemy.pos))
                     
             self.inventory.render(self.display)
-            
+            self.player.update(self.tilemap, self.movement, offset=render_scroll)
+            self.player.render(self.display, offset=render_scroll)     
             
             display_mask = pygame.mask.from_surface(self.display)
             display_sillhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0))
@@ -341,7 +340,7 @@ class Game:
             for offset in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
                 self.display_2.blit(display_sillhouette, offset)
             
-
+            
             self.display_2.blit(self.display, (0, 0))
             # self.water.render(self.display_2, render_scroll)
             
