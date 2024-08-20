@@ -20,8 +20,12 @@ class Assets:
                              "sand"   : load_images("tiles/sand"),
                              "water"  : water
                            },
+            
+            "decors"     :{
+                            "tree"    : load_images("decors")
+                          },
 
-            "spawner"    : { "entity_spawner" : load_images("spawners")
+            "spawners"    : { "entity_spawner" : load_images("spawners")
                            },
                       
             "entity_animation" : {

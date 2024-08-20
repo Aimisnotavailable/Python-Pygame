@@ -23,7 +23,7 @@ class Game:
 
         self.render_scroll = [0, 0]
 
-        self.assets = Assets().fetch(['blocks', 'spawner'])
+        self.assets = Assets().fetch(['blocks', 'spawners', 'decors'])
         
         self.water = Water()
         self.tilemap = TileMap(self)
@@ -36,6 +36,7 @@ class Game:
         self.shift = False
         self.clicking = False
         self.right_clicking = False
+        self.offgrid = False
 
         self.font = pygame.font.Font(size=15)   
 
@@ -84,7 +85,10 @@ class Game:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        self.clicking = True
+                        if self.offgrid:
+                            self.tilemap.offgrid_tiles.append({"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [mpos[0] + self.render_scroll[0], mpos[1] + self.render_scroll[1]]})
+                        else:
+                            self.clicking = True
                     
                     if event.button == 3:
                         self.right_clicking = True
@@ -125,6 +129,9 @@ class Game:
                         self.tilemap.save("data/maps/map.json")
                         self.tilemap.validate_water_blocks()
                     
+                    if event.key == pygame.K_o:
+                        self.offgrid = not self.offgrid
+
                     if event.key == pygame.K_t:
                         self.tilemap.auto_tile()
                         self.tilemap.validate_water_blocks()
@@ -158,7 +165,7 @@ class Game:
             text  = self.font.render(str(mpos[0] + self.render_scroll[0]) + ';' + str(mpos[1] + self.render_scroll[1]), True, (255, 0, 255))
             self.display.blit(text, (0, 32))
 
-            self.display.blit(current_image, (tile_pos[0] * self.tilemap.tile_size - self.render_scroll[0], tile_pos[1] * self.tilemap.tile_size - self.render_scroll[1]))
+            self.display.blit(current_image, (tile_pos[0] * self.tilemap.tile_size - self.render_scroll[0], tile_pos[1] * self.tilemap.tile_size - self.render_scroll[1]) if not self.offgrid else mpos)
             self.display.blit(current_image, (5,5))
 
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
