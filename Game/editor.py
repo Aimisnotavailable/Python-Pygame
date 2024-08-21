@@ -164,8 +164,8 @@ class Game:
 
             text  = self.font.render(str(mpos[0] + self.render_scroll[0]) + ';' + str(mpos[1] + self.render_scroll[1]), True, (255, 0, 255))
             self.display.blit(text, (0, 32))
-
-            self.display.blit(current_image, (tile_pos[0] * self.tilemap.tile_size - self.render_scroll[0], tile_pos[1] * self.tilemap.tile_size - self.render_scroll[1]) if not self.offgrid else mpos)
+            img_rect = current_image.get_rect(centerx=mpos[0], bottom=mpos[1])
+            self.display.blit(current_image, (tile_pos[0] * self.tilemap.tile_size - self.render_scroll[0], tile_pos[1] * self.tilemap.tile_size - self.render_scroll[1]) if not self.offgrid else img_rect)
             self.display.blit(current_image, (5,5))
 
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
