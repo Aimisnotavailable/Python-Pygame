@@ -72,6 +72,9 @@ class Game:
         self.screen_shake = ScreenShake()
         self.transition = Transition()
 
+        self.trees = self.tilemap.extract([('trees', 0), ('trees', 1)])
+
+        print(self.trees)
 
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
             pos = entity['pos']

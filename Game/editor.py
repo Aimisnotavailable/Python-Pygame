@@ -71,12 +71,19 @@ class Game:
                         self.tilemap.tilemap[key] = {"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": [tile_pos[0], tile_pos[1]]}
             
             if self.right_clicking:
-                if key in self.tilemap.tilemap:
-                    del self.tilemap.tilemap[key]
-                if key in self.tilemap.water_map:
-                    del self.tilemap.water_map[key]
-                if key in self.tilemap.interactive_water:
-                    del self.tilemap.interactive_water[key]
+                if self.offgrid:
+                    for tile in self.tilemap.offgrid_tiles.copy():
+                        tile_rect = self.assets[tile['type']][tile['variant']].get_rect(centerx=tile['pos'][0]-self.render_scroll[0], bottom=tile['pos'][1]-self.render_scroll[1])
+                        if tile_rect.collidepoint(mpos):
+                            print("HEHE")
+                            self.tilemap.offgrid_tiles.remove(tile)
+                else:
+                    if key in self.tilemap.tilemap:
+                        del self.tilemap.tilemap[key]
+                    if key in self.tilemap.water_map:
+                        del self.tilemap.water_map[key]
+                    if key in self.tilemap.interactive_water:
+                        del self.tilemap.interactive_water[key]
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -164,6 +171,7 @@ class Game:
 
             text  = self.font.render(str(mpos[0] + self.render_scroll[0]) + ';' + str(mpos[1] + self.render_scroll[1]), True, (255, 0, 255))
             self.display.blit(text, (0, 32))
+            
             img_rect = current_image.get_rect(centerx=mpos[0], bottom=mpos[1])
             self.display.blit(current_image, (tile_pos[0] * self.tilemap.tile_size - self.render_scroll[0], tile_pos[1] * self.tilemap.tile_size - self.render_scroll[1]) if not self.offgrid else img_rect)
             self.display.blit(current_image, (5,5))

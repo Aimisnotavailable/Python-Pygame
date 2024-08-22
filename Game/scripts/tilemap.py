@@ -55,6 +55,17 @@ class TileMap:
 
     def extract(self, id_pairs, keep=True):
         results = []
+
+        for tile in self.offgrid_tiles.copy():
+            print(tile)
+            if (tile['type'], tile['variant']) in id_pairs:
+                results.append(tile.copy())
+                results[-1]['pos'] = tile['pos'].copy()
+                results[-1]['pos'][0] *= self.tile_size
+                results[-1]['pos'][1] *= self.tile_size
+                if not keep:
+                    self.offgrid_tiles.remove(tile)
+
         for loc in self.tilemap.copy():
             tile = self.tilemap[loc]
             
