@@ -57,12 +57,11 @@ class TileMap:
         results = []
 
         for tile in self.offgrid_tiles.copy():
-            print(tile)
+            
             if (tile['type'], tile['variant']) in id_pairs:
                 results.append(tile.copy())
                 results[-1]['pos'] = tile['pos'].copy()
-                results[-1]['pos'][0] *= self.tile_size
-                results[-1]['pos'][1] *= self.tile_size
+                print(results[-1])
                 if not keep:
                     self.offgrid_tiles.remove(tile)
 
@@ -87,8 +86,8 @@ class TileMap:
             img_rect = self.game.assets[tile['type']][tile['variant']].get_rect(centerx=tile['pos'][0] - offset[0], bottom=tile['pos'][1] - offset[1])
             surf.blit(self.game.assets[tile['type']][tile['variant']], img_rect)
 
-        for x in range(offset[0] // self.tile_size, (offset[0] + surf.get_width()) // self.tile_size + 49):
-            for y in range(offset[1] // self.tile_size, (offset[1] + surf.get_height()) // self.tile_size + 49):
+        for x in range(offset[0] // self.tile_size -48, (offset[0] + surf.get_width()) // self.tile_size + 1):
+            for y in range(offset[1] // self.tile_size -48, (offset[1] + surf.get_height()) // self.tile_size + 1):
                 loc = str(x) + ';' + str(y)
                 if grid_enabled:
                     pygame.draw.rect(surf, (0, 0, 0), (x * self.tile_size - offset[0], y * self.tile_size - offset[1], self.tile_size , self.tile_size), 1)

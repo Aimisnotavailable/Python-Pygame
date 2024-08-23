@@ -146,6 +146,7 @@ class Game:
                     if event.key == pygame.K_r:
                         self.tilemap.tilemap = {}
                         self.tilemap.water_map = {}
+                        self.tilemap.offgrid_tiles = []
                         self.tilemap.interactive_water = {}
 
                     if event.key == pygame.K_LSHIFT:

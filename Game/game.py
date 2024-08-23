@@ -73,16 +73,16 @@ class Game:
         self.transition = Transition()
 
         self.trees = self.tilemap.extract([('trees', 0), ('trees', 1)])
-
-        print(self.trees)
-
+        
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
             pos = entity['pos']
+            print(pos)
             if entity['variant'] == 1:
                 self.player = Player(self, pos)
             else:
                 self.enemies.append(Enemy(self, pos))
 
+        # print(self.player.pos)
         # for loc in self.tilemap.tilemap:
         #     if random.randint(0, 20) == 1:
         #         self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
@@ -346,7 +346,6 @@ class Game:
             
             self.display_2.blit(self.display, (0, 0))
             # self.water.render(self.display_2, render_scroll)
-            
             cursor_rect = self.cursor.img().get_rect(center=mpos)
             self.display_2.blit(self.cursor.img(), cursor_rect)
             self.cursor.update()
@@ -357,6 +356,7 @@ class Game:
 
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
             # print(self.clock.get_rawtime())
+            # print(self.enemies[0].pos)
             pygame.display.update()
             self.clock.tick(60)   
     

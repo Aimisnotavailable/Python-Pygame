@@ -40,7 +40,8 @@ class Assets:
                             "enemy/attack" : Animation(load_images("entities/enemy/attack"), image_dur=6),
                        },
 
-            "particles" : { "particles/particles" : Animation(load_images("particles/particles")) }
+            "particles" : { "particles/particles" : Animation(load_images("particles/particles")),
+                            "particles/dust" : Animation(load_images("particles/dust"), image_dur=8, loop=False) }
             }
     
 
