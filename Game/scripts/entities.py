@@ -65,7 +65,11 @@ class PhysicsEntities:
             color = tile_data['color'][i]
 
             if entity_rect.colliderect(rect):
-                spawn_particles = random.randint(0, 1) + int(abs(self.velocity[1]))
+                if int(self.drag):
+                    spawn_particles = random.random() + int(abs(self.velocity[1]))
+                else:
+                    spawn_particles = False
+
                 if frame_movement[1] > 0:
                     entity_rect.bottom = rect.top
                     self.collisions['down'] = True
@@ -76,7 +80,7 @@ class PhysicsEntities:
 
                 self.pos[1] = entity_rect.y
 
-                if spawn_particles and (self.collisions['down'] or self.collisions['up']):
+                if spawn_particles > 0.6 and (self.collisions['down'] or self.collisions['up']):
                     if self.action != 'idle':
                         x = self.pos[0]
                         if self.collisions['down']:
@@ -86,7 +90,7 @@ class PhysicsEntities:
                             y = rect.bottom
                             angle = ((random.random()) * math.pi)
 
-                        speed = random.random() + 1.5
+                        speed = random.random() * random.random()
                         self.game.particles.append(Particles(self.game, 'dust', angle, speed, (x, y), color_key=color))
                 
         tile_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]

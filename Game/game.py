@@ -72,16 +72,21 @@ class Game:
         self.screen_shake = ScreenShake()
         self.transition = Transition()
 
-        self.trees = self.tilemap.extract([('trees', 0), ('trees', 1)])
+        self.trees = self.tilemap.extract([('tree', 0), ('tree', 1)])
         
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
             pos = entity['pos']
-            print(pos)
+            
             if entity['variant'] == 1:
                 self.player = Player(self, pos)
             else:
                 self.enemies.append(Enemy(self, pos))
 
+        self.tree_spawners = []
+
+        for tree in self.trees:
+            size = self.assets[tree['type']][tree['variant']].get_size()
+            self.tree_spawners.append(pygame.Rect(tree['pos'][0], tree['pos'][1], *size))
         # print(self.player.pos)
         # for loc in self.tilemap.tilemap:
         #     if random.randint(0, 20) == 1:
@@ -101,6 +106,14 @@ class Game:
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 15
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 15
             render_scroll = [int(self.scroll[0]), int(self.scroll[1])]
+
+            for spawner in self.tree_spawners:
+                if random.random() * 599999 < spawner[2] * spawner[3]:
+                    angle = random.random() * math.pi
+                    speed = 1
+                    pos =  (spawner[0] -  random.random() * spawner[2], spawner[1] - random.random() * spawner[3])
+                     
+                    self.particles.append(Particles(self, 'leaf', angle, speed, pos, color_key=(20, 160, 10)))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -215,9 +228,10 @@ class Game:
                 self.screen_shake.set_shake_config(strength=2, dur=4) 
 
             for particle in self.particles.copy():
-                particle.render(self.display, render_scroll)
-                if particle.update():
+                particle.pos[0] += math.cos(particle.angle) * (math.sin(particle.animation.frame)*-1)
+                if particle.render(self.display, render_scroll):
                     self.particles.remove(particle)
+                
 
             for spark in self.sparks.copy():
                 spark.render(self.display, render_scroll)

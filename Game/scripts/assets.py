@@ -41,7 +41,8 @@ class Assets:
                        },
 
             "particles" : { "particles/particles" : Animation(load_images("particles/particles")),
-                            "particles/dust" : Animation(load_images("particles/dust"), image_dur=8, loop=False) }
+                            "particles/dust" : Animation(load_images("particles/dust"), image_dur=2, loop=False),
+                             "particles/leaf" : Animation(load_images("particles/leaf"), image_dur=15, loop=False), }
             }
     
 
