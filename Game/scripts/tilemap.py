@@ -179,6 +179,38 @@ class TileMap:
                 if loc in self.interactive_water:
                     del self.interactive_water[loc]
                 
+    def propogate_wave(self, water_loc, water_loc_int, velocity=(0,0), offset=(0,0), entity_rect=None):
+
+        water_data = self.water_map[water_loc]
+        
+        if water_data['interactive']:
+            water = self.interactive_water[water_loc]
+            for i in range(len(water.springs)):
+                pos = water.springs[i].pos
+                if entity_rect.collidepoint((pos[0] + water_data['pos'][0] * self.tile_size + offset[0], pos[1] + water_data['pos'][1] * self.tile_size + offset[1])):
+                    water.wave(i, force=-velocity[1] * 2)
+
+            temp_loc = water_loc_int.copy()
+            previous_water = water
+            while(str(temp_loc[0]) + ";" + str(temp_loc[1]) in self.interactive_water):
+                if(abs(water.springs[-1].force) > 0.01):
+                    right_water_loc = str(temp_loc[0]) + ";" + str(temp_loc[1])
+                    if right_water_loc in self.water_map:
+                        right_water = self.interactive_water[right_water_loc]
+                        right_water.wave(0, force=previous_water.springs[-1].force)
+                        previous_water = right_water
+                temp_loc[0] += 1
+
+            temp_loc = water_loc_int.copy()
+            previous_water = water
+            while(str(temp_loc[0]) + ";" + str(temp_loc[1]) in self.interactive_water):
+                if(abs(water.springs[0].force) > 0.001):
+                    left_water_loc = str(temp_loc[0] - 1) + ";" + str(temp_loc[1])
+                    if left_water_loc in self.water_map:
+                        left_water = self.interactive_water[left_water_loc]
+                        left_water.wave(-1, force=previous_water.springs[0].force)
+                        previous_water = left_water
+                temp_loc[0] -= 1
 
     def save(self, path):
         f = open(path, 'w')

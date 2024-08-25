@@ -21,8 +21,6 @@ class Game:
 
         self.movement = [0, 0]
 
-        self.render_scroll = [0, 0]
-
         self.assets = Assets().fetch(['blocks', 'spawners', 'decors'])
         
         self.water = Water()
@@ -40,7 +38,13 @@ class Game:
 
         self.font = pygame.font.Font(size=15)   
 
-        
+        player = self.tilemap.extract([('entity_spawner', 1)])
+
+        if player:
+            self.render_scroll = [int(player[-1]['pos'][0] - self.display.get_width() / 2), int(player[-1]['pos'][1] - self.display.get_height() / 2)]
+        else:
+            self.render_scroll = [0, 0]
+        print(self.render_scroll)
     def run(self):
         running = True
 

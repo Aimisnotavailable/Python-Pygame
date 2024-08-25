@@ -93,30 +93,12 @@ class PhysicsEntities:
                         speed = random.random() * random.random()
                         self.game.particles.append(Particles(self.game, 'dust', angle, speed, (x, y), color_key=color))
                 
-        tile_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]
-        tile_loc = str(tile_loc_int[0]) + ";" + str(tile_loc_int[1])
+        water_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]
+        water_loc = str(water_loc_int[0]) + ";" + str(water_loc_int[1])
 
-        if tile_loc in tilemap.water_map:
-            tile = tilemap.water_map[tile_loc]
+        if water_loc in tilemap.water_map:
             self.drag = 0.6
-            
-            if tile['interactive']:
-                water = tilemap.interactive_water[tile_loc]
-                for i in range(len(water.springs)):
-                    pos = water.springs[i].pos
-                    if entity_rect.collidepoint((pos[0] + tile['pos'][0] * tilemap.tile_size + offset[0], pos[1] + tile['pos'][1] * tilemap.tile_size + offset[1])):
-                        water.wave(i, push_force=self.velocity[0] * 0.8, upward_force=-self.velocity[1] * 2)
-
-                if(abs(water.springs[-1].force) > 0.01):
-                    right_tile_loc = str(tile_loc_int[0] + 1) + ";" + str(tile_loc_int[1])
-                    if right_tile_loc in tilemap.water_map:
-                        right_water = tilemap.interactive_water[right_tile_loc]
-                        right_water.wave(0, push_force=self.velocity[0] * 0.8, upward_force=water.springs[-1].force)
-                if(abs(water.springs[0].force) > 0.001):
-                    left_tile_loc = str(tile_loc_int[0] - 1) + ";" + str(tile_loc_int[1])
-                    if left_tile_loc in tilemap.water_map:
-                        left_water = tilemap.interactive_water[left_tile_loc]
-                        left_water.wave(-1, push_force=self.velocity[0] * 0.8, upward_force=water.springs[0].force)
+            tilemap.propogate_wave(water_loc, water_loc_int, velocity=self.velocity, offset=offset, entity_rect=entity_rect)
         else:
             self.drag = min(1, self.drag + 0.01)
 

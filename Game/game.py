@@ -76,7 +76,6 @@ class Game:
         
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
             pos = entity['pos']
-            
             if entity['variant'] == 1:
                 self.player = Player(self, pos)
             else:
@@ -110,7 +109,7 @@ class Game:
             for spawner in self.tree_spawners:
                 if random.random() * 599999 < spawner[2] * spawner[3]:
                     angle = random.random() * math.pi
-                    speed = 1
+                    speed = random.random() + 0.4
                     pos =  (spawner[0] -  random.random() * spawner[2], spawner[1] - random.random() * spawner[3])
                      
                     self.particles.append(Particles(self, 'leaf', angle, speed, pos, color_key=(20, 160, 10)))
