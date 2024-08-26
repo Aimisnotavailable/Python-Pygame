@@ -2,6 +2,7 @@ import pygame
 import os
 
 BASE_IMG_PATH = 'data/images/'
+BASE_SFX_PATH = 'data/sounds/'
 
 def load_image(path):
     img = pygame.image.load(BASE_IMG_PATH + path).convert()
@@ -15,6 +16,17 @@ def load_images(path):
         images.append(load_image(path + '/' + img_name))
     return images
 
+def load_sound(path):
+    sound = pygame.mixer.Sound(BASE_SFX_PATH + path)
+    return sound
+
+def load_sounds(path):
+    sounds = []
+    
+    for sound_name in sorted(os.listdir(BASE_SFX_PATH + path)):
+        sounds.append(load_sound(path + '/' + sound_name))
+    
+    return sounds
 
 class Animation:
 
@@ -38,3 +50,20 @@ class Animation:
     
     def img(self):
         return self.images[int(self.frame / self.image_duration)]
+    
+class Background:
+
+    def __init__(self, imgs=[]):
+        
+        self.render_offset = [[0, 0] for i in range(len(imgs))]
+        self.pos = [[0, 0] for i in range(len(imgs))]
+        self.imgs = imgs
+    
+    def render(self, surf):
+        for i in range(len(self.imgs)):
+
+            self.render_offset[i][0] += (self.pos[i][0] - 0 - self.render_offset[i][0])
+            self.render_offset[i][1] += (self.pos[i][1] - 0 - self.render_offset[i][1])
+
+            damp_offset = [self.render_offset[i-1][0] if i > 0 else 0 , self.render_offset[i-1][1] if i > 0 else 0]
+            surf.blit(self.imgs[i], (self.pos[i][0] - (self.render_offset[i][0] + damp_offset[0] * 0.5), self.pos[i][1] - (self.render_offset[i][1] + damp_offset[1] * 0.5)))   

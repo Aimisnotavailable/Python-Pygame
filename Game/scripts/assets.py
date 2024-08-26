@@ -1,5 +1,5 @@
 import pygame
-from scripts.utils import load_image, load_images, Animation
+from scripts.utils import load_image, load_images, load_sound, load_sounds, Animation
 
 class Assets:
 
@@ -8,8 +8,8 @@ class Assets:
         water.append(pygame.Surface((16, 16), pygame.SRCALPHA))
         water[0].fill((0, 0, 255, 100))
         self.assets = {
-            "background" : { "background" : load_image("background.png"),
-                             "clouds" : load_image("clouds\cloud.png")
+            "background" : { "background" : load_images("backgrounds"),
+                             "clouds" : load_images("clouds")
                            },
             "tooltips"   : { "cursor" : Animation(load_images("cursor"), image_dur=7),
                               "inventory_slot" : load_images("inventory/slot")
@@ -42,7 +42,14 @@ class Assets:
 
             "particles" : { "particles/particles" : Animation(load_images("particles/particles")),
                             "particles/dust" : Animation(load_images("particles/dust"), image_dur=2, loop=False),
-                             "particles/leaf" : Animation(load_images("particles/leaf"), image_dur=15, loop=False), }
+                            "particles/leaf" : Animation(load_images("particles/leaf"), image_dur=15, loop=False),
+                          },
+
+            "sfx"       : {
+                            "background_music" : load_sounds('music'),
+                            "guns" : load_sounds('sfx/gun_sfx'),
+                            "swords" : []
+                          },
             }
     
 
@@ -53,4 +60,5 @@ class Assets:
 
         for obj_type in obj_types:
             assets.update(self.assets[obj_type])
+
         return assets

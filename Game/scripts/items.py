@@ -4,6 +4,7 @@ import random
 from scripts.utils import Animation, load_images
 from scripts.entities import PhysicsEntities
 from scripts.sparks import Sparks
+from scripts.sfx import SoundMixer
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -14,7 +15,7 @@ class Weapon(PhysicsEntities):
         self.type = w_type
         self.atk = 1
         self.is_dropped = False
-        
+        self.sound = SoundMixer([self.type])
         self.color = color
         self.weapon_path = w_path
         self.particle_path = p_path
@@ -49,6 +50,9 @@ class Weapon(PhysicsEntities):
 
     def update(self):
         super().update(self.game.tilemap)
+
+    def play_sound(self, variant=0, vol=1.0):
+        self.sound.play(self.type, variant=variant, loop=0, vol=vol)
 
     def render(self, surf, offset=(0,0)):
         if self.is_dropped:

@@ -3,7 +3,7 @@ import sys
 import os
 import random
 import math
-from scripts.utils import load_image, load_images, Animation
+from scripts.utils import load_image, load_images, Animation, Background
 from scripts.tilemap import TileMap
 from scripts.entities import PhysicsEntities, Player, Enemy
 from scripts.items import Weapon, Sword, Gun
@@ -18,6 +18,7 @@ from scripts.assets import Assets
 from scripts.projectiles import Projectiles
 from scripts.screenshake import ScreenShake
 from scripts.transition import Transition
+from scripts.sfx import SoundMixer
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -36,41 +37,56 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
+        self.assets = Assets().fetch(fetch_all=True)
+        
+        self.cursor = self.assets['cursor'].copy()
+
+        self.current_weapon = Gun(self, 'dirt_gun') # Sword(self,  'sword', color=(100, 100, 100)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
+
+        self.pos = (self.display.get_width()//2, self.display.get_height()//2)
+        self.load()
+        # self.weapon_pos = self.pos
+        
+        
+        
+        # self.inventory.item_list[1] = 
+
+       
+
+        # print(self.player.pos)
+        # for loc in self.tilemap.tilemap:
+        #     if random.randint(0, 20) == 1:
+        #         self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
+
+    def load(self):
+
         self.tilemap = TileMap(self)
         self.tilemap.load("data/maps/map.json")
         self.movement = [0, 0]
  
         self.scroll = [0, 0]
-        self.assets = Assets().fetch(fetch_all=True)
-        
-        self.cursor = self.assets['cursor'].copy()
-
         self.angle = 0
-        self.current_weapon = Gun(self, 'dirt_gun') # Sword(self,  'sword', color=(100, 100, 100)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
-
-        self.pos = (self.display.get_width()//2, self.display.get_height()//2)
-        # self.weapon_pos = self.pos
-        
-        self.enemies = []
-        self.items_nearby = []
-        self.attack_rect = None
-
-        self.inventory = Inventory(self.assets['inventory_slot'])
-        self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
-        self.inventory.item_list[1] = Sword(self, 'sword', color=(100, 100, 100))
-        # self.inventory.item_list[1] = 
-
-        self.clouds = Clouds(self.assets['clouds'], count=15)
 
         self.sparks = []
         self.projectiles = []
         self.particles = []
+        self.enemies = []
+        self.items_nearby = []
+        
+        self.inventory = Inventory(self.assets['inventory_slot'])
+        self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
+        self.inventory.item_list[1] = Sword(self, 'sword', color=(100, 100, 100))
 
-        self.water = Water()
-        self.under_water = False
         self.rotation = Rotation()
         self.screen_shake = ScreenShake()
         self.transition = Transition()
+        self.background = Background(self.assets['background'])
+        self.sound = SoundMixer(['background_music'])
+        
+        self.sound.play('background_music', vol=0.3)
+        self.water = Water()
+        self.under_water = False
+        self.clouds = Clouds(random.choice(self.assets['clouds']), count=15)
 
         self.trees = self.tilemap.extract([('tree', 0), ('tree', 1)])
         
@@ -86,26 +102,24 @@ class Game:
         for tree in self.trees:
             size = self.assets[tree['type']][tree['variant']].get_size()
             self.tree_spawners.append(pygame.Rect(tree['pos'][0], tree['pos'][1], *size))
-        # print(self.player.pos)
-        # for loc in self.tilemap.tilemap:
-        #     if random.randint(0, 20) == 1:
-        #         self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
 
     def run(self):
         running = True
 
         while running:
             self.display.fill((0,0,0,0))
-            self.display_2.blit(self.assets['background'], (0, 0))
+            
 
             mpos = list(pygame.mouse.get_pos())
             mpos[0] = mpos[0] // 2
             mpos[1] = mpos[1] // 2
-
+            
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 15
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 15
             render_scroll = [int(self.scroll[0]), int(self.scroll[1])]
 
+            self.background.render(self.display_2)
+            
             for spawner in self.tree_spawners:
                 if random.random() * 599999 < spawner[2] * spawner[3]:
                     angle = random.random() * math.pi
@@ -125,13 +139,15 @@ class Game:
                         self.movement[0] = -2
                     if event.key == pygame.K_d:
                         self.movement[0] = 2
-                    if event.key == pygame.K_w and self.player.jumps: 
+                    if (event.key == pygame.K_w or event.key == pygame.K_SPACE) and self.player.jumps: 
                         self.player.velocity[1] = -3
                         self.player.jumps -= 1
                     
                     if event.key == pygame.K_o:
+                        self.sound.stop('background_music')
+                        self.load()
                         self.transition.transition = True
-
+                        
                     if event.key == pygame.K_1 and self.player.attacking == 0:
                         self.inventory.current_selected = 0
                         self.current_weapon = self.inventory.item_list[self.inventory.current_selected ]
@@ -140,7 +156,6 @@ class Game:
                         self.inventory.current_selected = 1
                         self.current_weapon = self.inventory.item_list[self.inventory.current_selected ]
 
-
                     if event.key == pygame.K_e and self.current_weapon is not None and self.player.attacking == 0:
                         self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
                         self.items_nearby.append(self.current_weapon)
@@ -148,19 +163,6 @@ class Game:
 
                         self.current_weapon = None
                     
-                    if event.key == pygame.K_r and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
-                        self.current_weapon.velocity[0] = -5 if self.player.flip else 5
-
-                        self.inventory.remove_item()
-                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=False)
-                        self.current_weapon.set_throw_status(self.player.pos.copy(), is_thrown=True)
-
-                        self.items_nearby.append(self.current_weapon)
-                        atk_type = 'throw_meele_attack'
-                        self.player.perform_attack(atk_type, self.current_weapon)
-
-                        self.current_weapon = None
-
                     if event.key == pygame.K_q:
                         for item in self.items_nearby:
                             if (item.pos[0] >= self.player.pos[0] - self.tilemap.tile_size and item.pos[0] <= self.player.pos[0] + self.tilemap.tile_size) and (item.pos[1] >= self.player.pos[1] - self.tilemap.tile_size and item.pos[1] <= self.player.pos[1] + self.tilemap.tile_size):
@@ -172,6 +174,20 @@ class Game:
                                 self.current_weapon = item
                                 self.items_nearby.remove(self.current_weapon)
                                 break
+
+                    # if event.key == pygame.K_r and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
+                    #     self.current_weapon.velocity[0] = -5 if self.player.flip else 5
+
+                    #     self.inventory.remove_item()
+                    #     self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=False)
+                    #     self.current_weapon.set_throw_status(self.player.pos.copy(), is_thrown=True)
+
+                    #     self.items_nearby.append(self.current_weapon)
+                    #     atk_type = 'throw_meele_attack'
+                    #     self.player.perform_attack(atk_type, self.current_weapon)
+
+                    #     self.current_weapon = None
+
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_a:

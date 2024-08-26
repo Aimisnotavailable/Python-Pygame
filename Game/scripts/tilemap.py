@@ -61,7 +61,6 @@ class TileMap:
             if (tile['type'], tile['variant']) in id_pairs:
                 results.append(tile.copy())
                 results[-1]['pos'] = tile['pos'].copy()
-                print(results[-1])
                 if not keep:
                     self.offgrid_tiles.remove(tile)
 

@@ -37,9 +37,9 @@ class PhysicsEntities:
     def update(self, tilemap, movement=(0,0), offset=(0,0)):
         self.movement = movement
         self.collisions = {'up' : False, 'down' : False, 'right' : False, 'left' : False}
-        frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1] )
+        self.frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1] )
 
-        self.pos[0] += frame_movement[0] * self.drag
+        self.pos[0] += self.frame_movement[0] * self.drag
         entity_rect = self.rect()
         tile_data = tilemap.tiles_rect_around(self.pos)
 
@@ -47,16 +47,16 @@ class PhysicsEntities:
             rect = tile_data['rects'][i]
             color = tile_data['color'][i]
             if entity_rect.colliderect(rect):
-                if frame_movement[0] > 0:
+                if self.frame_movement[0] > 0:
                     entity_rect.right = rect.left
                     self.collisions['right'] = True
                 
-                if frame_movement[0] < 0:
+                if self.frame_movement[0] < 0:
                     entity_rect.left = rect.right
                     self.collisions['left'] = True
                 self.pos[0] = entity_rect.x
 
-        self.pos[1] += frame_movement[1] * self.drag
+        self.pos[1] += self.frame_movement[1] * self.drag
         entity_rect = self.rect()
         tile_data = tilemap.tiles_rect_around(self.pos)
 
@@ -70,11 +70,11 @@ class PhysicsEntities:
                 else:
                     spawn_particles = False
 
-                if frame_movement[1] > 0:
+                if self.frame_movement[1] > 0:
                     entity_rect.bottom = rect.top
                     self.collisions['down'] = True
 
-                if frame_movement[1] < 0:
+                if self.frame_movement[1] < 0:
                     entity_rect.top = rect.bottom
                     self.collisions['up'] = True
 
@@ -201,7 +201,6 @@ class Player(NonobjEntities):
 
     def __init__(self, game, pos, size=(8, 16)):
         super().__init__(game,'player', pos, size)
-        
         self.set_action('idle')
 
         self.attack_type = 0
@@ -242,15 +241,20 @@ class Player(NonobjEntities):
 
     def perform_attack(self, atk_type, current_weapon):
         super().perform_attack(atk_type, current_weapon)
+
         self.atk_type = atk_type
+        
+
         a_r = self.game.angle * (-1 if self.game.rotation.flip_x else 1)
         angle = math.radians(a_r)
         img = pygame.transform.rotate(current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
 
         if atk_type == "normal_attack":
             self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=15, pos=self.rect().center))
+            self.current_weapon.play()
         elif self.atk_type == "charged_attack":
             self.dash_velocity = (math.cos(math.radians(a_r)) * 8, math.sin(math.radians(a_r)) * 5)
+            self.current_weapon.play()
         elif self.atk_type == "shoot_attack":
             for i in range(4):
                 s_angle = random.random() - 0.5 + angle
@@ -258,6 +262,7 @@ class Player(NonobjEntities):
                 self.game.sparks.append(Sparks(angle=s_angle, speed=speed, pos=(math.cos(angle) * 15 + self.rect().center[0], math.sin(angle) * 15 + self.rect().center[1]), color=(255, 165, 30)))
             self.recoil(2, 0.5)
             self.game.projectiles.append(Projectiles(img, speed=10, angle=angle, life=100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
+            self.current_weapon.play_sound(variant=0, vol=0.3)
         elif self.atk_type == "splash_attack":
             a_r -= 10
             speed = random.random() + 10
@@ -271,7 +276,7 @@ class Player(NonobjEntities):
                 s_angle = random.random() - 0.5 + angle
                 speed = random.random() + 2
                 self.game.sparks.append(Sparks(angle=s_angle, speed=speed, pos=(math.cos(angle) * 15 + self.rect().center[0], math.sin(angle) * 15 + self.rect().center[1]), color=(255, 165, 30)))
-            
+            self.current_weapon.play_sound(variant=1, vol=0.3)
             self.recoil(5, 4)
                 
 
@@ -286,6 +291,10 @@ class Player(NonobjEntities):
 
     def update(self, tilemap, movement=(0,0), offset=(0, 0)):
         super().update(tilemap, movement)
+
+        for pos in self.game.background.pos:
+            pos[0] += self.frame_movement[0] * 0.4
+            pos[1] += self.frame_movement[1] * 0.4
 
         if self.collisions['down']:
             self.jumps = 1
