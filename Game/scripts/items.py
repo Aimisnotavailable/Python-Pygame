@@ -15,7 +15,7 @@ class Weapon(PhysicsEntities):
         self.type = w_type
         self.atk = 1
         self.is_dropped = False
-        self.sound = SoundMixer([self.type])
+        self.sound = SoundMixer(payload={'weapon' : [self.type]})
         self.color = color
         self.weapon_path = w_path
         self.particle_path = p_path

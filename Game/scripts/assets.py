@@ -8,57 +8,74 @@ class Assets:
         water.append(pygame.Surface((16, 16), pygame.SRCALPHA))
         water[0].fill((0, 0, 255, 100))
         self.assets = {
-            "background" : { "background" : load_images("backgrounds"),
-                             "clouds" : load_images("clouds")
-                           },
-            "tooltips"   : { "cursor" : Animation(load_images("cursor"), image_dur=7),
-                              "inventory_slot" : load_images("inventory/slot")
-                           },
-
-            "blocks"     : { "grass"  : load_images("tiles/grass"),
-                             "stone"  : load_images("tiles/stone"),
-                             "sand"   : load_images("tiles/sand"),
-                             "water"  : water
-                           },
             
-            "decors"     :{
-                            "tree"    : load_images("decors")
-                          },
+            'img' : {
+                      "background" : { "background" : load_images("backgrounds"),
+                                        "clouds" : load_images("clouds")
+                                      },
+                      "tooltips"   : { "cursor" : Animation(load_images("cursor"), image_dur=7),
+                                        "inventory_slot" : load_images("inventory/slot")
+                                      },
 
-            "spawners"    : { "entity_spawner" : load_images("spawners")
-                           },
+                      "blocks"     : { "grass"  : load_images("tiles/grass"),
+                                        "stone"  : load_images("tiles/stone"),
+                                        "sand"   : load_images("tiles/sand"),
+                                        "water"  : water
+                                      },
                       
-            "entity_animation" : {
-                            "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
-                            "player/jump" : Animation(load_images("entities/player/jump")),
-                            "player/run" : Animation(load_images("entities/player/run"), image_dur=5),
-                            #player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
-                            
-                            "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),
-                            "enemy/damaged" : Animation(load_images("entities/enemy/damaged")),
-                            "enemy/run" : Animation(load_images("entities/enemy/run"), image_dur=5),
-                            "enemy/attack" : Animation(load_images("entities/enemy/attack"), image_dur=6),
-                       },
+                      "decors"     :{
+                                      "tree"    : load_images("decors")
+                                    },
 
-            "particles" : { "particles/particles" : Animation(load_images("particles/particles")),
-                            "particles/dust" : Animation(load_images("particles/dust"), image_dur=2, loop=False),
-                            "particles/leaf" : Animation(load_images("particles/leaf"), image_dur=15, loop=False),
-                          },
+                      "spawners"    : { "entity_spawner" : load_images("spawners")
+                                      },
+                                
+                      "entity_animation" : {
+                                      "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
+                                      "player/jump" : Animation(load_images("entities/player/jump")),
+                                      "player/run" : Animation(load_images("entities/player/run"), image_dur=5),
+                                      #player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
+                                      
+                                      "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),
+                                      "enemy/damaged" : Animation(load_images("entities/enemy/damaged")),
+                                      "enemy/run" : Animation(load_images("entities/enemy/run"), image_dur=5),
+                                      "enemy/attack" : Animation(load_images("entities/enemy/attack"), image_dur=6),
+                                  },
 
-            "sfx"       : {
-                            "background_music" : load_sounds('music'),
-                            "guns" : load_sounds('sfx/gun_sfx'),
-                            "swords" : []
-                          },
+                      "particles" : { "particles/particles" : Animation(load_images("particles/particles")),
+                                      "particles/dust" : Animation(load_images("particles/dust"), image_dur=2, loop=False),
+                                      "particles/leaf" : Animation(load_images("particles/leaf"), image_dur=15, loop=False),
+                                    },
+            },
+
+            "sfx" : {
+                      "background": {
+                          "background_music" : load_sounds('music'),
+                      },
+                      
+                      "weapon" : {
+                          "guns" : load_sounds('sfx/gun_sfx'),
+                          "swords" : []
+                      }
+
+                      },
             }
     
 
-    def fetch(self, obj_types=[], fetch_all=False):
+    def fetch(self, payload={}, fetch_all=False):
         assets = {}
         if fetch_all:
-            obj_types = list(self.assets)
-
-        for obj_type in obj_types:
-            assets.update(self.assets[obj_type])
-
-        return assets
+          file_types = list(self.assets)
+          for file_type in file_types:
+              for obj_type in self.assets[file_type]:
+                assets.update(self.assets[file_type][obj_type])
+          return assets
+        else:
+          for file_type in payload:
+            if 'all' in payload[file_type]:
+               for obj_type in self.assets[file_type]:
+                  assets.update(self.assets[file_type][obj_type])
+            else:
+              for obj_type in payload[file_type]:
+                assets.update(self.assets[file_type][obj_type])
+          return assets 

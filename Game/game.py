@@ -37,12 +37,12 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
-        self.assets = Assets().fetch(fetch_all=True)
+        self.assets = Assets().fetch(payload={'img' : {'all': True}})
         
         self.cursor = self.assets['cursor'].copy()
 
         self.current_weapon = Gun(self, 'dirt_gun') # Sword(self,  'sword', color=(100, 100, 100)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
-
+        
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
         self.load()
         # self.weapon_pos = self.pos
@@ -81,8 +81,7 @@ class Game:
         self.screen_shake = ScreenShake()
         self.transition = Transition()
         self.background = Background(self.assets['background'])
-        self.sound = SoundMixer(['background_music'])
-        
+        self.sound = SoundMixer(payload={'background' : ['background_music', 'all']})
         self.sound.play('background_music', vol=0.3)
         self.water = Water()
         self.under_water = False

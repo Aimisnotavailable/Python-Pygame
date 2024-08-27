@@ -2,10 +2,10 @@ from scripts.utils import load_sound, load_sounds
 from scripts.assets import Assets
 class SoundMixer:
 
-    def __init__(self, s_types=[]):
+    def __init__(self, payload={}):
         self.assets = {}
-        for s_type in s_types:
-            self.assets.update({s_type : Assets().fetch(['sfx'])[s_type]})
+        for load in payload:
+            self.assets.update(Assets().fetch(payload={'sfx' : {load : payload[load]}}))
 
     def play(self, s_type, variant=0, loop=-1, vol=1.0):
         self.assets[s_type][variant].play(loop)
