@@ -73,41 +73,11 @@ class Sword(Weapon):
 
         self.w_animation = {atk_type : Animation(load_images(f"{self.weapon_path}{atk_type}"), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + self.weapon_path)}
         self.p_animation =  {atk_type : Animation(load_images(f"{self.particle_path}{atk_type}"), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + self.particle_path)}
-        self.t_animation = Animation(load_images(f"items/weapons/swords/throw_animation/{self.name}"), image_dur=10)
+        # self.t_animation = Animation(load_images(f"items/weapons/swords/throw_animation/{self.name}"), image_dur=10)
 
-        self.is_thrown =  False
-
-
-    def throw_animation(self):
-        return self.t_animation.copy()
-    
-    def set_throw_status(self, pos, is_thrown=False):
-        if is_thrown:
-            self.is_thrown = is_thrown
-            self.animation = self.throw_animation()
-            self.pos = pos
-        else:
-            self.is_thrown = is_thrown
-
-
-    def update(self):
-        super().update()
-        if (self.velocity[0] == 0 or self.collisions['left'] or self.collisions['right']) and self.is_thrown :
-            for i in range(4):
-                angle = (random.random() - 0.5)  + (math.pi if self.velocity[0] > 0 else 0)
-                speed = (random.random() + 0.5) * 2
-                self.game.sparks.append(Sparks(angle, speed, self.rect().center, self.color))
-
-            self.set_drop_status(self.pos, is_dropped=True)    
-            self.set_throw_status(self.pos, is_thrown=False)
-            self.game.player.attacking = 0
-        
     def render(self, surf, offset=(0,0)):
         self.update()
         super().render(surf, offset)
-        if self.is_thrown:
-            surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))
-            self.game.attack_rect = self.rect()
 
 class Gun(Weapon):
 

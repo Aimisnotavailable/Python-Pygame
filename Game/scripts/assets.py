@@ -55,7 +55,7 @@ class Assets:
                       
                       "weapon" : {
                           "guns" : load_sounds('sfx/gun_sfx'),
-                          "swords" : []
+                          "swords" : load_sounds('sfx/sword_sfx')
                       }
 
                       },

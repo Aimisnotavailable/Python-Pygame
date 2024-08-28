@@ -247,14 +247,17 @@ class Player(NonobjEntities):
 
         a_r = self.game.angle * (-1 if self.game.rotation.flip_x else 1)
         angle = math.radians(a_r)
-        img = pygame.transform.rotate(current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
+        img = pygame.transform.rotate(self.current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
 
         if atk_type == "normal_attack":
             self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=15, pos=self.rect().center))
-            self.current_weapon.play()
+            self.current_weapon.play_sound(variant=0, vol=1.0)
         elif self.atk_type == "charged_attack":
             self.dash_velocity = (math.cos(math.radians(a_r)) * 8, math.sin(math.radians(a_r)) * 5)
-            self.current_weapon.play()
+            self.current_weapon.play_sound(variant=1, vol=1.0)
+        elif self.atk_type == "throw_meele_attack":
+            self.game.projectiles.append(Projectiles(img, speed=10, angle=angle, life=15, pos=self.rect().center))
+            self.current_weapon.play_sound(variant=2, vol=1.0)
         elif self.atk_type == "shoot_attack":
             for i in range(4):
                 s_angle = random.random() - 0.5 + angle

@@ -174,18 +174,17 @@ class Game:
                                 self.items_nearby.remove(self.current_weapon)
                                 break
 
-                    # if event.key == pygame.K_r and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
-                    #     self.current_weapon.velocity[0] = -5 if self.player.flip else 5
+                    if event.key == pygame.K_r and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
+                        self.current_weapon.velocity[0] = -5 if self.player.flip else 5
 
-                    #     self.inventory.remove_item()
-                    #     self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=False)
-                    #     self.current_weapon.set_throw_status(self.player.pos.copy(), is_thrown=True)
+                        self.inventory.remove_item()
+                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
 
-                    #     self.items_nearby.append(self.current_weapon)
-                    #     atk_type = 'throw_meele_attack'
-                    #     self.player.perform_attack(atk_type, self.current_weapon)
+                        self.items_nearby.append(self.current_weapon)
+                        atk_type = 'throw_meele_attack'
+                        self.player.perform_attack(atk_type, self.current_weapon)
 
-                    #     self.current_weapon = None
+                        self.current_weapon = None
 
 
                 if event.type == pygame.KEYUP:
@@ -332,6 +331,7 @@ class Game:
                 
             for item in self.items_nearby.copy():
                 item.render(self.display, render_scroll)
+                print(item.pos)
                 if item.life == 0:
                     self.items_nearby.remove(item)
 
