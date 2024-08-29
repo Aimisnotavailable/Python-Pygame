@@ -2,13 +2,15 @@ import math
 import pygame
 class Projectiles:
 
-    def __init__(self, img, speed, angle, life, pos=(0, 0)):
+    def __init__(self, img, speed, angle, life, pos=(0, 0), spawn=None):
         self.img = img
         self.speed = speed
         self.pos = list(pos)
         self.angle = angle
         self.life = life
+        self.spawn = spawn
         self.y_vel = 0
+       
 
     def update(self):
         self.y_vel = min(5, self.y_vel + 0.01) 

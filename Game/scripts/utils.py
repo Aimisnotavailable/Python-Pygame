@@ -4,16 +4,20 @@ import os
 BASE_IMG_PATH = 'data/images/'
 BASE_SFX_PATH = 'data/sounds/'
 
-def load_image(path):
+def load_image(path, scale=[]):
     img = pygame.image.load(BASE_IMG_PATH + path).convert()
     img.set_colorkey((0, 0, 0))
+
+    if scale:
+        img = pygame.transform.scale(img, scale)
+
     return img
 
-def load_images(path):
+def load_images(path, scale=[]):
     images = []
 
     for img_name in sorted(os.listdir(BASE_IMG_PATH + path)):
-        images.append(load_image(path + '/' + img_name))
+        images.append(load_image(path + '/' + img_name, scale=scale))
     return images
 
 def load_sound(path):

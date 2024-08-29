@@ -127,9 +127,9 @@ class TileMap:
         tile_loc = str(int((pos[0] //self.tile_size))) + ";" + str(int((pos[1]//self.tile_size)))
         if tile_loc in self.tilemap:
             if self.tilemap[tile_loc]['type'] in PHYSICS_TILES:
-                return True
-            return False
-
+                return self.tilemap[tile_loc]
+            return None
+        
     def tiles_rect_around(self, pos, type='solid'):
         tile_data = {'rects' : [], 'color' : []}
         for tile in self.tiles_around(pos, type):

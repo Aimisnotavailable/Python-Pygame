@@ -85,8 +85,7 @@ class Game:
         self.sound.play('background_music', vol=0.3)
         self.water = Water()
         self.under_water = False
-        self.clouds = Clouds(random.choice(self.assets['clouds']), count=15)
-
+        self.clouds = Clouds(self.assets['clouds'][0], count=15)
         self.trees = self.tilemap.extract([('tree', 0), ('tree', 1)])
         
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
@@ -156,7 +155,7 @@ class Game:
                         self.current_weapon = self.inventory.item_list[self.inventory.current_selected ]
 
                     if event.key == pygame.K_e and self.current_weapon is not None and self.player.attacking == 0:
-                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
+                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=False)
                         self.items_nearby.append(self.current_weapon)
                         self.inventory.remove_item()
 
@@ -168,19 +167,18 @@ class Game:
                                 if self.current_weapon is not None:
                                     self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
                                     self.items_nearby.append(self.current_weapon)
+                                
                                 item.animation = item.stash_animation()
                                 self.inventory.item_list[self.inventory.current_selected] = item
                                 self.current_weapon = item
-                                self.items_nearby.remove(self.current_weapon)
+                                self.items_nearby.remove(item)
+                                self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=False)
                                 break
 
                     if event.key == pygame.K_r and self.current_weapon is not None and self.current_weapon.type == 'swords' and self.player.attacking == 0:
-                        self.current_weapon.velocity[0] = -5 if self.player.flip else 5
+                        #self.current_weapon.velocity[0] = -5 if self.player.flip else 5
 
                         self.inventory.remove_item()
-                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
-
-                        self.items_nearby.append(self.current_weapon)
                         atk_type = 'throw_meele_attack'
                         self.player.perform_attack(atk_type, self.current_weapon)
 
@@ -196,6 +194,7 @@ class Game:
 
                 if event.type == pygame.MOUSEBUTTONDOWN: 
                     if event.button == 1 and self.current_weapon is not None and self.player.attacking == 0:
+                        # self.projectiles.append(Projectiles(self.assets['clouds'][1], speed=10, angle=0, life=10000, pos=(self.player.pos[0] - self.display.get_width(), self.player.pos[1]-15)))
                         if self.current_weapon.type == 'swords':
                             self.player.start_charge(is_initialized=True)
                         elif self.current_weapon.type == 'guns':
@@ -253,11 +252,18 @@ class Game:
             # print(self.assets[self.tilemap.tilemap['-11;2']['type']][self.tilemap.tilemap['-11;2']['variant']])
             for projectile in self.projectiles.copy():
                 projectile.render(self.display, render_scroll)
-                if self.tilemap.solid_check(projectile.pos):
-                    for i in range(4):
-                        angle = (random.random() - 0.5) + (math.pi if projectile.speed > 0 else 0) + projectile.angle
-                        speed = (random.random() + 2)
-                        self.sparks.append(Sparks(angle, speed, projectile.pos))
+                tile = self.tilemap.solid_check(projectile.pos)
+                if tile:
+                    for i in range(10):
+                        angle =  (random.random() - 0.5) + (math.pi if projectile.speed > 0 else 0) + projectile.angle
+                        speed = (random.random() * 100)
+                        self.sparks.append(Sparks(angle, speed, projectile.pos, color=(255, 165, 0)))
+
+                    if projectile.spawn:
+                        projectile.spawn.set_drop_status(projectile.pos.copy(), is_dropped=True)
+                        projectile.spawn.phase = 10
+                        self.items_nearby.append(projectile.spawn)
+
                     self.projectiles.remove(projectile)
                     continue
                 
@@ -331,7 +337,6 @@ class Game:
                 
             for item in self.items_nearby.copy():
                 item.render(self.display, render_scroll)
-                print(item.pos)
                 if item.life == 0:
                     self.items_nearby.remove(item)
 

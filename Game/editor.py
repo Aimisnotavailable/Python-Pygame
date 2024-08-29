@@ -21,7 +21,7 @@ class Game:
 
         self.movement = [0, 0]
 
-        self.assets = Assets().fetch(['blocks', 'spawners', 'decors'])
+        self.assets = Assets().fetch(payload={'img' : ['blocks', 'spawners', 'decors']})
         
         self.water = Water()
         self.tilemap = TileMap(self)

@@ -20,7 +20,7 @@ class Weapon(PhysicsEntities):
         self.weapon_path = w_path
         self.particle_path = p_path
 
-        self.d_animation = Animation(load_images(f"items/weapons/{w_type}/drop_animation/{self.name}"), image_dur=10)
+        self.d_animation = Animation(load_images(f"items/weapons/{w_type}/drop_animation/{self.name}", scale=[16, 8]), image_dur=10)
         self.animation = self.d_animation.copy()
         self.w_animation = None
         self.p_animation = None
@@ -61,17 +61,17 @@ class Weapon(PhysicsEntities):
 
 
 class Sword(Weapon):
-    def __init__(self, game, name, is_dropped=False, color=(255, 255, 255)):
+    def __init__(self, game, name, size=(15,9), is_dropped=False, color=(255, 255, 255)):
         type = 'swords'
         w_path = f'items/weapons/{type}/weapon_animation/{name}/'
         p_path = f'items/weapons/{type}/particle_animation/{name}/'
 
-        super().__init__(game, name, type ,w_path, p_path, color=color)
+        super().__init__(game, name, type ,w_path, p_path, size=size, color=color)
         self.atk = 1
         self.is_dropped = False
         self.velocity = [0, 0]
 
-        self.w_animation = {atk_type : Animation(load_images(f"{self.weapon_path}{atk_type}"), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + self.weapon_path)}
+        self.w_animation = {atk_type : Animation(load_images(f"{self.weapon_path}{atk_type}", scale=size), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + self.weapon_path)}
         self.p_animation =  {atk_type : Animation(load_images(f"{self.particle_path}{atk_type}"), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + self.particle_path)}
         # self.t_animation = Animation(load_images(f"items/weapons/swords/throw_animation/{self.name}"), image_dur=10)
 
@@ -86,8 +86,8 @@ class Gun(Weapon):
         w_path = f'items/weapons/{type}/weapon_animation/{name}/'
         p_path = f'items/weapons/{type}/particle_animation/{name}/'
 
-        super().__init__(game, name, type, w_path, p_path)
-        self.w_animation = Animation(load_images(self.weapon_path), image_dur=10, loop=False)
+        super().__init__(game, name, type, w_path, p_path, size=size)
+        self.w_animation = Animation(load_images(self.weapon_path, scale=size), image_dur=10, loop=False)
         self.p_animation =  {atk_type : Animation(load_images(f"{self.particle_path}{atk_type}"), image_dur=10) for atk_type in os.listdir(BASE_IMG_PATH + self.particle_path)}
         self.animation = self.w_animation.copy()
         self.pos = [0,0]
