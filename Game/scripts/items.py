@@ -31,11 +31,12 @@ class Weapon(PhysicsEntities):
         if is_dropped:
             self.is_dropped = is_dropped
             self.animation = self.drop_animation()
-            self.pos = pos
         else:
             self.life = 1000
             self.is_dropped = is_dropped
-    
+        print(self.life)
+        self.pos = pos
+        
     def drop_animation(self):
         return self.d_animation.copy()
     
@@ -55,6 +56,7 @@ class Weapon(PhysicsEntities):
         self.sound.play(self.type, variant=variant, loop=0, vol=vol)
 
     def render(self, surf, offset=(0,0)):
+        print(self.pos)
         if self.is_dropped:
             self.life -= 1
             surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))
@@ -97,4 +99,4 @@ class Gun(Weapon):
 
     def render(self, surf, offset=(0, 0)):
         self.update()
-        surf.blit(self.animation.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1]))
+        super().render(surf, offset)

@@ -8,7 +8,6 @@ from scripts.projectiles import Projectiles
 class PhysicsEntities:
 
     def __init__(self, game, e_type, pos=(0,0), size=(16,16)):
-        
         self.game = game
         self.type = e_type
         self.pos = list(pos)
@@ -259,7 +258,7 @@ class Player(NonobjEntities):
             self.dash_velocity = (math.cos(math.radians(a_r)) * 8, math.sin(math.radians(a_r)) * 5)
             self.current_weapon.play_sound(variant=1, vol=1.0)
         elif self.atk_type == "throw_meele_attack":
-            self.game.projectiles.append(Projectiles(img, speed=10, angle=angle, life=15, pos=self.rect().center, spawn=self.current_weapon))
+            self.game.projectiles.append(Projectiles(img, speed=10, angle=angle, life=100, pos=self.rect().center, spawn=self.current_weapon))
             self.current_weapon.play_sound(variant=2, vol=1.0)
         elif self.atk_type == "shoot_attack":
             for i in range(4):

@@ -122,4 +122,4 @@ class Game:
             pygame.display.update()
             self.clock.tick(60)
 
-# Game().run()
+#Game().run()

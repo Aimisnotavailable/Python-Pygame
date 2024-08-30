@@ -17,7 +17,7 @@ class Projectiles:
         self.pos[0] += math.cos(self.angle) * self.speed
         self.pos[1] += math.sin(self.angle) * self.speed + self.y_vel
         self.life -=1
-
+        print(self.life)
         return not self.life
 
     def render(self, surf, offset=(0, 0)):

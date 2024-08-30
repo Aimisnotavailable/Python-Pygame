@@ -155,7 +155,7 @@ class Game:
                         self.current_weapon = self.inventory.item_list[self.inventory.current_selected ]
 
                     if event.key == pygame.K_e and self.current_weapon is not None and self.player.attacking == 0:
-                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=False)
+                        self.current_weapon.set_drop_status(self.player.pos.copy(), is_dropped=True)
                         self.items_nearby.append(self.current_weapon)
                         self.inventory.remove_item()
 
@@ -256,14 +256,16 @@ class Game:
                 if tile:
                     for i in range(10):
                         angle =  (random.random() - 0.5) + (math.pi if projectile.speed > 0 else 0) + projectile.angle
-                        speed = (random.random() * 100)
+                        speed = (random.random() + 2)
                         self.sparks.append(Sparks(angle, speed, projectile.pos, color=(255, 165, 0)))
 
                     if projectile.spawn:
                         projectile.spawn.set_drop_status(projectile.pos.copy(), is_dropped=True)
-                        projectile.spawn.phase = 10
+                        pos = [projectile.pos[0] + 24 * (1 if math.cos(angle) > 0 else -1), projectile.pos[1] + 8 * (1 if math.sin(angle) > 0 else -1)]
+                        projectile.spawn.pos = pos
                         self.items_nearby.append(projectile.spawn)
-
+                        print("HEHE")
+                        
                     self.projectiles.remove(projectile)
                     continue
                 
