@@ -37,7 +37,7 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
-        self.assets = Assets().fetch(payload={'img' : {'all': True}})
+        self.assets = Assets().fetch(payload={'img' : ['all']})
         
         self.cursor = self.assets['cursor'].copy()
 
@@ -81,7 +81,7 @@ class Game:
         self.screen_shake = ScreenShake()
         self.transition = Transition()
         self.background = Background(self.assets['background'])
-        self.sound = SoundMixer(payload={'background' : ['background_music', 'all']})
+        self.sound = SoundMixer(payload={'background' : ['all'], 'tile' : ['all']})
         self.sound.play('background_music', vol=0.3)
         self.water = Water()
         self.under_water = False
@@ -264,9 +264,9 @@ class Game:
                         pos = [projectile.pos[0] + 24 * (1 if math.cos(angle) > 0 else -1), projectile.pos[1] + 8 * (1 if math.sin(angle) > 0 else -1)]
                         projectile.spawn.pos = pos
                         self.items_nearby.append(projectile.spawn)
-                        print("HEHE")
                         
                     self.projectiles.remove(projectile)
+                    self.sound.play(tile['type'], loop=0, vol=0.8)
                     continue
                 
                 if projectile.update():

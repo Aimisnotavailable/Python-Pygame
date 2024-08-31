@@ -26,7 +26,6 @@ class PhysicsEntities:
         self.objects = []
         self.attacking = 0
         self.drag = 1
-        self.phase = 0
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -43,46 +42,44 @@ class PhysicsEntities:
         entity_rect = self.rect()
         tile_data = tilemap.tiles_rect_around(self.pos)
 
-        if not self.phase:
-            for i in range(len(tile_data['rects'])):
-                rect = tile_data['rects'][i]
-                color = tile_data['color'][i]
-                if entity_rect.colliderect(rect):
-                    if self.frame_movement[0] > 0:
-                        entity_rect.right = rect.left
-                        self.collisions['right'] = True
-                    
-                    if self.frame_movement[0] < 0:
-                        entity_rect.left = rect.right
-                        self.collisions['left'] = True
-                    self.pos[0] = entity_rect.x
+        for i in range(len(tile_data['rects'])):
+            rect = tile_data['rects'][i]
+            color = tile_data['color'][i]
+            if entity_rect.colliderect(rect):
+                if self.frame_movement[0] > 0:
+                    entity_rect.right = rect.left
+                    self.collisions['right'] = True
+                
+                if self.frame_movement[0] < 0:
+                    entity_rect.left = rect.right
+                    self.collisions['left'] = True
+                self.pos[0] = entity_rect.x
 
         self.pos[1] += self.frame_movement[1] * self.drag
         entity_rect = self.rect()
         tile_data = tilemap.tiles_rect_around(self.pos)
-
-        if not self.phase:
             
-            for i in range(len(tile_data['rects'])):
-                rect = tile_data['rects'][i]
-                color = tile_data['color'][i]
+        for i in range(len(tile_data['rects'])):
+            rect = tile_data['rects'][i]
+            color = tile_data['color'][i]
 
-                if entity_rect.colliderect(rect):
-                    if int(self.drag):
-                        spawn_particles = random.random() + int(abs(self.velocity[1]))
-                    else:
-                        spawn_particles = False
+            if entity_rect.colliderect(rect):
+                if int(self.drag):
+                    spawn_particles = random.random() + int(abs(self.velocity[1]))
+                else:
+                    spawn_particles = False
 
-                    if self.frame_movement[1] > 0:
-                        entity_rect.bottom = rect.top
-                        self.collisions['down'] = True
+                if self.frame_movement[1] > 0:
+                    entity_rect.bottom = rect.top
+                    self.collisions['down'] = True
 
-                    if self.frame_movement[1] < 0:
-                        entity_rect.top = rect.bottom
-                        self.collisions['up'] = True
+                if self.frame_movement[1] < 0:
+                    entity_rect.top = rect.bottom
+                    self.collisions['up'] = True
 
-                    self.pos[1] = entity_rect.y
+                self.pos[1] = entity_rect.y
 
+                if self.type == 'player' or self.type == 'enemy':
                     if spawn_particles > 0.6 and (self.collisions['down'] or self.collisions['up']):
                         if self.action != 'idle':
                             x = self.pos[0]
@@ -96,14 +93,14 @@ class PhysicsEntities:
                             speed = random.random() * random.random()
                             self.game.particles.append(Particles(self.game, 'dust', angle, speed, (x, y), color_key=color))
                     
-            water_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]
-            water_loc = str(water_loc_int[0]) + ";" + str(water_loc_int[1])
+        water_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]
+        water_loc = str(water_loc_int[0]) + ";" + str(water_loc_int[1])
 
-            if water_loc in tilemap.water_map:
-                self.drag = 0.6
-                tilemap.propogate_wave(water_loc, water_loc_int, velocity=self.velocity, offset=offset, entity_rect=entity_rect)
-            else:
-                self.drag = min(1, self.drag + 0.01)
+        if water_loc in tilemap.water_map:
+            self.drag = 0.6
+            tilemap.propogate_wave(water_loc, water_loc_int, velocity=self.velocity, offset=offset, entity_rect=entity_rect)
+        else:
+            self.drag = min(1, self.drag + 0.01)
         
         if movement[0] > 0:
             self.flip = False
@@ -118,7 +115,6 @@ class PhysicsEntities:
             self.velocity[0] = max(self.velocity[0] - 0.1, 0)
         elif self.velocity[0] < 0:
             self.velocity[0] = min(self.velocity[0] + 0.1, 0)
-        self.phase = max(0, self.phase - 1)
         self.animation.update()
 
 class NonobjEntities(PhysicsEntities):
@@ -253,7 +249,7 @@ class Player(NonobjEntities):
 
         if atk_type == "normal_attack":
             self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=15, pos=self.rect().center))
-            self.current_weapon.play_sound(variant=0, vol=1.0)
+            self.current_weapon.play_sound(variant=0, vol=0.5)
         elif self.atk_type == "charged_attack":
             self.dash_velocity = (math.cos(math.radians(a_r)) * 8, math.sin(math.radians(a_r)) * 5)
             self.current_weapon.play_sound(variant=1, vol=1.0)

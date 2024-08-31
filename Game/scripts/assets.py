@@ -56,8 +56,13 @@ class Assets:
                       "weapon" : {
                           "guns" : load_sounds('sfx/gun_sfx'),
                           "swords" : load_sounds('sfx/sword_sfx')
-                      }
+                      },
 
+                      "tile" : {
+                          'grass' : load_sounds('sfx/tile_sfx/grass'),
+                          'sand'  : load_sounds('sfx/tile_sfx/sand'),
+                          'stone' : load_sounds('sfx/tile_sfx/stone'),
+                      },
                       },
             }
     
