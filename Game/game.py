@@ -87,7 +87,7 @@ class Game:
         self.under_water = False
         self.clouds = Clouds(self.assets['clouds'][0], count=15)
         self.trees = self.tilemap.extract([('tree', 0), ('tree', 1)])
-        
+
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
             pos = entity['pos']
             if entity['variant'] == 1:
@@ -101,19 +101,25 @@ class Game:
             size = self.assets[tree['type']][tree['variant']].get_size()
             self.tree_spawners.append(pygame.Rect(tree['pos'][0], tree['pos'][1], *size))
 
+        self.entity_track_rect = self.player.rect()
+
     def run(self):
         running = True
 
         while running:
             self.display.fill((0,0,0,0))
             
-
             mpos = list(pygame.mouse.get_pos())
             mpos[0] = mpos[0] // 2
             mpos[1] = mpos[1] // 2
             
-            self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 15
-            self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 15
+            if not self.player.track:
+                self.entity_track_rect = self.player.rect()
+            else:
+                self.entity_track_rect = pygame.Rect(*self.projectiles[-1].pos.copy(), 8 , 8)
+
+            self.scroll[0] += (self.entity_track_rect.centerx - self.display.get_width() / 2 - self.scroll[0]) / 15
+            self.scroll[1] += (self.entity_track_rect.centery - self.display.get_height() / 2 - self.scroll[1]) / 15
             render_scroll = [int(self.scroll[0]), int(self.scroll[1])]
 
             self.background.render(self.display_2)
@@ -259,38 +265,42 @@ class Game:
                         speed = (random.random() + 2)
                         self.sparks.append(Sparks(angle, speed, projectile.pos, color=(255, 165, 0)))
 
+                    self.sound.play(tile['type'], loop=0, vol=0.8)
+                    projectile.kill = True
+                
+                if projectile.update():
+                    projectile.kill = True
+
+                if not projectile.kill:
+                    for enemy in self.enemies.copy():
+                        if enemy.attacked:
+                            continue
+                        if enemy.rect().colliderect(pygame.Rect(projectile.pos, projectile.animation.img().get_size())):
+                            projectile.kill = True
+                            if enemy.attacked == 0:
+                                enemy.damage()
+                            if enemy.current_hp <= 0:
+                                dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
+                                dropped_item.set_drop_status(enemy.pos,is_dropped=True)
+                                self.items_nearby.append(dropped_item)
+                                self.enemies.remove(enemy)
+                                for i in range(30):
+                                    angle = (random.random() + 0.5) * math.pi * 2
+                                    speed = (random.random() + 0.5) + 1
+                                    self.sparks.append(Sparks(angle, speed, enemy.pos))
+                            break
+                
+                if projectile.kill:
                     if projectile.spawn:
                         projectile.spawn.set_drop_status(projectile.pos.copy(), is_dropped=True)
                         pos = [projectile.pos[0] + 24 * (1 if math.cos(angle) > 0 else -1), projectile.pos[1] + 8 * (1 if math.sin(angle) > 0 else -1)]
-                        projectile.spawn.pos = pos
+                        projectile.spawn.pos = pos.copy()
+                        self.player.pos = pos.copy()
                         self.items_nearby.append(projectile.spawn)
-                        
-                    self.projectiles.remove(projectile)
-                    self.sound.play(tile['type'], loop=0, vol=0.8)
-                    continue
-                
-                if projectile.update():
-                    self.projectiles.remove(projectile)
-                    continue
 
-                for enemy in self.enemies.copy():
-                    if enemy.attacked:
-                        continue
-
-                    if enemy.rect().colliderect(pygame.Rect(projectile.pos, projectile.img.get_size())):
-                        self.projectiles.remove(projectile)
-                        if enemy.attacked == 0:
-                            enemy.damage()
-                        if enemy.current_hp <= 0:
-                            dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
-                            dropped_item.set_drop_status(enemy.pos,is_dropped=True)
-                            self.items_nearby.append(dropped_item)
-                            self.enemies.remove(enemy)
-                            for i in range(30):
-                                angle = (random.random() + 0.5) * math.pi * 2
-                                speed = (random.random() + 0.5) + 1
-                                self.sparks.append(Sparks(angle, speed, enemy.pos))
-                        break
+                    self.player.track = 0
+                    self.projectiles.remove(projectile)
+                    
                 
             if self.player.dashing >= 1:
                 for enemy in self.enemies.copy():

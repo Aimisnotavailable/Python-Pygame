@@ -26,6 +26,7 @@ class PhysicsEntities:
         self.objects = []
         self.attacking = 0
         self.drag = 1
+        self.track = 0
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -116,6 +117,8 @@ class PhysicsEntities:
         elif self.velocity[0] < 0:
             self.velocity[0] = min(self.velocity[0] + 0.1, 0)
         self.animation.update()
+
+        self.track = max(0, self.track - 1)
 
 class NonobjEntities(PhysicsEntities):
     
@@ -245,16 +248,18 @@ class Player(NonobjEntities):
 
         a_r = self.game.angle * (-1 if self.game.rotation.flip_x else 1)
         angle = math.radians(a_r)
-        img = pygame.transform.rotate(self.current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
-
+        animation = self.current_weapon.particle_animation()[atk_type].copy()
+        img_rotation_angle = -a_r
+        print(self.current_weapon.pos)
         if atk_type == "normal_attack":
-            self.game.projectiles.append(Projectiles(img, speed=2, angle=angle, life=15, pos=self.rect().center))
+            self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed=2, angle=angle, life=15, pos=self.rect().center))
             self.current_weapon.play_sound(variant=0, vol=0.5)
         elif self.atk_type == "charged_attack":
             self.dash_velocity = (math.cos(math.radians(a_r)) * 8, math.sin(math.radians(a_r)) * 5)
             self.current_weapon.play_sound(variant=1, vol=1.0)
         elif self.atk_type == "throw_meele_attack":
-            self.game.projectiles.append(Projectiles(img, speed=10, angle=angle, life=100, pos=self.rect().center, spawn=self.current_weapon))
+            self.track = self.cooldown_time
+            self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed=10, angle=angle, life=self.track, pos=self.rect().center, spawn=self.current_weapon))
             self.current_weapon.play_sound(variant=2, vol=1.0)
         elif self.atk_type == "shoot_attack":
             for i in range(4):
@@ -262,16 +267,16 @@ class Player(NonobjEntities):
                 speed = random.random() + 2
                 self.game.sparks.append(Sparks(angle=s_angle, speed=speed, pos=(math.cos(angle) * 15 + self.rect().center[0], math.sin(angle) * 15 + self.rect().center[1]), color=(255, 165, 30)))
             self.recoil(2, 0.5)
-            self.game.projectiles.append(Projectiles(img, speed=10, angle=angle, life=100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
+            self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed=10, angle=angle, life=100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
             self.current_weapon.play_sound(variant=0, vol=0.3)
         elif self.atk_type == "splash_attack":
             a_r -= 10
             speed = random.random() + 10
             for i in range(3):
-                img = pygame.transform.rotate(current_weapon.particle_animation()[atk_type].copy().img(), -a_r)
+                img_rotation_angle = -a_r
                 a = math.radians(a_r)
                 
-                self.game.projectiles.append(Projectiles(img, speed, a, 100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
+                self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed, a, 100, pos=(math.cos(angle) * 10 + self.rect().center[0], math.sin(angle) * 10 + self.rect().center[1])))
                 a_r += 10
             for i in range(12):
                 s_angle = random.random() - 0.5 + angle

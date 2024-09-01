@@ -72,7 +72,7 @@ class Sword(Weapon):
         self.velocity = [0, 0]
 
         self.w_animation = {atk_type : Animation(load_images(f"{self.weapon_path}{atk_type}", scale=size), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + self.weapon_path)}
-        self.p_animation =  {atk_type : Animation(load_images(f"{self.particle_path}{atk_type}"), image_dur=10, loop=False) for atk_type in os.listdir(BASE_IMG_PATH + self.particle_path)}
+        self.p_animation =  {atk_type : Animation(load_images(f"{self.particle_path}{atk_type}"), image_dur=10, loop=True) for atk_type in os.listdir(BASE_IMG_PATH + self.particle_path)}
         # self.t_animation = Animation(load_images(f"items/weapons/swords/throw_animation/{self.name}"), image_dur=10)
 
     def render(self, surf, offset=(0,0)):
