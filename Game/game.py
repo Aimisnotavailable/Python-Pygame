@@ -88,6 +88,12 @@ class Game:
         self.clouds = Clouds(self.assets['clouds'][0], count=15)
         self.trees = self.tilemap.extract([('tree', 0), ('tree', 1)])
 
+        for i in range(70):
+            angle = random.random() * math.pi
+            speed = random.random() + 3
+            pos = [random.random() * self.display.get_width(), random.random() * self.display.get_height()]
+            self.particles.append(Particles(self, 'snow', angle, speed, pos))
+
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
             pos = entity['pos']
             if entity['variant'] == 1:
@@ -400,6 +406,7 @@ class Game:
                 self.transition.render(self.display_2)
 
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
+            print(self.clock.get_fps())
             # print(self.clock.get_rawtime())
             # print(self.enemies[0].pos)
             pygame.display.update()

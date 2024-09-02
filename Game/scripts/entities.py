@@ -159,6 +159,8 @@ class Enemy(NonobjEntities):
         self.max_hp = 5
         self.attacked =0
 
+        self.hat = self.game.assets['enemy/hat'].copy()
+
     def damage(self):
         self.current_hp -=1
         self.attacked = 30
@@ -195,8 +197,10 @@ class Enemy(NonobjEntities):
     
     def render(self, surf, offset=(0,0)):
         super().render(surf, offset)
-        pygame.draw.rect(surf, (255, 0, 0), pygame.Rect(self.pos[0] - offset[0], self.pos[1] - offset[1], 5 * (self.max_hp), 5))
-        pygame.draw.rect(surf, (0, 255, 0), pygame.Rect(self.pos[0] - offset[0], self.pos[1] - offset[1], (5 * self.current_hp) + self.attacked//3, 5))
+        # pygame.draw.rect(surf, (255, 0, 0), pygame.Rect(self.pos[0] - offset[0], self.pos[1] - offset[1], 5 * (self.max_hp), 5))
+        # pygame.draw.rect(surf, (0, 255, 0), pygame.Rect(self.pos[0] - offset[0], self.pos[1] - offset[1], (5 * self.current_hp) + self.attacked//3, 5))
+        surf.blit(self.hat.img(), (self.pos[0] - offset[0], self.pos[1] - offset[1] - 4))
+        self.hat.update()
 
 class Player(NonobjEntities):
 

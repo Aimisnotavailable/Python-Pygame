@@ -9,6 +9,7 @@ class Particles:
         self.angle = angle
         self.speed = speed
         self.color_key = color_key
+        self.type = type
         self.animation = game.assets['particles' + '/' + type].copy()
         self.animation.frame = random.randint(0, len(self.animation.images))
         
@@ -31,7 +32,12 @@ class Particles:
         
         img_mask = pygame.mask.from_surface(self.animation.img())
         img = img_mask.to_surface(setcolor=(*self.color_key, 180), unsetcolor=(0, 0, 0, 0))
-        surf.blit(img, (self.pos[0] - offset[0], self.pos[1] - offset[1]))
+        #
+        if self.type == 'snow':
+            pygame.draw.circle(surf, (255, 255, 255), (((self.pos[0] - offset[0]) % (surf.get_width() + img.get_width()) - img.get_width(), (self.pos[1] - offset[1]) % (surf.get_height() + img.get_height()) -img.get_height())), random.random() * 3)
+            #surf.blit(img, ((self.pos[0] - offset[0]) % (surf.get_width() + img.get_width()) - img.get_width(), (self.pos[1] - offset[1]) % (surf.get_height() + img.get_height()) -img.get_height()))
+        else:
+            surf.blit(img, (self.pos[0] - offset[0], self.pos[1] - offset[1]))
         self.update()
         self.animation.update()
 

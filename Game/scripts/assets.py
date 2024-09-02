@@ -40,11 +40,13 @@ class Assets:
                                       "enemy/damaged" : Animation(load_images("entities/enemy/damaged")),
                                       "enemy/run" : Animation(load_images("entities/enemy/run"), image_dur=5),
                                       "enemy/attack" : Animation(load_images("entities/enemy/attack"), image_dur=6),
+                                      "enemy/hat"    : Animation(load_images("entities/enemy/hat"), image_dur=6),
                                   },
 
                       "particles" : { "particles/particles" : Animation(load_images("particles/particles")),
                                       "particles/dust" : Animation(load_images("particles/dust"), image_dur=2, loop=False),
                                       "particles/leaf" : Animation(load_images("particles/leaf"), image_dur=15, loop=False),
+                                      "particles/snow" : Animation(load_images("particles/snow"), image_dur=15, loop=True),
                                     },
             },
 
