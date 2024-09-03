@@ -254,7 +254,6 @@ class Player(NonobjEntities):
         angle = math.radians(a_r)
         animation = self.current_weapon.particle_animation()[atk_type].copy()
         img_rotation_angle = -a_r
-        print(self.current_weapon.pos)
         if atk_type == "normal_attack":
             self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed=2, angle=angle, life=15, pos=self.rect().center))
             self.current_weapon.play_sound(variant=0, vol=0.5)

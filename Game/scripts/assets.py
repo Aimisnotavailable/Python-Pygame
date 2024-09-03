@@ -48,6 +48,9 @@ class Assets:
                                       "particles/leaf" : Animation(load_images("particles/leaf"), image_dur=15, loop=False),
                                       "particles/snow" : Animation(load_images("particles/snow"), image_dur=15, loop=True),
                                     },
+                      "christmas" : {
+                                      "christmas/santa" : Animation(load_images("santa"), image_dur=5),
+                      }
             },
 
             "sfx" : {

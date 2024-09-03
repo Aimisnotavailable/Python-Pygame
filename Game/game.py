@@ -8,7 +8,7 @@ from scripts.tilemap import TileMap
 from scripts.entities import PhysicsEntities, Player, Enemy
 from scripts.items import Weapon, Sword, Gun
 from scripts.inventory import Inventory
-from scripts.clouds import Clouds
+from scripts.clouds import Clouds, Cloud
 from scripts.sparks import Sparks
 from scripts.particles import Particles
 #from test_scripts.water1 import Water
@@ -19,6 +19,8 @@ from scripts.projectiles import Projectiles
 from scripts.screenshake import ScreenShake
 from scripts.transition import Transition
 from scripts.sfx import SoundMixer
+
+from scripts.seasonal.christmas.santa import Santa
 
 BASE_IMG_PATH = 'data/images/'
 
@@ -87,6 +89,8 @@ class Game:
         self.under_water = False
         self.clouds = Clouds(self.assets['clouds'][0], count=15)
         self.trees = self.tilemap.extract([('tree', 0), ('tree', 1)])
+
+        self.santa = Santa(self.assets['christmas/santa'].copy(), (0, 0), 0, 2)
 
         for i in range(70):
             angle = random.random() * math.pi
@@ -239,7 +243,7 @@ class Game:
                 shake_offset = self.screen_shake.screen_shake()
                 render_scroll = (int(render_scroll[0] + shake_offset[0]), int(render_scroll[1] + shake_offset[1]))
 
-                        
+            self.santa.render(self.display, render_scroll)
             self.clouds.render(self.display_2, render_scroll)
             self.clouds.update()
 
@@ -383,7 +387,7 @@ class Game:
             #                     angle = (random.random() + 0.5) * math.pi * 2
             #                     speed = (random.random() + 0.5) + 1
             #                     self.sparks.append(Sparks(angle, speed, enemy.pos))
-                    
+
             self.inventory.render(self.display)
             self.player.update(self.tilemap, self.movement, offset=render_scroll)
             self.player.render(self.display, offset=render_scroll)     
@@ -393,7 +397,6 @@ class Game:
 
             for offset in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
                 self.display_2.blit(display_sillhouette, offset)
-            
             
             self.display_2.blit(self.display, (0, 0))
             # self.water.render(self.display_2, render_scroll)
@@ -406,7 +409,7 @@ class Game:
                 self.transition.render(self.display_2)
 
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
-            print(self.clock.get_fps())
+            # print(self.clock.get_fps())
             # print(self.clock.get_rawtime())
             # print(self.enemies[0].pos)
             pygame.display.update()
