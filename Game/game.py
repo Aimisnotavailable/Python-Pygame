@@ -36,6 +36,7 @@ class Game:
         self.screen = pygame.display.set_mode((600, 400))
         self.display = pygame.Surface((300, 200), pygame.SRCALPHA)
         self.display_2 = pygame.Surface((300, 200))
+        self.night_mask = pygame.Surface((300, 200), pygame.SRCALPHA)
 
         self.clock = pygame.time.Clock()
 
@@ -118,7 +119,8 @@ class Game:
 
         while running:
             self.display.fill((0,0,0,0))
-            
+            self.night_mask.fill((0, 0, 0, 140))
+
             mpos = list(pygame.mouse.get_pos())
             mpos[0] = mpos[0] // 2
             mpos[1] = mpos[1] // 2
@@ -243,7 +245,12 @@ class Game:
                 shake_offset = self.screen_shake.screen_shake()
                 render_scroll = (int(render_scroll[0] + shake_offset[0]), int(render_scroll[1] + shake_offset[1]))
 
-            self.santa.render(self.display, render_scroll)
+            if self.santa.done:
+                self.santa.angle = (random.random() + 0.5) * math.pi + math.pi
+                self.santa.done = False
+            else:
+                self.santa.render(self.display, render_scroll)
+
             self.clouds.render(self.display_2, render_scroll)
             self.clouds.update()
 
@@ -409,6 +416,7 @@ class Game:
                 self.transition.render(self.display_2)
 
             self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
+            self.screen.blit(pygame.transform.scale(self.night_mask, self.screen.get_size()), (0, 0))
             # print(self.clock.get_fps())
             # print(self.clock.get_rawtime())
             # print(self.enemies[0].pos)
