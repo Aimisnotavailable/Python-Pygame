@@ -90,7 +90,7 @@ class Game:
         self.under_water = False
         self.clouds = Clouds(self.assets['clouds'][0], count=15)
         self.trees = self.tilemap.extract([('tree', 0), ('tree', 1)])
-
+        self.zoom = 1.5
         self.santa = Santa(self.assets['christmas/santa'].copy(), (0, 0), 0, 2)
 
         for i in range(70):
@@ -130,8 +130,8 @@ class Game:
             else:
                 self.entity_track_rect = pygame.Rect(*self.projectiles[-1].pos.copy(), 8 , 8)
 
-            self.scroll[0] += (self.entity_track_rect.centerx - self.display.get_width() / 2 - self.scroll[0]) / 15
-            self.scroll[1] += (self.entity_track_rect.centery - self.display.get_height() / 2 - self.scroll[1]) / 15
+            self.scroll[0] += ((self.entity_track_rect.centerx - self.display.get_width() / 2 / self.zoom - self.scroll[0]) / 15) 
+            self.scroll[1] += ((self.entity_track_rect.centery - self.display.get_height() / 2 / self.zoom - self.scroll[1]) / 15) 
             render_scroll = [int(self.scroll[0]), int(self.scroll[1])]
 
             self.background.render(self.display_2)
@@ -415,7 +415,13 @@ class Game:
             if self.transition.transition:
                 self.transition.render(self.display_2)
 
-            self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), (0, 0))
+            # if self.player.attacking:
+            #     self.zoom = 1 + self.player.attacking / 10
+            # else:
+            #     self.zoom = 1.5
+
+            size =  list(self.screen.get_size())
+            self.screen.blit(pygame.transform.scale(self.display_2, (size[0] * self.zoom, size[1] * self.zoom)), (0,0))
             self.screen.blit(pygame.transform.scale(self.night_mask, self.screen.get_size()), (0, 0))
             # print(self.clock.get_fps())
             # print(self.clock.get_rawtime())
@@ -424,3 +430,5 @@ class Game:
             self.clock.tick(60)   
     
 Game().run()
+
+
