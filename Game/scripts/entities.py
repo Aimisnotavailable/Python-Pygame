@@ -261,9 +261,11 @@ class Player(NonobjEntities):
             self.dash_velocity = (math.cos(math.radians(a_r)) * 8, math.sin(math.radians(a_r)) * 5)
             self.current_weapon.play_sound(variant=1, vol=1.0)
         elif self.atk_type == "throw_meele_attack":
-            self.track = self.cooldown_time
-            self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed=10, angle=angle, life=self.track, pos=self.rect().center, spawn=self.current_weapon))
+            # self.track = self.cooldown_time
+            self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed=10, angle=angle, life=self.cooldown_time, pos=self.rect().center, spawn=self.current_weapon))
             self.current_weapon.play_sound(variant=2, vol=1.0)
+            self.game.zooming = self.cooldown_time
+
         elif self.atk_type == "shoot_attack":
             for i in range(4):
                 s_angle = random.random() - 0.5 + angle
