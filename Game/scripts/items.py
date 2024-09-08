@@ -25,7 +25,7 @@ class Weapon(PhysicsEntities):
         self.w_animation = None
         self.p_animation = None
         self.life = 1000
-        self.attack_cooldowns = {'normal_attack' : 30, 'charged_attack' : 30, 'throw_meele_attack' : 50, 'shoot_attack' : 15, 'splash_attack' : 60}
+        self.attack_cooldowns = {'normal_attack' : 29, 'charged_attack' : 30, 'throw_meele_attack' : 120, 'shoot_attack' : 15, 'splash_attack' : 60}
     
     def set_drop_status(self, pos, is_dropped=False):
         if is_dropped:

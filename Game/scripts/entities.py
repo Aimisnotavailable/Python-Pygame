@@ -222,6 +222,8 @@ class Player(NonobjEntities):
         self.shooting = False
         self.jumps = 1
 
+        self.teleporting = 0
+
     def start_charge(self, is_initialized=False):
         self.is_initialized = is_initialized
     
@@ -244,6 +246,7 @@ class Player(NonobjEntities):
             self.dashing -= 1
         return self.dashing
 
+    
     def perform_attack(self, atk_type, current_weapon):
         super().perform_attack(atk_type, current_weapon)
 
@@ -262,9 +265,9 @@ class Player(NonobjEntities):
             self.current_weapon.play_sound(variant=1, vol=1.0)
         elif self.atk_type == "throw_meele_attack":
             # self.track = self.cooldown_time
-            self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed=10, angle=angle, life=self.cooldown_time, pos=self.rect().center, spawn=self.current_weapon))
+            self.game.projectiles.append(Projectiles(animation, img_rotation_angle, speed=10, angle=angle, life=self.cooldown_time // 2, pos=self.rect().center, spawn=self.current_weapon))
             self.current_weapon.play_sound(variant=2, vol=1.0)
-            self.game.zooming = self.cooldown_time
+            self.game.zooming = self.cooldown_time // 2
 
         elif self.atk_type == "shoot_attack":
             for i in range(4):
@@ -295,7 +298,12 @@ class Player(NonobjEntities):
         self.velocity[0] = - math.cos(math.radians(self.game.angle)) * x_recoil
         y_vel = math.sin(math.radians(self.game.angle * (1 if self.game.rotation.flip_x else -1))) * y_recoil
         self.velocity[1] += y_vel 
-    
+
+    def teleport(self, end_pos=[0, 0]):
+        self.teleporting = 21
+        self.set_action('fade')
+        self.pos = end_pos 
+
     def cooldown(self, surf, offset=(0, 0)):
         pos = self.rect().topleft
         pygame.draw.rect(surf, (255, 255, 255), (pos[0] - offset[0], pos[1] - offset[1] - 10, (self.attacking/self.cooldown_time) * 20 , 5))
@@ -334,13 +342,16 @@ class Player(NonobjEntities):
                 else:
                     self.velocity[0] = 0
                     self.velocity[1] = 0
-        if self.air_time > 4 + (4 * 1 - self.drag):
-            self.set_action('jump')
-        elif self.movement[0] != 0:
-            self.set_action('run')
-        else:
-            self.set_action('idle')
 
+        if not self.teleporting:
+            if self.air_time > 4 + (4 * 1 - self.drag):
+                self.set_action('jump')
+            elif self.movement[0] != 0:
+                self.set_action('run')
+            else:
+                self.set_action('idle')
+
+        self.teleporting = max(0, self.teleporting - 1)
     def render(self, surf, offset=(0,0)):
         
         if self.attacking:

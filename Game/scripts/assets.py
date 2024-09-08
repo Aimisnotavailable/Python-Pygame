@@ -33,7 +33,8 @@ class Assets:
                       "entity_animation" : {
                                       "player/idle" : Animation(load_images("entities/player/idle"), image_dur=10),
                                       "player/jump" : Animation(load_images("entities/player/jump")),
-                                      "player/run" : Animation(load_images("entities/player/run"), image_dur=5),
+                                      "player/run"  : Animation(load_images("entities/player/run"), image_dur=5),
+                                      "player/fade" : Animation(load_images("entities/player/fade"), image_dur=3),
                                       #player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
                                       
                                       "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),
@@ -57,7 +58,11 @@ class Assets:
                       "background": {
                           "background_music" : load_sounds('music'),
                       },
-                      
+
+                      "player" : {
+                          "teleport" : load_sounds('sfx/entity_sfx/player/teleport')
+                      },
+
                       "weapon" : {
                           "guns" : load_sounds('sfx/gun_sfx'),
                           "swords" : load_sounds('sfx/sword_sfx')

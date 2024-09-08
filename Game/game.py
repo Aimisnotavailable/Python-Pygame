@@ -75,7 +75,7 @@ class Game:
         self.particles = []
         self.enemies = []
         self.items_nearby = []
-        
+
         self.inventory = Inventory(self.assets['inventory_slot'])
         self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
         self.inventory.item_list[1] = Sword(self, 'sword', color=(100, 100, 100))
@@ -84,7 +84,7 @@ class Game:
         self.screen_shake = ScreenShake()
         self.transition = Transition()
         self.background = Background(self.assets['background'])
-        self.sound = SoundMixer(payload={'background' : ['all'], 'tile' : ['all']})
+        self.sound = SoundMixer(payload={'background' : ['all'], 'tile' : ['all'], 'player' : ['all']})
         self.sound.play('background_music', vol=0.3)
         self.water = Water()
         self.under_water = False
@@ -114,6 +114,7 @@ class Game:
             self.tree_spawners.append(pygame.Rect(tree['pos'][0], tree['pos'][1], *size))
 
         self.entity_track_rect = self.player.rect()
+        self.fps = 60
     
     def run(self):
         running = True
@@ -147,7 +148,7 @@ class Game:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
+                    pygame.quit()   
                     sys.exit()
 
                 if event.type == pygame.KEYDOWN:
@@ -313,8 +314,10 @@ class Game:
                         projectile.spawn.set_drop_status(projectile.pos.copy(), is_dropped=True)
                         pos = [projectile.pos[0] + 24 * (1 if math.cos(angle) > 0 else -1), projectile.pos[1] + 8 * (1 if math.sin(angle) > 0 else -1)]
                         projectile.spawn.pos = pos.copy()
-                        self.player.pos = pos.copy()
+                        self.player.teleport(pos.copy())
+                        self.sound.play('teleport', variant=0, loop=0) 
                         self.items_nearby.append(projectile.spawn)
+                        self.zooming = 0
 
                     self.player.track = 0
                     self.projectiles.remove(projectile)
@@ -418,19 +421,20 @@ class Game:
 
             if self.zooming:
                 self.zoom = min(2, self.zoom + 0.01)
+                self.fps  = 30
             else:
                 self.zoom = max(1, self.zoom - 0.01)
-            print(self.zooming)
+                self.fps =  60
             self.zooming = max(0, self.zooming - 1)
 
             size =  list(self.screen.get_size())
             self.screen.blit(pygame.transform.scale(self.display_2, (size[0] * self.zoom, size[1] * self.zoom)), (0,0))
-            self.screen.blit(pygame.transform.scale(self.night_mask, self.screen.get_size()), (0, 0))
+            # self.screen.blit(pygame.transform.scale(self.night_mask, self.screen.get_size()), (0, 0))
             # print(self.clock.get_fps())
             # print(self.clock.get_rawtime())
             # print(self.enemies[0].pos)
             pygame.display.update()
-            self.clock.tick(60)   
+            self.clock.tick(self.fps)   
     
 Game().run()
 
