@@ -311,6 +311,10 @@ class Player(NonobjEntities):
     def update(self, tilemap, movement=(0,0), offset=(0, 0)):
         super().update(tilemap, movement)
 
+        if (self.collisions['left'] or self.collisions['right']) and self.velocity[1] >= 0.2 and self.frame_movement[0] != 0:
+            print("WALL CLIMB")
+            self.drag = 0.2
+
         for pos in self.game.background.pos:
             pos[0] += self.frame_movement[0] * 0.4
             pos[1] += self.frame_movement[1] * 0.4

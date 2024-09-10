@@ -282,7 +282,7 @@ class Game:
                     for i in range(10):
                         angle =  (random.random() - 0.5) + (math.pi if projectile.speed > 0 else 0) + projectile.angle
                         speed = (random.random() + 2)
-                        self.sparks.append(Sparks(angle, speed, projectile.pos, color=(255, 165, 0)))
+                        self.sparks.append(Sparks(angle, speed, projectile.pos, self.tilemap.colors[tile['type']][random.randint(0, len(self.tilemap.colors[tile['type']]) - 1 )]))
 
                     self.sound.play(tile['type'], loop=0, vol=0.8)
                     projectile.kill = True
