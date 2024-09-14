@@ -35,6 +35,7 @@ class Assets:
                                       "player/jump" : Animation(load_images("entities/player/jump")),
                                       "player/run"  : Animation(load_images("entities/player/run"), image_dur=5),
                                       "player/fade" : Animation(load_images("entities/player/fade"), image_dur=3),
+                                      "player/wall_slide" : Animation(load_images("entities/player/wall_slide/")),
                                       #player/attack" : Animation(load_images("entities/player/attack"), image_dur=5),
                                       
                                       "enemy/idle" : Animation(load_images("entities/enemy/idle"), image_dur=7),

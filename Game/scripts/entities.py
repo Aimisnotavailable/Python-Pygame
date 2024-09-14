@@ -311,10 +311,6 @@ class Player(NonobjEntities):
     def update(self, tilemap, movement=(0,0), offset=(0, 0)):
         super().update(tilemap, movement)
 
-        if (self.collisions['left'] or self.collisions['right']) and self.velocity[1] >= 0.2 and self.frame_movement[0] != 0:
-            print("WALL CLIMB")
-            self.drag = 0.2
-
         for pos in self.game.background.pos:
             pos[0] += self.frame_movement[0] * 0.4
             pos[1] += self.frame_movement[1] * 0.4
@@ -348,7 +344,13 @@ class Player(NonobjEntities):
                     self.velocity[1] = 0
 
         if not self.teleporting:
-            if self.air_time > 4 + (4 * 1 - self.drag):
+
+            if (self.collisions['left'] or self.collisions['right']) and self.velocity[1] >= 0.2 and self.frame_movement[0] != 0:
+                self.set_action('wall_slide')
+                self.flip = not self.flip
+                self.drag = 0.5
+                self.jumps = 1
+            elif self.air_time > 4 + (4 * 1 - self.drag):
                 self.set_action('jump')
             elif self.movement[0] != 0:
                 self.set_action('run')
@@ -356,6 +358,7 @@ class Player(NonobjEntities):
                 self.set_action('idle')
 
         self.teleporting = max(0, self.teleporting - 1)
+        
     def render(self, surf, offset=(0,0)):
         
         if self.attacking:

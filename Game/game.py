@@ -159,6 +159,7 @@ class Game:
                         self.movement[0] = 2
                     if (event.key == pygame.K_w or event.key == pygame.K_SPACE) and self.player.jumps: 
                         self.player.velocity[1] = -3
+                        self.player.velocity[0] =  0 if self.player.action != 'wall_slide' else (-5 if self.player.flip else 5)
                         self.player.jumps -= 1
                     
                     if event.key == pygame.K_o:
@@ -345,7 +346,7 @@ class Game:
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
             self.angle = self.rotation.get_angle(p_pos, mpos)
             self.rotation.draw_curve(self.display, p_pos, math.radians(self.angle * (-1 if self.rotation.flip_x else 1)), 10)
-            
+            print(self.player.velocity[0])
             if self.current_weapon is not None:
                 if not self.player.attacking or self.current_weapon.type == "guns":
                     img = self.rotation.img(self.current_weapon.animation.img(), self.angle)
