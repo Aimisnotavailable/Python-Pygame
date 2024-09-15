@@ -153,9 +153,9 @@ class Game:
 
                 if event.type == pygame.KEYDOWN:
                     
-                    if event.key == pygame.K_a:
+                    if event.key == pygame.K_a :
                         self.movement[0] = -2
-                    if event.key == pygame.K_d:
+                    if event.key == pygame.K_d :
                         self.movement[0] = 2
                     if (event.key == pygame.K_w or event.key == pygame.K_SPACE) and self.player.jumps: 
                         self.player.velocity[1] = -3

@@ -345,7 +345,7 @@ class Player(NonobjEntities):
 
         if not self.teleporting:
 
-            if (self.collisions['left'] or self.collisions['right']) and self.velocity[1] >= 0.2 and self.frame_movement[0] != 0:
+            if (self.collisions['left'] or self.collisions['right']) and self.movement[0] != 0 and self.frame_movement[0] != 0:
                 self.set_action('wall_slide')
                 self.flip = not self.flip
                 self.drag = 0.5
