@@ -27,15 +27,16 @@ BASE_IMG_PATH = 'data/images/'
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
 
         pygame.display.set_caption("Game")
         pygame.mouse.set_visible(False)
 
         self.time = 0
 
-        self.screen = pygame.display.set_mode((600, 400))
-        self.display = pygame.Surface((300, 200), pygame.SRCALPHA)
-        self.display_2 = pygame.Surface((300, 200))
+        self.screen = pygame.display.set_mode((900, 600))
+        self.display = pygame.Surface((450, 300), pygame.SRCALPHA)
+        self.display_2 = pygame.Surface((450, 300))
         self.night_mask = pygame.Surface((300, 200), pygame.SRCALPHA)
 
         self.clock = pygame.time.Clock()
@@ -94,11 +95,11 @@ class Game:
         self.zooming = 0
         self.santa = Santa(self.assets['christmas/santa'].copy(), (0, 0), 0, 2)
 
-        for i in range(70):
-            angle = random.random() * math.pi
-            speed = random.random() + 3
-            pos = [random.random() * self.display.get_width(), random.random() * self.display.get_height()]
-            self.particles.append(Particles(self, 'snow', angle, speed, pos))
+        # for i in range(70):
+        #     angle = random.random() * math.pi
+        #     speed = random.random() + 3
+        #     pos = [random.random() * self.display.get_width(), random.random() * self.display.get_height()]
+        #     self.particles.append(Particles(self, 'snow', angle, speed, pos))
 
         for entity in self.tilemap.extract([('entity_spawner', 1), ('entity_spawner', 0)], keep=False):
             pos = entity['pos']
@@ -115,7 +116,8 @@ class Game:
 
         self.entity_track_rect = self.player.rect()
         self.fps = 60
-    
+
+
     def run(self):
         running = True
 
@@ -248,11 +250,11 @@ class Game:
                 shake_offset = self.screen_shake.screen_shake()
                 render_scroll = (int(render_scroll[0] + shake_offset[0]), int(render_scroll[1] + shake_offset[1]))
 
-            if self.santa.done:
-                self.santa.angle = (random.random() + 0.5) * math.pi + math.pi
-                self.santa.done = False
-            else:
-                self.santa.render(self.display, render_scroll)
+            # if self.santa.done:
+            #     self.santa.angle = (random.random() + 0.5) * math.pi + math.pi
+            #     self.santa.done = False
+            # else:
+            #     self.santa.render(self.display, render_scroll)
 
             self.clouds.render(self.display_2, render_scroll)
             self.clouds.update()
@@ -279,6 +281,18 @@ class Game:
             for projectile in self.projectiles.copy():
                 projectile.render(self.display, render_scroll)
                 tile = self.tilemap.solid_check(projectile.pos)
+                water_tile = self.tilemap.water_check(projectile.pos)
+                if water_tile:
+                    if water_tile['interactive'] == True:
+                        water_pos = water_tile['pos']
+                        self.tilemap.propogate_wave(f"{water_pos[0]};{water_pos[1]}", 
+                                                    water_loc_int=[water_pos[0] * self.tilemap.tile_size, water_pos[1] * self.tilemap.tile_size], 
+                                                    velocity=(0, 1), 
+                                                    offset=render_scroll, 
+                                                    entity_rect=projectile.rect(offset=render_scroll))
+                    projectile.drag = 0.6
+                else:
+                    projectile.drag = 1
                 if tile:
                     for i in range(10):
                         angle =  (random.random() - 0.5) + (math.pi if projectile.speed > 0 else 0) + projectile.angle
@@ -346,7 +360,7 @@ class Game:
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
             self.angle = self.rotation.get_angle(p_pos, mpos)
             self.rotation.draw_curve(self.display, p_pos, math.radians(self.angle * (-1 if self.rotation.flip_x else 1)), 10)
-            print(self.player.velocity[0])
+            # print(self.player.velocity[0])
             if self.current_weapon is not None:
                 if not self.player.attacking or self.current_weapon.type == "guns":
                     img = self.rotation.img(self.current_weapon.animation.img(), self.angle)

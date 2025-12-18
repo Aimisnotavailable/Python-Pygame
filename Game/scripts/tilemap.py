@@ -20,7 +20,9 @@ AUTO_TILE_MAP = {
     tuple(sorted([(-1, 0), (0, -1)])) : 8
 }
 
+
 PHYSICS_TILES = {'grass', 'stone', 'sand'}
+LIQUID_TILES = {'water'}
 AUTO_TILE_TYPES = {'grass', 'stone', 'sand'}
 
 COLORS = {
@@ -125,6 +127,13 @@ class TileMap:
                     physics_tiles.append(self.tilemap[key])
         return physics_tiles
     
+    def water_check(self, pos):
+        tile_loc = str(int((pos[0] //self.tile_size))) + ";" + str(int((pos[1]//self.tile_size)))
+        print(tile_loc)
+        if tile_loc in self.water_map:
+            return self.water_map[tile_loc]
+        return None
+    
     def solid_check(self, pos):
         tile_loc = str(int((pos[0] //self.tile_size))) + ";" + str(int((pos[1]//self.tile_size)))
         if tile_loc in self.tilemap:
@@ -139,29 +148,39 @@ class TileMap:
             tile_data['color'].append(random.choice(COLORS[tile['type']]))
         return tile_data
 
-    
+    def check_loc(self, str_pos, map=None):
+        if str_pos in map:
+            return True
+        
     def auto_tile(self):
 
         for loc in self.tilemap:
             tile = self.tilemap[loc]
-            neighbours = set()
 
+            tile_nearby = {'neighbours' : set(), 'water' : False}
             for shift in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                check_loc = str(tile['pos'][0] + shift[0]) + ';' + str(tile['pos'][1] + shift[1])
-                if check_loc in self.tilemap:
-                    if self.tilemap[check_loc]['type'] == tile['type']:
-                        neighbours.add(shift)
-            neighbours = tuple(sorted(neighbours))
+                str_pos = str(tile['pos'][0] + shift[0]) + ';' + str(tile['pos'][1] + shift[1])
+                if self.check_loc(str_pos, self.tilemap):
+                    if self.tilemap[str_pos]['type'] == tile['type'] or self.tilemap[str_pos]['type'] in AUTO_TILE_TYPES:
+                        tile_nearby['neighbours'].add(shift)
+                if self.check_loc(str_pos, self.water_map):
+                    tile_nearby['water'] = True
+
+            neighbours = tuple(sorted(tile_nearby['neighbours']))
 
             if (tile['type'] in AUTO_TILE_TYPES) and (neighbours in AUTO_TILE_MAP):
-                tile['variant'] = AUTO_TILE_MAP[neighbours]
+                shift = (0, -1)
+                str_pos = str(tile['pos'][0] + shift[0]) + ';' + str(tile['pos'][1] + shift[1])
+                if tile_nearby['water'] and (self.check_loc(str_pos, self.water_map) or self.check_loc(str_pos, self.tilemap)):
+                    tile['variant'] = 4
+                else:
+                    tile['variant'] = AUTO_TILE_MAP[neighbours]
     
     def validate_water_blocks(self):
 
         for loc in self.water_map.copy():
             water = self.water_map[loc]
             check_loc = str(water['pos'][0]) + ';' + str(water['pos'][1] -1)
-
             if not check_loc in self.water_map:
                 water['interactive'] = True
             else:
@@ -183,13 +202,15 @@ class TileMap:
     def propogate_wave(self, water_loc, water_loc_int, velocity=(0,0), offset=(0,0), entity_rect=None):
 
         water_data = self.water_map[water_loc]
-        
+        print(entity_rect, water_loc, water_data['pos'][0] * self.tile_size + offset[0], water_data['pos'][1] * self.tile_size + offset[1], offset)
         if water_data['interactive']:
             water = self.interactive_water[water_loc]
             for i in range(len(water.springs)):
                 pos = water.springs[i].pos
                 if entity_rect.collidepoint((pos[0] + water_data['pos'][0] * self.tile_size + offset[0], pos[1] + water_data['pos'][1] * self.tile_size + offset[1])):
-                    water.wave(i, force=-velocity[1] * 2)
+                    print("HIT")
+                
+                    water.wave(i, force=min(-0.5, -velocity[1] * 2))
 
             temp_loc = water_loc_int.copy()
             previous_water = water

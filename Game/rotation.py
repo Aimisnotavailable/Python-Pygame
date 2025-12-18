@@ -77,6 +77,8 @@ class Rotation:
             x = (mpos[0] - midpoint[0])
             y = (mpos[1] - midpoint[1])
 
+            print((x, y))
+
             if x != 0:
                 angle = int((math.atan(y/x) * (-1 if self.flip_x else 1) * (180 / math.pi) ) + QUADRANTS[quad])
             else:
@@ -89,7 +91,7 @@ class Rotation:
             img_rect = img.get_rect(center=(self.img_pos[0] + math.cos(math.radians(angle * (-1 if self.flip_x else 1)))  * 15, self.img_pos[1] + math.sin(math.radians(angle * (-1 if self.flip_x else 1))) * 15))
 
             self.display.blit(pygame.transform.flip(img, False ,  not self.flip_x), img_rect)
-            print(angle)
+            # print(angle)
 
             if self.clicking:
                 if self.cd == 0:

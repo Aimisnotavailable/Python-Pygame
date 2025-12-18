@@ -8,6 +8,7 @@ class SoundMixer:
             self.assets.update(Assets().fetch(payload={'sfx' : {load : payload[load]}}))
 
     def play(self, s_type, variant=0, loop=-1, vol=1.0):
+        
         self.assets[s_type][variant].play(loop)
         self.assets[s_type][variant].set_volume(vol)
     

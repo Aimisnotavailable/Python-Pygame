@@ -10,7 +10,7 @@ class Assets:
         self.assets = {
             
             'img' : {
-                      "background" : { "background" : load_images("backgrounds"),
+                      "background" : { "background" : load_images("backgrounds", scale=[450, 300]),
                                         "clouds" : load_images("clouds")
                                       },
                       "tooltips"   : { "cursor" : Animation(load_images("cursor"), image_dur=7),
