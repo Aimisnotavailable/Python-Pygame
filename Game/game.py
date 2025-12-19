@@ -94,7 +94,17 @@ class Game:
         self.zoom = 1.0
         self.zooming = 0
         self.santa = Santa(self.assets['christmas/santa'].copy(), (0, 0), 0, 2)
-
+        # TO-DO :
+        # - Add seasonal events system
+        # - Add Christmas event with Santa flying across the screen occasionally dropping gifts
+        # - Add Halloween event with bats flying across the screen occasionally dropping candy
+        # - Add Easter event with bunnies hopping across the screen occasionally dropping eggs
+        # - Add Summer event with beach balls bouncing across the screen occasionally dropping ice cream
+        ##########################################################################################
+        ##########################################################################################
+        ##########################################################################################
+        ##########################################################################################
+        ##########################################################################################
         # for i in range(70):
         #     angle = random.random() * math.pi
         #     speed = random.random() + 3
