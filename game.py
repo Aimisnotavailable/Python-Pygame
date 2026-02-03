@@ -94,6 +94,7 @@ class Game:
         self.zoom = 1.0
         self.zooming = 0
         self.santa = Santa(self.assets['christmas/santa'].copy(), (0, 0), 0, 2)
+        
         # TO-DO :
         # - Add seasonal events system
         # - Add Christmas event with Santa flying across the screen occasionally dropping gifts
