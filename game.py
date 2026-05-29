@@ -232,6 +232,7 @@ class Game:
                         if self.current_weapon.type == 'swords':
                             self.player.start_charge(is_initialized=True)
                         elif self.current_weapon.type == 'guns':
+                            print(self.player.pos)
                             self.player.shooting = True
                             atk_type = 'shoot_attack'
                             self.player.perform_attack(atk_type, self.current_weapon)

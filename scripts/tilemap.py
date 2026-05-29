@@ -129,7 +129,7 @@ class TileMap:
     
     def water_check(self, pos):
         tile_loc = str(int((pos[0] //self.tile_size))) + ";" + str(int((pos[1]//self.tile_size)))
-        print(tile_loc)
+        # print(tile_loc)
         if tile_loc in self.water_map:
             return self.water_map[tile_loc]
         return None
@@ -202,13 +202,13 @@ class TileMap:
     def propogate_wave(self, water_loc, water_loc_int, velocity=(0,0), offset=(0,0), entity_rect=None):
 
         water_data = self.water_map[water_loc]
-        print(entity_rect, water_loc, water_data['pos'][0] * self.tile_size + offset[0], water_data['pos'][1] * self.tile_size + offset[1], offset)
+        # print(entity_rect, water_loc, water_data['pos'][0] * self.tile_size + offset[0], water_data['pos'][1] * self.tile_size + offset[1], offset)
         if water_data['interactive']:
             water = self.interactive_water[water_loc]
             for i in range(len(water.springs)):
                 pos = water.springs[i].pos
                 if entity_rect.collidepoint((pos[0] + water_data['pos'][0] * self.tile_size + offset[0], pos[1] + water_data['pos'][1] * self.tile_size + offset[1])):
-                    print("HIT")
+                    # print("HIT")
                 
                     water.wave(i, force=min(-0.5, -velocity[1] * 2))
 

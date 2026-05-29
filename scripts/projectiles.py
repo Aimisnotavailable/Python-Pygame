@@ -1,5 +1,7 @@
 import math
 import pygame
+from collections import deque
+import random
 class Projectiles:
 
     def __init__(self, animation, rotation_angle, speed, angle, life, pos=(0, 0), spawn=None):
@@ -13,6 +15,7 @@ class Projectiles:
         self.y_vel = 0
         self.kill = False
         self.drag = 1
+        self.trail = deque(maxlen=20)
        
     def rect(self, offset=(0, 0)):
         img = pygame.transform.rotate(self.animation.img(), self.rotation_angle)
@@ -24,10 +27,16 @@ class Projectiles:
         self.y_vel = min(5, self.y_vel + 0.01) 
         self.pos[0] += (math.cos(self.angle) * self.speed) * self.drag
         self.pos[1] += (math.sin(self.angle) * self.speed + self.y_vel) * self.drag
+        self.trail.append(self.pos.copy())
         self.life -=1
         return not self.life
 
     def render(self, surf, offset=(0, 0)):
+        
+        for trail in self.trail:
+            pos = (trail[0] + math.cos(random.random() * 2 * math.pi) * self.speed * self.drag, 
+                    trail[1] + math.sin(random.random() * 2 * math.pi) * self.speed * self.drag)
+            pygame.draw.circle(surf, (0, 0, 0), (pos[0] - offset[0], pos[1] - offset[1]), 1)
         img = pygame.transform.rotate(self.animation.img(), self.rotation_angle)
         img_rect = img.get_rect(center=(self.pos[0] - offset[0], self.pos[1] - offset[1]))
         surf.blit(img, img_rect)
