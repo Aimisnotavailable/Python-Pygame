@@ -48,6 +48,7 @@ TILE_TYPES = {'solid' : PHYSICS_TILES, 'liquid' : 'water'}
 class TileMap:
     def __init__(self, game, tile_size=16):
         self.game = game
+        self.assets = game.assets
         self.tile_size = tile_size
         self.tilemap = {}
         self.offgrid_tiles = []
@@ -86,8 +87,8 @@ class TileMap:
 
     def render(self, surf, offset=(0,0), grid_enabled=False):
         for tile in self.offgrid_tiles:
-            img_rect = self.game.assets[tile['type']][tile['variant']].get_rect(centerx=tile['pos'][0] - offset[0], bottom=tile['pos'][1] - offset[1])
-            surf.blit(self.game.assets[tile['type']][tile['variant']], img_rect)
+            img_rect = self.assets[tile['type']][tile['variant']].get_rect(centerx=tile['pos'][0] - offset[0], bottom=tile['pos'][1] - offset[1])
+            surf.blit(self.assets[tile['type']][tile['variant']], img_rect)
 
         for x in range(offset[0] // self.tile_size -48, (offset[0] + surf.get_width()) // self.tile_size + 1):
             for y in range(offset[1] // self.tile_size -48, (offset[1] + surf.get_height()) // self.tile_size + 1):
@@ -97,7 +98,7 @@ class TileMap:
 
                 if loc in self.tilemap:
                     tile = self.tilemap[loc]
-                    surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
+                    surf.blit(self.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
 
                 if loc in self.water_map:
                     self.nearby_water[loc] = (x, y)
@@ -112,7 +113,7 @@ class TileMap:
                 water = self.interactive_water[loc]
                 water.render(surf, pos=(x * self.tile_size, y * self.tile_size), offset=offset)
             else:
-                surf.blit(self.game.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
+                surf.blit(self.assets[tile['type']][tile['variant']],(tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
 
             del self.nearby_water[loc]
             
