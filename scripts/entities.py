@@ -13,6 +13,7 @@ class PhysicsEntities:
         self.camera = game.camera
         self.rotation = game.rotation
         self.background = game.background
+        self.physics = game.physics
         self.type = e_type
         self.pos = list(pos)
         self.size = size
@@ -39,91 +40,7 @@ class PhysicsEntities:
         surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
 
     def update(self, tilemap, movement=(0,0), offset=(0,0)):
-        self.movement = movement
-        self.collisions = {'up' : False, 'down' : False, 'right' : False, 'left' : False}
-        self.frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1] )
-
-        self.pos[0] += self.frame_movement[0] * self.drag
-        entity_rect = self.rect()
-        tile_data = tilemap.tiles_rect_around(self.pos)
-
-        for i in range(len(tile_data['rects'])):
-            rect = tile_data['rects'][i]
-            color = tile_data['color'][i]
-            if entity_rect.colliderect(rect):
-                if self.frame_movement[0] > 0:
-                    entity_rect.right = rect.left
-                    self.collisions['right'] = True
-                
-                if self.frame_movement[0] < 0:
-                    entity_rect.left = rect.right
-                    self.collisions['left'] = True
-                self.pos[0] = entity_rect.x
-
-        self.pos[1] += self.frame_movement[1] * self.drag
-        entity_rect = self.rect()
-        tile_data = tilemap.tiles_rect_around(self.pos)
-            
-        for i in range(len(tile_data['rects'])):
-            rect = tile_data['rects'][i]
-            color = tile_data['color'][i]
-
-            if entity_rect.colliderect(rect):
-                if int(self.drag):
-                    spawn_particles = random.random() + int(abs(self.velocity[1]))
-                else:
-                    spawn_particles = False
-
-                if self.frame_movement[1] > 0:
-                    entity_rect.bottom = rect.top
-                    self.collisions['down'] = True
-
-                if self.frame_movement[1] < 0:
-                    entity_rect.top = rect.bottom
-                    self.collisions['up'] = True
-
-                self.pos[1] = entity_rect.y
-
-                if self.type == 'player' or self.type == 'enemy':
-                    if spawn_particles > 0.6 and (self.collisions['down'] or self.collisions['up']):
-                        if self.action != 'idle':
-                            x = self.pos[0]
-                            if self.collisions['down']:
-                                y = rect.top
-                                angle = ((random.random() * math.pi) + math.pi)
-                                speed = random.random() * random.random()
-                                self.effects.particles.append(Particles(self.game, 'dust', angle, speed, (x, y), color_key=color))
-                            elif self.collisions['up']:
-                                y = rect.bottom
-                                angle = ((random.random()) * math.pi)
-                                speed = random.random() * random.random()
-                                self.effects.particles.append(Particles(self.game, 'dust', angle, speed, (x, y), color_key=color))
-                    
-        water_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]
-        water_loc = str(water_loc_int[0]) + ";" + str(water_loc_int[1])
-
-        if water_loc in tilemap.water_map:
-            self.drag = 0.6
-            tilemap.propogate_wave(water_loc, water_loc_int, velocity=self.velocity, offset=offset, entity_rect=entity_rect)
-        else:
-            self.drag = min(1, self.drag + 0.01)
-        
-        if movement[0] > 0:
-            self.flip = False
-        elif movement[0] < 0:
-            self.flip = True
-        
-        self.velocity[1] = min(5 * self.drag, self.velocity[1] + 0.1)
-        if self.collisions['up'] or self.collisions['down']:
-            self.velocity[1] = 0
-        
-        if self.velocity[0] > 0:
-            self.velocity[0] = max(self.velocity[0] - 0.1, 0)
-        elif self.velocity[0] < 0:
-            self.velocity[0] = min(self.velocity[0] + 0.1, 0)
-        self.animation.update()
-
-        self.track = max(0, self.track - 1)
+        self.physics.update(self, tilemap, movement, offset)
 
 class NonobjEntities(PhysicsEntities):
     

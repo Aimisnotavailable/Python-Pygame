@@ -13,6 +13,7 @@ from scripts.sparks import Sparks
 from scripts.particles import Particles
 from scripts.effects import Effects
 from scripts.camera import Camera
+from scripts.physics import Physics
 #from test_scripts.water1 import Water
 from scripts.water import Water
 from scripts.rotation import Rotation
@@ -49,6 +50,7 @@ class Game:
         # Everything an entity needs must exist before the first entity is built.
         self.effects = Effects()
         self.camera = Camera(self.display)
+        self.physics = Physics()
         self.rotation = Rotation()
         self.background = Background(self.assets['background'])
 
