@@ -1,7 +1,10 @@
 import pygame
 import sys
+import os
 import math
 import random
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts.rotation import Rotation
 from scripts.projectiles import Projectiles
@@ -25,7 +28,7 @@ class Game:
 
         self.sparks = []
         self.projectiles = []
-        self.assets = Assets().fetch(fetch_all=True)
+        self.assets = Assets().fetch(payload={'img': ['all']})
 
         self.midpoint = (150, 100)
 

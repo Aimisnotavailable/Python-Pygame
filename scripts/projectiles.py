@@ -30,7 +30,7 @@ class Projectiles:
         self.pos[1] += (math.sin(self.angle) * self.speed + self.y_vel) * self.drag * frame
         self.trail.append(self.pos.copy())
         self.life -= frame
-        return not self.life
+        return self.life <= 0
 
     def render(self, surf, offset=(0, 0)):
         

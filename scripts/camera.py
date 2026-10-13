@@ -1,4 +1,3 @@
-import pygame
 from scripts.screenshake import ScreenShake
 
 class Camera:

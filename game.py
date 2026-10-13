@@ -14,12 +14,11 @@ from scripts.particles import Particles
 from scripts.effects import Effects
 from scripts.camera import Camera
 from scripts.physics import Physics
-#from test_scripts.water1 import Water
+#from archive.test_scripts.water1 import Water
 from scripts.water import Water
 from scripts.rotation import Rotation
 from scripts.assets import Assets
 from scripts.projectiles import Projectiles
-from scripts.screenshake import ScreenShake
 from scripts.transition import Transition
 from scripts.sfx import SoundMixer
 
@@ -257,6 +256,7 @@ class Game:
                         if self.current_weapon.type == 'swords':
                             self.player.start_charge(is_initialized=True)
                         elif self.current_weapon.type == 'guns':
+                            self.player.shooting = True
                             atk_type = 'shoot_attack'
                             self.player.perform_attack(atk_type, self.current_weapon)
                             self.screen_shake.set_shake_config(strength=4, dur=4)
@@ -451,6 +451,7 @@ class Game:
             size =  list(self.screen.get_size())
             self.screen.blit(pygame.transform.scale(self.display_2, (size[0] * self.camera.zoom, size[1] * self.camera.zoom)), (0,0))
             pygame.display.update()
+            self.clock.tick(self.camera.fps)
     
 Game().run()
 

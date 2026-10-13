@@ -10,10 +10,9 @@ class Physics:
     sets its own before entities are built.
     """
 
-    def __init__(self, gravity=0.1, max_fall=5, drag=1, friction=0.1, water_drag=0.6):
+    def __init__(self, gravity=0.1, max_fall=5, friction=0.1, water_drag=0.6):
         self.gravity = gravity
         self.max_fall = max_fall
-        self.drag = drag
         self.friction = friction
         self.water_drag = water_drag
 

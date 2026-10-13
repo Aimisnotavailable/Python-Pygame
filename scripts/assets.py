@@ -132,10 +132,6 @@ def get_registry():
     return _registry
 
 
-class LazySfx(LazyAssets):
-    pass
-
-
 def fetch(payload={}, fetch_all=False):
     """Flattens the registry into a single lazily-resolved namespace."""
 

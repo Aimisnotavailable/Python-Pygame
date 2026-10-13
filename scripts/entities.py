@@ -2,13 +2,13 @@ import pygame
 import random
 import math
 from scripts.sparks import Sparks
-from scripts.particles import Particles
 from scripts.projectiles import Projectiles
 
 class PhysicsEntities:
 
     def __init__(self, game, e_type, pos=(0,0), size=(16,16)):
         self.game = game
+        self.assets = game.assets
         self.effects = game.effects
         self.camera = game.camera
         self.rotation = game.rotation
@@ -47,7 +47,7 @@ class NonobjEntities(PhysicsEntities):
     def set_action(self, action):
         if action != self.action:
             self.action = action
-            self.animation = self.game.assets[self.type + '/' + self.action].copy()
+            self.animation = self.assets[self.type + '/' + self.action].copy()
 
     def perform_attack(self, atk_type, current_weapon):
         #if(self.air_time < 4):
@@ -81,7 +81,7 @@ class Enemy(NonobjEntities):
         self.max_hp = 5
         self.attacked =0
 
-        self.hat = self.game.assets['enemy/hat'].copy()
+        self.hat = self.assets['enemy/hat'].copy()
 
     def damage(self):
         self.current_hp -=1
@@ -115,7 +115,7 @@ class Enemy(NonobjEntities):
         else:
             self.set_action('idle')
         
-        super().update(tilemap, movement, offset, dt)
+        super().update(tilemap, movement, dt=dt)
     
     def render(self, surf, offset=(0,0)):
         super().render(surf, offset)
@@ -231,7 +231,7 @@ class Player(NonobjEntities):
         pygame.draw.rect(surf, (255, 255, 255), (pos[0] - offset[0], pos[1] - offset[1] - 10, (self.attacking/self.cooldown_time) * 20 , 5))
 
     def update(self, tilemap, movement=(0,0), offset=(0, 0), dt=1/60):
-        super().update(tilemap, movement, offset, dt)
+        super().update(tilemap, movement, dt=dt)
 
         for pos in self.background.pos:
             pos[0] += self.frame_movement[0] * 0.4
