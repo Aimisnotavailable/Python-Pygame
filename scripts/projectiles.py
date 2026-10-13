@@ -23,12 +23,13 @@ class Projectiles:
         return img_rect
     
     
-    def update(self):
-        self.y_vel = min(5, self.y_vel + 0.01) 
-        self.pos[0] += (math.cos(self.angle) * self.speed) * self.drag
-        self.pos[1] += (math.sin(self.angle) * self.speed + self.y_vel) * self.drag
+    def update(self, dt=1/60):
+        frame = 60 * dt
+        self.y_vel = min(5, self.y_vel + 0.01 * frame)
+        self.pos[0] += (math.cos(self.angle) * self.speed) * self.drag * frame
+        self.pos[1] += (math.sin(self.angle) * self.speed + self.y_vel) * self.drag * frame
         self.trail.append(self.pos.copy())
-        self.life -=1
+        self.life -= frame
         return not self.life
 
     def render(self, surf, offset=(0, 0)):

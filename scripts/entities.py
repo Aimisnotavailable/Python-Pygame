@@ -39,8 +39,8 @@ class PhysicsEntities:
     def render(self, surf, offset=(0,0)):
         surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
 
-    def update(self, tilemap, movement=(0,0), offset=(0,0)):
-        self.physics.update(self, tilemap, movement, offset)
+    def update(self, tilemap, movement=(0,0), offset=(0,0), dt=1/60):
+        self.physics.update(self, tilemap, movement, offset, dt)
 
 class NonobjEntities(PhysicsEntities):
     
@@ -89,7 +89,7 @@ class Enemy(NonobjEntities):
         self.velocity[1] = -2
         self.flip = not self.flip
 
-    def update(self, tilemap, movement=(0,0), offset=(0, 0)):
+    def update(self, tilemap, movement=(0,0), offset=(0, 0), dt=1/60):
         if self.walking and self.action != 'damaged':
             if tilemap.solid_check((self.rect().centerx + (-7 if self.flip else 7), self.pos[1] + 23)):
                 if(self.collisions['right'] or self.collisions['left']):
@@ -115,7 +115,7 @@ class Enemy(NonobjEntities):
         else:
             self.set_action('idle')
         
-        super().update(tilemap, movement)
+        super().update(tilemap, movement, offset, dt)
     
     def render(self, surf, offset=(0,0)):
         super().render(surf, offset)
@@ -230,8 +230,8 @@ class Player(NonobjEntities):
         pos = self.rect().topleft
         pygame.draw.rect(surf, (255, 255, 255), (pos[0] - offset[0], pos[1] - offset[1] - 10, (self.attacking/self.cooldown_time) * 20 , 5))
 
-    def update(self, tilemap, movement=(0,0), offset=(0, 0)):
-        super().update(tilemap, movement)
+    def update(self, tilemap, movement=(0,0), offset=(0, 0), dt=1/60):
+        super().update(tilemap, movement, offset, dt)
 
         for pos in self.background.pos:
             pos[0] += self.frame_movement[0] * 0.4

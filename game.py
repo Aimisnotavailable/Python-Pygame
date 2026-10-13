@@ -159,6 +159,9 @@ class Game:
             self.display.fill((0,0,0,0))
             self.night_mask.fill((0, 0, 0, 140))
 
+            # Clamped so a stalled frame cannot teleport anything through a wall.
+            self.dt = min(self.clock.get_time() / 1000, 1/30)
+
             mpos = list(pygame.mouse.get_pos())
             mpos[0] = mpos[0] // 2
             mpos[1] = mpos[1] // 2
@@ -325,7 +328,7 @@ class Game:
                     self.sound.play(tile['type'], loop=0, vol=0.8)
                     projectile.kill = True
                 
-                if projectile.update():
+                if projectile.update(self.dt):
                     projectile.kill = True
 
                 if not projectile.kill:
@@ -396,7 +399,7 @@ class Game:
                     self.items_nearby.remove(item)
 
             for enemy in self.enemies:
-                enemy.update(self.tilemap, offset=render_scroll)
+                enemy.update(self.tilemap, offset=render_scroll, dt=self.dt)
                 enemy.render(self.display, offset=render_scroll)
                 pygame.draw.circle(self.display, (0, 0 if not self.tilemap.solid_check((enemy.rect().centerx + (-7 if enemy.flip else 7), enemy.pos[1] + 23)) else 255, 0), (enemy.rect().centerx + (-7 if enemy.flip else 7) - render_scroll[0], enemy.pos[1] + 23 - render_scroll[1]), 1)
             
@@ -422,7 +425,7 @@ class Game:
             #                     self.sparks.append(Sparks(angle, speed, enemy.pos))
 
             self.inventory.render(self.display)
-            self.player.update(self.tilemap, self.movement, offset=render_scroll)
+            self.player.update(self.tilemap, self.movement, offset=render_scroll, dt=self.dt)
             self.player.render(self.display, offset=render_scroll)     
             
             display_mask = pygame.mask.from_surface(self.display)

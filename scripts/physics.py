@@ -17,7 +17,11 @@ class Physics:
         self.friction = friction
         self.water_drag = water_drag
 
-    def update(self, entity, tilemap, movement=(0, 0), offset=(0, 0)):
+    def update(self, entity, tilemap, movement=(0, 0), offset=(0, 0), dt=1/60):
+        # Every tuned value below was authored per frame at 60 FPS. frame keeps
+        # those exact numbers so behaviour is unchanged at dt = 1/60 and
+        # scales correctly when a frame runs long.
+        frame = 60 * dt
 
         entity.movement = movement
         entity.collisions = {'up' : False, 'down' : False, 'right' : False, 'left' : False}
@@ -86,21 +90,21 @@ class Physics:
             entity.drag = self.water_drag
             tilemap.propogate_wave(water_loc, water_loc_int, velocity=entity.velocity, offset=offset, entity_rect=entity_rect)
         else:
-            entity.drag = min(1, entity.drag + 0.01)
+            entity.drag = min(1, entity.drag + 0.01 * frame)
 
         if movement[0] > 0:
             entity.flip = False
         elif movement[0] < 0:
             entity.flip = True
 
-        entity.velocity[1] = min(self.max_fall * entity.drag, entity.velocity[1] + self.gravity)
+        entity.velocity[1] = min(self.max_fall * entity.drag, entity.velocity[1] + self.gravity * frame)
         if entity.collisions['up'] or entity.collisions['down']:
             entity.velocity[1] = 0
 
         if entity.velocity[0] > 0:
-            entity.velocity[0] = max(entity.velocity[0] - self.friction, 0)
+            entity.velocity[0] = max(entity.velocity[0] - self.friction * frame, 0)
         elif entity.velocity[0] < 0:
-            entity.velocity[0] = min(entity.velocity[0] + self.friction, 0)
+            entity.velocity[0] = min(entity.velocity[0] + self.friction * frame, 0)
 
         entity.animation.update()
 
