@@ -8,6 +8,12 @@ class Effects:
         self.sparks = []
         self.particles = []
 
+    def clear(self):
+
+        self.projectiles.clear()
+        self.sparks.clear()
+        self.particles.clear()
+
     def render(self, surf, offset=(0, 0)):
 
         for particle in self.particles.copy():

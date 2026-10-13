@@ -10,6 +10,9 @@ class PhysicsEntities:
     def __init__(self, game, e_type, pos=(0,0), size=(16,16)):
         self.game = game
         self.effects = game.effects
+        self.camera = game.camera
+        self.rotation = game.rotation
+        self.background = game.background
         self.type = e_type
         self.pos = list(pos)
         self.size = size
@@ -255,7 +258,7 @@ class Player(NonobjEntities):
         self.atk_type = atk_type
         
 
-        a_r = self.game.angle * (-1 if self.game.rotation.flip_x else 1)
+        a_r = self.camera.angle * (-1 if self.rotation.flip_x else 1)
         angle = math.radians(a_r)
         animation = self.current_weapon.particle_animation()[atk_type].copy()
         img_rotation_angle = -a_r
@@ -269,7 +272,7 @@ class Player(NonobjEntities):
             # self.track = self.cooldown_time
             self.effects.projectiles.append(Projectiles(animation, img_rotation_angle, speed=10, angle=angle, life=self.cooldown_time // 2, pos=self.rect().center, spawn=self.current_weapon))
             self.current_weapon.play_sound(variant=2, vol=1.0)
-            self.game.zooming = self.cooldown_time // 2
+            self.camera.zooming = self.cooldown_time // 2
 
         elif self.atk_type == "shoot_attack":
             for i in range(4):
@@ -297,8 +300,8 @@ class Player(NonobjEntities):
                 
 
     def recoil(self, x_recoil, y_recoil):
-        self.velocity[0] = - math.cos(math.radians(self.game.angle)) * x_recoil
-        y_vel = math.sin(math.radians(self.game.angle * (1 if self.game.rotation.flip_x else -1))) * y_recoil
+        self.velocity[0] = - math.cos(math.radians(self.camera.angle)) * x_recoil
+        y_vel = math.sin(math.radians(self.camera.angle * (1 if self.rotation.flip_x else -1))) * y_recoil
         self.velocity[1] += y_vel 
 
     def teleport(self, end_pos=[0, 0]):
@@ -313,7 +316,7 @@ class Player(NonobjEntities):
     def update(self, tilemap, movement=(0,0), offset=(0, 0)):
         super().update(tilemap, movement)
 
-        for pos in self.game.background.pos:
+        for pos in self.background.pos:
             pos[0] += self.frame_movement[0] * 0.4
             pos[1] += self.frame_movement[1] * 0.4
 

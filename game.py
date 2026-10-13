@@ -12,6 +12,7 @@ from scripts.clouds import Clouds, Cloud
 from scripts.sparks import Sparks
 from scripts.particles import Particles
 from scripts.effects import Effects
+from scripts.camera import Camera
 #from test_scripts.water1 import Water
 from scripts.water import Water
 from scripts.rotation import Rotation
@@ -45,10 +46,18 @@ class Game:
         self.assets = Assets().fetch(payload={'img' : ['all']})
         
         self.cursor = self.assets['cursor'].copy()
+        # Everything an entity needs must exist before the first entity is built.
+        self.effects = Effects()
+        self.camera = Camera(self.display)
+        self.rotation = Rotation()
+        self.background = Background(self.assets['background'])
+
 
         self.current_weapon = Gun(self, 'dirt_gun') # Sword(self,  'sword', color=(100, 100, 100)) # Sword(self, 'dirt_stick', color=(150, 75, 0))
         
         self.pos = (self.display.get_width()//2, self.display.get_height()//2)
+
+
         self.load()
         # self.weapon_pos = self.pos
         
@@ -68,11 +77,12 @@ class Game:
         self.tilemap = TileMap(self)
         self.tilemap.load("data/maps/map.json")
         self.movement = [0, 0]
- 
-        self.scroll = [0, 0]
-        self.angle = 0
 
-        self.effects = Effects()
+        self.camera.reset()
+        self.scroll = self.camera.scroll
+        self.screen_shake = self.camera.screen_shake
+
+        self.effects.clear()
         self.sparks = self.effects.sparks
         self.projectiles = self.effects.projectiles
         self.particles = self.effects.particles
@@ -83,18 +93,13 @@ class Game:
         self.inventory.item_list[self.inventory.current_selected] = self.current_weapon
         self.inventory.item_list[1] = Sword(self, 'sword', color=(100, 100, 100))
 
-        self.rotation = Rotation()
-        self.screen_shake = ScreenShake()
         self.transition = Transition()
-        self.background = Background(self.assets['background'])
         self.sound = SoundMixer(payload={'background' : ['all'], 'tile' : ['all'], 'player' : ['all']})
         self.sound.play('background_music', vol=0.3)
         self.water = Water()
         self.under_water = False
         self.clouds = Clouds(self.assets['clouds'][0], count=15)
         self.trees = self.tilemap.extract([('tree', 0), ('tree', 1)])
-        self.zoom = 1.0
-        self.zooming = 0
         self.santa = Santa(self.assets['christmas/santa'].copy(), (0, 0), 0, 2)
         
         # TO-DO :
@@ -131,7 +136,7 @@ class Game:
             self.tree_spawners.append(pygame.Rect(tree['pos'][0], tree['pos'][1], *size))
 
         self.entity_track_rect = self.player.rect()
-        self.fps = 60
+        self.camera.fps = 60
 
 
     def run(self):
@@ -150,8 +155,7 @@ class Game:
             else:
                 self.entity_track_rect = pygame.Rect(*self.projectiles[-1].pos.copy(), 8 , 8)
 
-            self.scroll[0] += ((self.entity_track_rect.centerx - self.display.get_width() / 2 / self.zoom - self.scroll[0]) / (15 if self.zoom <= 1 else 1)) 
-            self.scroll[1] += ((self.entity_track_rect.centery - self.display.get_height() / 2 / self.zoom - self.scroll[1]) / (15 if self.zoom <= 1 else 1)) 
+            self.camera.track(self.entity_track_rect)
             render_scroll = [int(self.scroll[0]), int(self.scroll[1])]
 
             self.background.render(self.display_2)
@@ -264,7 +268,7 @@ class Game:
                                 self.player.shooting = False
 
             if self.screen_shake.dur:
-                shake_offset = self.screen_shake.screen_shake()
+                shake_offset = self.camera.shake_offset()
                 render_scroll = (int(render_scroll[0] + shake_offset[0]), int(render_scroll[1] + shake_offset[1]))
 
             # if self.santa.done:
@@ -340,7 +344,7 @@ class Game:
                         self.player.teleport(pos.copy())
                         self.sound.play('teleport', variant=0, loop=0) 
                         self.items_nearby.append(projectile.spawn)
-                        self.zooming = 0
+                        self.camera.zooming = 0
 
                     self.player.track = 0
                     self.projectiles.remove(projectile)
@@ -366,23 +370,23 @@ class Game:
             
 
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
-            self.angle = self.rotation.get_angle(p_pos, mpos)
-            self.rotation.draw_curve(self.display, p_pos, math.radians(self.angle * (-1 if self.rotation.flip_x else 1)), 10)
+            self.camera.angle = self.rotation.get_angle(p_pos, mpos)
+            self.rotation.draw_curve(self.display, p_pos, math.radians(self.camera.angle * (-1 if self.rotation.flip_x else 1)), 10)
             # print(self.player.velocity[0])
             if self.current_weapon is not None:
                 if not self.player.attacking or self.current_weapon.type == "guns":
-                    img = self.rotation.img(self.current_weapon.animation.img(), self.angle)
+                    img = self.rotation.img(self.current_weapon.animation.img(), self.camera.angle)
 
                     # print(self.rotation.angle)
                     
-                    if self.angle > 90 and self.angle < 270:
+                    if self.camera.angle > 90 and self.camera.angle < 270:
                         self.player.flip = True
                     else:
                         self.player.flip = False
 
                     # img_rect = img.get_rect(left=p_pos[0] + (-7 if self.player.flip else 12), top = p_pos[1] + 5)
                     
-                    img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.angle * (-1 if self.rotation.flip_x else 1))) * 8))
+                    img_rect = img.get_rect(center=(p_pos[0] + math.cos(math.radians(self.camera.angle * (-1 if self.rotation.flip_x else 1)))  * 10, p_pos[1] + math.sin(math.radians(self.camera.angle * (-1 if self.rotation.flip_x else 1))) * 8))
                     self.display.blit(img, img_rect)
             
             
@@ -444,22 +448,16 @@ class Game:
             if self.transition.transition:
                 self.transition.render(self.display_2)
 
-            if self.zooming:
-                self.zoom = min(2, self.zoom + 0.01)
-                self.fps  = 30
-            else:
-                self.zoom = max(1, self.zoom - 0.01)
-                self.fps =  60
-            self.zooming = max(0, self.zooming - 1)
+            self.camera.update_zoom()
 
             size =  list(self.screen.get_size())
-            self.screen.blit(pygame.transform.scale(self.display_2, (size[0] * self.zoom, size[1] * self.zoom)), (0,0))
+            self.screen.blit(pygame.transform.scale(self.display_2, (size[0] * self.camera.zoom, size[1] * self.camera.zoom)), (0,0))
             # self.screen.blit(pygame.transform.scale(self.night_mask, self.screen.get_size()), (0, 0))
             # print(self.clock.get_fps())
             # print(self.clock.get_rawtime())
             # print(self.enemies[0].pos)
             pygame.display.update()
-            self.clock.tick(self.fps)   
+            self.clock.tick(self.camera.fps)   
     
 Game().run()
 
