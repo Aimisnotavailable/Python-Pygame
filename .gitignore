@@ -1,0 +1,20 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+
+# --- Editor ---
+.vscode/
+
+# --- Agent instructions and scratch ---
+# The repo is the engine only. Agent config and working notes stay local.
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+COPILOT.md
+.cursorrules
+.cursor/
+.aider*
+.codeium/
+.windsurf/
+docs/
+.superpowers/

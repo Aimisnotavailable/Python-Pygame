@@ -7,6 +7,7 @@ from scripts.rotation import Rotation
 from scripts.projectiles import Projectiles
 from scripts.sparks import Sparks
 from scripts.assets import Assets
+from scripts.utils import Animation
 
 
 
@@ -24,9 +25,10 @@ class Game:
 
         self.sparks = []
         self.projectiles = []
-        self.assets = Assets().fetch()
+        self.assets = Assets().fetch(fetch_all=True)
 
         self.midpoint = (150, 100)
+
         
         self.cursor = self.assets['cursor'].copy()
     
@@ -55,7 +57,6 @@ class Game:
 
             angle = self.rotation.get_angle(self.midpoint, mpos)
 
-            print(angle)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -67,7 +68,7 @@ class Game:
                    img.fill((255, 255, 255))
                    img.set_colorkey((255,255 ,255))
                    pygame.draw.circle(img, (100, 100, 100), (5, 5), 5)
-                   self.projectiles.append(Projectiles(img, 2, math.radians(angle * (-1 if self.rotation.flip_x else 1)), 100, self.midpoint))
+                   self.projectiles.append(Projectiles(Animation([img]), 0, 2, math.radians(angle * (-1 if self.rotation.flip_x else 1)), 100, self.midpoint))
             
             
             test_rect = pygame.Rect((*self.midpoint , 10, 10))

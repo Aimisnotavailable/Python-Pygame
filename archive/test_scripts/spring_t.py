@@ -90,19 +90,19 @@ class Game:
                     self.clicking = False
                     self.pull_force = 0
 
-                # if event.type == pygame.KEYDOWN:
-                #     if event.key == pygame.K_LEFT:
-                #         self.ball_velocity[0] = -1
-                #     if event.key == pygame.K_RIGHT:
-                #         self.ball_velocity[0] = 1
-                #     if event.key == pygame.K_UP and self.ball_velocity:
-                #         self.ball_velocity[1] = -10
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        self.ball_velocity[0] = -1
+                    if event.key == pygame.K_RIGHT:
+                        self.ball_velocity[0] = 1
+                    if event.key == pygame.K_UP and self.ball_velocity:
+                        self.ball_velocity[1] = -10
 
-                # if event.type == pygame.KEYUP:
-                #     if event.key == pygame.K_LEFT:
-                #         self.ball_velocity[0] = 0
-                #     if event.key == pygame.K_RIGHT:
-                #         self.ball_velocity[0] = 0
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_LEFT:
+                        self.ball_velocity[0] = 0
+                    if event.key == pygame.K_RIGHT:
+                        self.ball_velocity[0] = 0
 
             pygame.draw.circle(self.display, (0, 0, 0), mpos, 5)
 
@@ -122,4 +122,4 @@ class Game:
             pygame.display.update()
             self.clock.tick(60)
 
-#Game().run()
+Game().run()
