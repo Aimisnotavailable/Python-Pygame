@@ -87,12 +87,13 @@ class PhysicsEntities:
                             if self.collisions['down']:
                                 y = rect.top
                                 angle = ((random.random() * math.pi) + math.pi)
+                                speed = random.random() * random.random()
+                                self.game.particles.append(Particles(self.game, 'dust', angle, speed, (x, y), color_key=color))
                             elif self.collisions['up']:
                                 y = rect.bottom
                                 angle = ((random.random()) * math.pi)
-
-                            speed = random.random() * random.random()
-                            self.game.particles.append(Particles(self.game, 'dust', angle, speed, (x, y), color_key=color))
+                                speed = random.random() * random.random()
+                                self.game.particles.append(Particles(self.game, 'dust', angle, speed, (x, y), color_key=color))
                     
         water_loc_int = [int((self.pos[0] //tilemap.tile_size)), int((self.pos[1]//tilemap.tile_size))]
         water_loc = str(water_loc_int[0]) + ";" + str(water_loc_int[1])

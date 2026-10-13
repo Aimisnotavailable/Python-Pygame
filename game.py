@@ -119,6 +119,9 @@ class Game:
             else:
                 self.enemies.append(Enemy(self, pos))
 
+        if not hasattr(self, 'player'):
+            raise ValueError("No player spawner (entity_spawner, variant 1) in map")
+
         self.tree_spawners = []
 
         for tree in self.trees:
@@ -140,7 +143,7 @@ class Game:
             mpos[0] = mpos[0] // 2
             mpos[1] = mpos[1] // 2
             
-            if not self.player.track:
+            if not self.player.track or not self.projectiles:
                 self.entity_track_rect = self.player.rect()
             else:
                 self.entity_track_rect = pygame.Rect(*self.projectiles[-1].pos.copy(), 8 , 8)
@@ -178,7 +181,7 @@ class Game:
                     if event.key == pygame.K_o:
                         self.sound.stop('background_music')
                         self.load()
-                        self.transition.transition = True
+                        self.transition.start()
                         
                     if event.key == pygame.K_1 and self.player.attacking == 0:
                         self.inventory.current_selected = 0
@@ -339,7 +342,7 @@ class Game:
                 if projectile.kill:
                     if projectile.spawn:
                         projectile.spawn.set_drop_status(projectile.pos.copy(), is_dropped=True)
-                        pos = [projectile.pos[0] + 24 * (1 if math.cos(angle) > 0 else -1), projectile.pos[1] + 8 * (1 if math.sin(angle) > 0 else -1)]
+                        pos = [projectile.pos[0] + 24 * (1 if math.cos(projectile.angle) > 0 else -1), projectile.pos[1] + 8 * (1 if math.sin(projectile.angle) > 0 else -1)]
                         projectile.spawn.pos = pos.copy()
                         self.player.teleport(pos.copy())
                         self.sound.play('teleport', variant=0, loop=0) 
@@ -442,6 +445,8 @@ class Game:
             self.display_2.blit(self.cursor.img(), cursor_rect)
             self.cursor.update()
             self.tilemap.render_water(self.display_2, render_scroll)
+
+            self.transition.update()
 
             if self.transition.transition:
                 self.transition.render(self.display_2)
