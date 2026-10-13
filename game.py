@@ -69,7 +69,6 @@ class Game:
 
        
 
-        # print(self.player.pos)
         # for loc in self.tilemap.tilemap:
         #     if random.randint(0, 20) == 1:
         #         self.enemies.append(Enemy(self, (self.tilemap.tilemap[loc]['pos'][0] * self.tilemap.tile_size, self.tilemap.tilemap[loc]['pos'][1] * self.tilemap.tile_size)))
@@ -255,8 +254,6 @@ class Game:
                         if self.current_weapon.type == 'swords':
                             self.player.start_charge(is_initialized=True)
                         elif self.current_weapon.type == 'guns':
-                            print(self.player.pos)
-                            self.player.shooting = True
                             atk_type = 'shoot_attack'
                             self.player.perform_attack(atk_type, self.current_weapon)
                             self.screen_shake.set_shake_config(strength=4, dur=4)
@@ -372,12 +369,10 @@ class Game:
             p_pos = [(self.player.pos[0] - render_scroll[0] + 5), (self.player.pos[1] - render_scroll[1] + 10)]
             self.camera.angle = self.rotation.get_angle(p_pos, mpos)
             self.rotation.draw_curve(self.display, p_pos, math.radians(self.camera.angle * (-1 if self.rotation.flip_x else 1)), 10)
-            # print(self.player.velocity[0])
             if self.current_weapon is not None:
                 if not self.player.attacking or self.current_weapon.type == "guns":
                     img = self.rotation.img(self.current_weapon.animation.img(), self.camera.angle)
 
-                    # print(self.rotation.angle)
                     
                     if self.camera.angle > 90 and self.camera.angle < 270:
                         self.player.flip = True
@@ -452,12 +447,7 @@ class Game:
 
             size =  list(self.screen.get_size())
             self.screen.blit(pygame.transform.scale(self.display_2, (size[0] * self.camera.zoom, size[1] * self.camera.zoom)), (0,0))
-            # self.screen.blit(pygame.transform.scale(self.night_mask, self.screen.get_size()), (0, 0))
-            # print(self.clock.get_fps())
-            # print(self.clock.get_rawtime())
-            # print(self.enemies[0].pos)
             pygame.display.update()
-            self.clock.tick(self.camera.fps)   
     
 Game().run()
 

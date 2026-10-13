@@ -20,16 +20,7 @@ class Particles:
         self.pos[1] += math.sin(self.angle) * self.speed * 1.5
 
     def render(self, surf, offset=(0, 0)):
-        
-        # render_points = [
-        #     (self.pos[0] - offset[0] + math.cos(self.angle) * self.speed , self.pos[1] - offset[1] + math.sin(self.angle) * self.speed ),
-        #     (self.pos[0] - offset[0] + math.cos(self.angle + math.pi * 0.5) * self.speed , self.pos[1] - offset[1] + math.sin(self.angle) * self.speed ),
-        #     (self.pos[0] - offset[0] + math.cos(self.angle + math.pi * 0.5) * self.speed , self.pos[1] - offset[1] + math.sin(self.angle + math.pi) * self.speed ),
-        #     (self.pos[0] - offset[0] + math.cos(self.angle) * self.speed , self.pos[1] - offset[1] + math.sin(self.angle + math.pi) * self.speed ),
-        # ]
 
-        # pygame.draw.polygon(surf, self.color_key, render_points)
-        
         img_mask = pygame.mask.from_surface(self.animation.img())
         img = img_mask.to_surface(setcolor=(*self.color_key, 180), unsetcolor=(0, 0, 0, 0))
         #
