@@ -11,6 +11,7 @@ from scripts.inventory import Inventory
 from scripts.clouds import Clouds, Cloud
 from scripts.sparks import Sparks
 from scripts.particles import Particles
+from scripts.effects import Effects
 #from test_scripts.water1 import Water
 from scripts.water import Water
 from scripts.rotation import Rotation
@@ -71,9 +72,10 @@ class Game:
         self.scroll = [0, 0]
         self.angle = 0
 
-        self.sparks = []
-        self.projectiles = []
-        self.particles = []
+        self.effects = Effects()
+        self.sparks = self.effects.sparks
+        self.projectiles = self.effects.projectiles
+        self.particles = self.effects.particles
         self.enemies = []
         self.items_nearby = []
 
@@ -282,17 +284,8 @@ class Game:
                 self.player.perform_attack(atk_type, self.current_weapon)
                 self.screen_shake.set_shake_config(strength=2, dur=4) 
 
-            for particle in self.particles.copy():
-                particle.pos[0] += math.cos(particle.angle) * (math.sin(particle.animation.frame)*-1)
-                if particle.render(self.display, render_scroll):
-                    self.particles.remove(particle)
-                
+            self.effects.render(self.display, render_scroll)
 
-            for spark in self.sparks.copy():
-                spark.render(self.display, render_scroll)
-                if spark.update():
-                    self.sparks.remove(spark)
-            # print(self.assets[self.tilemap.tilemap['-11;2']['type']][self.tilemap.tilemap['-11;2']['variant']])
             for projectile in self.projectiles.copy():
                 projectile.render(self.display, render_scroll)
                 tile = self.tilemap.solid_check(projectile.pos)
