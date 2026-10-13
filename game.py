@@ -141,6 +141,18 @@ class Game:
         self.camera.fps = 60
 
 
+    def handle_enemy_death(self, enemy):
+
+        dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
+        dropped_item.set_drop_status(enemy.pos,is_dropped=True)
+        self.items_nearby.append(dropped_item)
+        self.enemies.remove(enemy)
+
+        for i in range(30):
+            angle = (random.random() + 0.5) * math.pi * 2
+            speed = (random.random() + 0.5) + 1
+            self.sparks.append(Sparks(angle, speed, enemy.pos))
+
     def run(self):
         running = True
 
@@ -328,14 +340,7 @@ class Game:
                             if enemy.attacked == 0:
                                 enemy.damage()
                             if enemy.current_hp <= 0:
-                                dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
-                                dropped_item.set_drop_status(enemy.pos,is_dropped=True)
-                                self.items_nearby.append(dropped_item)
-                                self.enemies.remove(enemy)
-                                for i in range(30):
-                                    angle = (random.random() + 0.5) * math.pi * 2
-                                    speed = (random.random() + 0.5) + 1
-                                    self.sparks.append(Sparks(angle, speed, enemy.pos))
+                                self.handle_enemy_death(enemy)
                             break
                 
                 if projectile.kill:
@@ -359,14 +364,7 @@ class Game:
                             enemy.damage()
 
                         if enemy.current_hp <= 0:
-                            dropped_item = Sword(self, 'slime_stick', color=(255, 10, 10))
-                            dropped_item.set_drop_status(enemy.pos,is_dropped=True)
-                            self.items_nearby.append(dropped_item)
-                            self.enemies.remove(enemy)
-                            for i in range(30):
-                                angle = (random.random() + 0.5) * math.pi * 2
-                                speed = (random.random() + 0.5) + 1
-                                self.sparks.append(Sparks(angle, speed, enemy.pos))
+                            self.handle_enemy_death(enemy)
                         break
 
             
