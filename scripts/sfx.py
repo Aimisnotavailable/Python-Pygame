@@ -1,11 +1,10 @@
 from scripts.utils import load_sound, load_sounds
-from scripts.assets import Assets
+from scripts.assets import fetch
+
 class SoundMixer:
 
     def __init__(self, payload={}):
-        self.assets = {}
-        for load in payload:
-            self.assets.update(Assets().fetch(payload={'sfx' : {load : payload[load]}}))
+        self.assets = fetch(payload={'sfx' : dict(payload)})
 
     def play(self, s_type, variant=0, loop=-1, vol=1.0):
         
